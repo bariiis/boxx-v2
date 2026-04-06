@@ -130,6 +130,50 @@ export async function getProduct(id: string) {
   })
 }
 
+export async function duplicateProduct(id: string) {
+  const source = await db.product.findUnique({
+    where: { id },
+    include: { images: true },
+  })
+  if (!source) throw new Error("Ürün bulunamadı")
+
+  const newSku = await generateSku()
+  const baseSlug = source.slug.replace(/-kopya(-\d+)?$/, "")
+  // Find unique slug
+  let slugNum = 1
+  let newSlug = `${baseSlug}-kopya`
+  while (await db.product.findUnique({ where: { slug: newSlug }, select: { id: true } })) {
+    slugNum++
+    newSlug = `${baseSlug}-kopya-${slugNum}`
+  }
+
+  const duplicate = await db.product.create({
+    data: {
+      sku: newSku,
+      slug: newSlug,
+      name: `${source.name} (Kopya)`,
+      nameEn: source.nameEn ? `${source.nameEn} (Copy)` : null,
+      type: source.type,
+      description: source.description,
+      descriptionEn: source.descriptionEn,
+      currency: source.currency,
+      price: source.price,
+      costPrice: source.costPrice,
+      stock: source.stock,
+      isActive: false,
+      isSaleOpen: false,
+      warrantyMonths: source.warrantyMonths,
+      weight: source.weight,
+      dimensions: source.dimensions,
+      categoryId: source.categoryId,
+      specs: source.specs ?? undefined,
+    },
+  })
+
+  revalidatePath("/admin/products")
+  return duplicate
+}
+
 export async function generateSku() {
   const last = await db.product.findFirst({
     where: { sku: { startsWith: "STX-" } },

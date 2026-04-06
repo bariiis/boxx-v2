@@ -7,11 +7,11 @@ import { Badge } from "@/components/ui/badge"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { GripVertical, Package, Trash2 } from "lucide-react"
+import { GripVertical, Package, Trash2, Copy } from "lucide-react"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog"
-import { reorderProducts, deleteProduct } from "@/lib/actions/product-actions"
+import { reorderProducts, deleteProduct, duplicateProduct } from "@/lib/actions/product-actions"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 
@@ -45,6 +45,16 @@ export function ProductList({ products: initialProducts }: { products: ProductIt
   const [deleteTarget, setDeleteTarget] = useState<ProductItem | null>(null)
   const [deleting, setDeleting] = useState(false)
   const router = useRouter()
+
+  async function handleDuplicate(product: ProductItem) {
+    try {
+      const dup = await duplicateProduct(product.id)
+      toast.success(`"${product.name}" kopyalandı`)
+      router.refresh()
+    } catch {
+      toast.error("Kopyalama başarısız")
+    }
+  }
 
   async function handleDelete() {
     if (!deleteTarget) return
@@ -177,7 +187,17 @@ export function ProductList({ products: initialProducts }: { products: ProductIt
                   <Button
                     variant="ghost"
                     size="icon"
+                    className="size-8"
+                    title="Kopyala"
+                    onClick={() => handleDuplicate(product)}
+                  >
+                    <Copy className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="size-8 text-destructive hover:text-destructive"
+                    title="Sil"
                     onClick={() => setDeleteTarget(product)}
                   >
                     <Trash2 className="size-4" />
