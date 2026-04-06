@@ -29,9 +29,9 @@ export default async function ProductsPage({
     <div>
       {/* Hero */}
       <section className="bg-gradient-to-b from-background to-muted/30 py-16 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 text-center sm:px-6">
           <h1 className="text-3xl font-bold sm:text-4xl">Ürünler</h1>
-          <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
             Her iş yüküne uygun, özel yapılandırılmış donanım çözümleri. İş istasyonlarından
             GPU sunuculara, depolamadan ağ altyapısına.
           </p>
