@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl:*)",
+      "Bash(taskkill //F //IM \"node.exe\" //FI \"WINDOWTITLE eq *next*\")",
+      "Bash(node -e ':*)",
+      "Bash(npx tsc:*)",
+      "Bash(rm -rf \"C:/Users/Baris/Projelerim/boxx/.next\")"
+    ]
+  }
+}

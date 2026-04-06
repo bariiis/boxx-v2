@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsx:*)",
+      "Bash(node -e ':*)",
+      "Bash(npm run *)",
+      "Bash(npx prisma *)",
+      "Bash(npx kill-port *)",
+      "Bash(curl *)",
+      "Bash(tail *)",
+      "Bash(sleep *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(grep *)",
+      "Edit",
+      "Write",
+      "Read"
+    ]
+  }
+}

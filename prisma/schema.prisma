@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,864 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ==========================================
+// AUTH & USERS
+// ==========================================
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+  CUSTOMER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  username      String?   @unique
+  name          String?
+  surname       String?
+  email         String    @unique
+  emailVerified DateTime?
+  password      String?
+  phone         String?
+  image         String?
+  role            UserRole  @default(CUSTOMER)
+  isActive        Boolean   @default(true)
+  organizationId  String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  accounts      Account[]
+  sessions      Session[]
+  organization  Organization? @relation(fields: [organizationId], references: [id])
+
+  // Employee relations
+  assignedTickets  Ticket[]       @relation("AssignedEmployee")
+  createdQuotes    Quote[]        @relation("QuoteCreator")
+  ticketMessages   TicketMessage[]
+  auditLogs        AuditLog[]
+  smtpConfig       SmtpConfig?
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verification_tokens")
+}
+
+// ==========================================
+// CRM - ORGANIZATIONS
+// ==========================================
+
+enum OrganizationType {
+  COMPANY
+  UNIVERSITY
+  INDIVIDUAL
+  GOVERNMENT
+  NGO
+  OTHER
+}
+
+enum OrganizationSource {
+  WEBSITE
+  STORE
+  PHONE
+  EMAIL
+  REFERRAL
+  SOCIAL_MEDIA
+  OTHER
+}
+
+enum OrganizationStatus {
+  LEAD
+  ACTIVE
+  PASSIVE
+  CUSTOMER
+}
+
+model Organization {
+  id          String             @id @default(cuid())
+  type        OrganizationType
+  source      OrganizationSource @default(WEBSITE)
+  status      OrganizationStatus @default(LEAD)
+  name        String
+  taxOffice   String?
+  taxNumber   String?
+  email       String?
+  phone       String?
+  website     String?
+  address     String?
+  district    String?
+  city        String?
+  country     String?            @default("Türkiye")
+  notes       String?            @db.Text
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  contacts           Contact[]
+  quotes             Quote[]
+  tickets            Ticket[]
+  serialNumbers      SerialNumber[]
+  orders             Order[]
+  users              User[]
+  shippingAddresses  ShippingAddress[]
+
+  @@map("organizations")
+}
+
+model ShippingAddress {
+  id             String  @id @default(cuid())
+  organizationId String
+  label          String
+  contactName    String?
+  phone          String?
+  address        String  @db.Text
+  district       String?
+  city           String
+  postalCode     String?
+  country        String  @default("Türkiye")
+  isDefault      Boolean @default(false)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@map("shipping_addresses")
+}
+
+// ==========================================
+// CRM - CONTACTS
+// ==========================================
+
+model Contact {
+  id             String  @id @default(cuid())
+  title          String?
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String?
+  department     String?
+  notes          String? @db.Text
+  organizationId String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  quotes       Quote[]       @relation("QuoteContact")
+  tickets      Ticket[]
+  serialNumbers SerialNumber[]
+  orders        Order[]
+
+  @@map("contacts")
+}
+
+// ==========================================
+// QUOTES (TEKLIF)
+// ==========================================
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  VIEWED
+  APPROVED
+  REJECTED
+  REVISED
+}
+
+enum DisplayMode {
+  RECIPE
+  DETAILED
+}
+
+enum Currency {
+  TRY
+  USD
+  EUR
+  GBP
+}
+
+model Quote {
+  id              String      @id @default(cuid())
+  quoteNumber     String      @unique
+  status          QuoteStatus @default(DRAFT)
+  currency        Currency    @default(USD)
+  displayMode     DisplayMode @default(DETAILED)
+  projectName     String?
+  projectNumber   String?
+  vatRate         Float       @default(20)
+  discountPercent Float?
+  discountAmount  Float?
+  validUntil      DateTime?
+  publicNote      String?     @db.Text
+  internalNote    String?     @db.Text
+  version         Int         @default(1)
+  totalAmount     Float       @default(0)
+  viewedAt        DateTime?
+  sentAt          DateTime?
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  publicToken     String      @unique @default(cuid())
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  organizationId  String?
+  contactId       String?
+  createdById     String
+
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  contact      Contact?      @relation("QuoteContact", fields: [contactId], references: [id])
+  createdBy    User          @relation("QuoteCreator", fields: [createdById], references: [id])
+  items        QuoteItem[]
+  versions     QuoteVersion[]
+  order        Order?
+
+  @@map("quotes")
+}
+
+model QuoteItem {
+  id              String  @id @default(cuid())
+  quoteId         String
+  productId       String?
+  customName      String?
+  description     String?
+  quantity        Int     @default(1)
+  unitPrice       Float
+  isOptional      Boolean @default(false)
+  isConfig        Boolean @default(false)
+  sortOrder       Int     @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  quote          Quote           @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product        Product?        @relation(fields: [productId], references: [id])
+  configItems    QuoteConfigItem[]
+
+  @@map("quote_items")
+}
+
+model QuoteConfigItem {
+  id            String  @id @default(cuid())
+  quoteItemId   String
+  productId     String?
+  customName    String?
+  category      String?
+  quantity      Int     @default(1)
+  unitPrice     Float
+  isGroupOption Boolean @default(false)
+  groupName     String?
+  isSelected    Boolean @default(true)
+  sortOrder     Int     @default(0)
+
+  quoteItem QuoteItem @relation(fields: [quoteItemId], references: [id], onDelete: Cascade)
+  product   Product?  @relation(fields: [productId], references: [id])
+
+  @@map("quote_config_items")
+}
+
+model QuoteVersion {
+  id        String   @id @default(cuid())
+  quoteId   String
+  version   Int
+  snapshot  Json
+  createdAt DateTime @default(now())
+
+  quote Quote @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  @@map("quote_versions")
+}
+
+// ==========================================
+// PRODUCTS
+// ==========================================
+
+enum ProductType {
+  STANDALONE
+  CONFIGURABLE
+  COMPONENT
+}
+
+model ProductCategory {
+  id          String  @id @default(cuid())
+  name        String
+  nameEn      String?
+  slug        String  @unique
+  description String? @db.Text
+  parentId    String?
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  parent   ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children ProductCategory[] @relation("CategoryHierarchy")
+  products Product[]
+
+  @@map("product_categories")
+}
+
+model Product {
+  id              String      @id @default(cuid())
+  sku             String      @unique
+  name            String
+  nameEn          String?
+  slug            String      @unique
+  type            ProductType @default(STANDALONE)
+  description     String?     @db.Text
+  descriptionEn   String?     @db.Text
+  currency        Currency    @default(USD)
+  price           Float       @default(0)
+  costPrice       Float?
+  stock           Int         @default(0)
+  isActive        Boolean     @default(true)
+  isSaleOpen      Boolean     @default(true)
+  warrantyMonths  Int         @default(24)
+  weight          Float?
+  dimensions      String?
+  specs           Json?
+  heroImage       String?
+  heroTitle       String?
+  heroSubtitle    String?     @db.Text
+  heroVideo       String?
+  features        Json?
+  sortOrder       Int         @default(0)
+  categoryId      String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  category        ProductCategory? @relation(fields: [categoryId], references: [id])
+  images          ProductImage[]
+  quoteItems      QuoteItem[]
+  quoteConfigItems QuoteConfigItem[]
+  serialNumbers   SerialNumber[]
+  componentSpecs  ComponentSpec?
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+  solutionProducts SolutionProduct[]
+  sections        ProductSection[]
+  faqs            ProductFaq[]
+  benchmarks      BenchmarkChart[] @relation("ProductBenchmarks")
+
+  @@map("products")
+}
+
+model ProductImage {
+  id        String @id @default(cuid())
+  productId String
+  url       String
+  alt       String?
+  sortOrder Int    @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_images")
+}
+
+model ProductSection {
+  id          String @id @default(cuid())
+  productId   String
+  sectionType String @default("CUSTOM")
+  tabKey      String
+  tabLabel    String
+  content     String? @db.Text
+  sortOrder   Int     @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, tabKey])
+  @@map("product_sections")
+}
+
+model ProductFaq {
+  id        String @id @default(cuid())
+  productId String
+  question  String
+  answer    String @db.Text
+  sortOrder Int    @default(0)
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_faqs")
+}
+
+// ==========================================
+// CONFIGURATOR
+// ==========================================
+
+model ComponentSpec {
+  id              String  @id @default(cuid())
+  productId       String  @unique
+  componentType   String
+  socketType      String?
+  ramType         String?
+  maxRamCapacity  Int?
+  ramSlots        Int?
+  pcieSlots       Float?
+  pcieSlotsUsed   Float?
+  nvmePorts       Int?
+  sataPorts       Int?
+  hddBays         Int?
+  ssdBays         Int?
+  tdpWatts        Int?
+  maxGpuLength    Int?
+  supportsDualPsu Boolean @default(false)
+  coolingType     String?
+  formFactor      String?
+  maxGpuCount     Int?
+  extraSpecs      Json?
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("component_specs")
+}
+
+model CompatibilityRule {
+  id          String @id @default(cuid())
+  name        String
+  description String?
+  ruleType    String
+  sourceType  String
+  targetType  String
+  condition   Json
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("compatibility_rules")
+}
+
+// ==========================================
+// SPEC PRESETS
+// ==========================================
+
+enum SpecFieldType {
+  TEXT
+  TEXTAREA
+  SELECT
+}
+
+model SpecPreset {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+  sortOrder   Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  fields SpecPresetField[]
+
+  @@map("spec_presets")
+}
+
+model SpecPresetField {
+  id           String        @id @default(cuid())
+  presetId     String
+  key          String
+  fieldType    SpecFieldType @default(TEXT)
+  options      Json?
+  defaultValue String?
+  sortOrder    Int           @default(0)
+
+  preset SpecPreset @relation(fields: [presetId], references: [id], onDelete: Cascade)
+
+  @@map("spec_preset_fields")
+}
+
+// ==========================================
+// TICKETS (DESTEK)
+// ==========================================
+
+enum TicketStatus {
+  OPEN
+  AWAITING_REPLY
+  RESOLVED
+  CLOSED
+}
+
+enum TicketPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+model TicketCategory {
+  id      String   @id @default(cuid())
+  name    String
+  nameEn  String?
+  isActive Boolean @default(true)
+
+  tickets Ticket[]
+
+  @@map("ticket_categories")
+}
+
+model Ticket {
+  id             String         @id @default(cuid())
+  ticketNumber   String         @unique
+  publicToken    String         @unique @default(cuid())
+  subject        String
+  description    String         @db.Text
+  status         TicketStatus   @default(OPEN)
+  priority       TicketPriority @default(NORMAL)
+  contactName    String?
+  contactEmail   String?
+  serialNumberId String?
+  organizationId String?
+  contactId      String?
+  assignedToId   String?
+  categoryId     String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  closedAt       DateTime?
+
+  serialNumber SerialNumber?  @relation(fields: [serialNumberId], references: [id])
+  organization Organization?  @relation(fields: [organizationId], references: [id])
+  contact      Contact?       @relation(fields: [contactId], references: [id])
+  assignedTo   User?          @relation("AssignedEmployee", fields: [assignedToId], references: [id])
+  category     TicketCategory? @relation(fields: [categoryId], references: [id])
+  messages     TicketMessage[]
+  attachments  TicketAttachment[]
+
+  @@map("tickets")
+}
+
+model TicketMessage {
+  id         String   @id @default(cuid())
+  ticketId   String
+  senderId   String?
+  content    String   @db.Text
+  isInternal Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender User?  @relation(fields: [senderId], references: [id])
+
+  @@map("ticket_messages")
+}
+
+model TicketAttachment {
+  id        String @id @default(cuid())
+  ticketId  String
+  fileName  String
+  fileUrl   String
+  fileSize  Int
+  mimeType  String
+  createdAt DateTime @default(now())
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("ticket_attachments")
+}
+
+// ==========================================
+// SERIAL NUMBERS
+// ==========================================
+
+model SerialNumber {
+  id             String   @id @default(cuid())
+  serialNumber   String   @unique
+  productId      String?
+  organizationId String?
+  contactId      String?
+  orderId        String?
+  isActive       Boolean  @default(true)
+  configuration  String?  @db.Text
+  warrantyStart  DateTime @default(now())
+  warrantyEnd    DateTime?
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  product      Product?      @relation(fields: [productId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  contact      Contact?      @relation(fields: [contactId], references: [id])
+  order        Order?        @relation(fields: [orderId], references: [id])
+  tickets      Ticket[]
+
+  @@map("serial_numbers")
+}
+
+// ==========================================
+// E-COMMERCE
+// ==========================================
+
+model Cart {
+  id        String   @id @default(cuid())
+  sessionId String?  @unique
+  userId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id            String @id @default(cuid())
+  cartId        String
+  productId     String
+  quantity      Int    @default(1)
+  configuration Json?
+  unitPrice     Float
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("cart_items")
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  status          OrderStatus @default(PENDING)
+  currency        Currency    @default(USD)
+  totalAmount     Float
+  vatAmount       Float
+  vatRate         Float       @default(20)
+  shippingAddress Json?
+  billingAddress  Json?
+  paymentId       String?
+  paymentMethod   String?
+  notes           String?     @db.Text
+  quoteId         String?     @unique
+  organizationId  String?
+  contactId       String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  quote        Quote?        @relation(fields: [quoteId], references: [id])
+  organization Organization? @relation(fields: [organizationId], references: [id])
+  contact      Contact?      @relation(fields: [contactId], references: [id])
+  items        OrderItem[]
+  serialNumbers SerialNumber[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String @id @default(cuid())
+  orderId       String
+  productId     String?
+  name          String
+  quantity      Int
+  unitPrice     Float
+  configuration Json?
+
+  order   Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+// ==========================================
+// SOLUTIONS (COZUMLER)
+// ==========================================
+
+model SolutionCategory {
+  id          String  @id @default(cuid())
+  name        String
+  nameEn      String?
+  slug        String  @unique
+  description String? @db.Text
+  subtitle    String? @db.Text
+  intro       String? @db.Text
+  icon        String?
+  heroImage   String?
+  parentId    String?
+  sortOrder   Int     @default(0)
+  isActive    Boolean @default(true)
+
+  parent    SolutionCategory?  @relation("SolutionHierarchy", fields: [parentId], references: [id])
+  children  SolutionCategory[] @relation("SolutionHierarchy")
+  solutions Solution[]
+
+  @@map("solution_categories")
+}
+
+model Solution {
+  id              String  @id @default(cuid())
+  title           String
+  titleEn         String?
+  slug            String  @unique
+  subtitle        String? @db.Text
+  icon            String?
+  heroImage       String?
+  metaTitle       String?
+  metaDescription String?
+  categoryId      String?
+  isActive        Boolean @default(true)
+  sortOrder       Int     @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  category SolutionCategory? @relation(fields: [categoryId], references: [id])
+  sections SolutionSection[]
+  benchmarks BenchmarkChart[]
+  recommendedProducts SolutionProduct[]
+
+  @@map("solutions")
+}
+
+model SolutionProduct {
+  id         String @id @default(cuid())
+  solutionId String
+  productId  String
+  sortOrder  Int    @default(0)
+  note       String? // "En iyi performans", "Bütçe dostu" gibi etiket
+
+  solution Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([solutionId, productId])
+  @@map("solution_products")
+}
+
+model SolutionSection {
+  id         String  @id @default(cuid())
+  solutionId String
+  tabKey     String
+  tabLabel   String
+  content    String? @db.Text
+  contentEn  String? @db.Text
+  sortOrder  Int     @default(0)
+
+  solution Solution @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+
+  @@unique([solutionId, tabKey])
+  @@map("solution_sections")
+}
+
+model BenchmarkChart {
+  id         String @id @default(cuid())
+  solutionId String?
+  productId  String?
+  title      String
+  titleEn    String?
+  chartType  String @default("bar")
+  unit       String @default("points")
+  sectionKey String?
+  sortOrder  Int    @default(0)
+  labels     String @default("[]") @db.Text
+  datasets   BenchmarkDataset[]
+
+  solution Solution? @relation(fields: [solutionId], references: [id], onDelete: Cascade)
+  product  Product?  @relation("ProductBenchmarks", fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("benchmark_charts")
+}
+
+model BenchmarkDataset {
+  id        String  @id @default(cuid())
+  chartId   String
+  name      String
+  color     String  @default("#3b82f6")
+  values    String  @default("[]") @db.Text
+  sortOrder Int     @default(0)
+
+  chart BenchmarkChart @relation(fields: [chartId], references: [id], onDelete: Cascade)
+
+  @@map("benchmark_datasets")
+}
+
+// ==========================================
+// SETTINGS & SYSTEM
+// ==========================================
+
+model Setting {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String @db.Text
+  group String @default("general")
+
+  @@map("settings")
+}
+
+model ExchangeRate {
+  id       String   @id @default(cuid())
+  currency Currency
+  buyRate  Float
+  sellRate Float
+  source   String
+  date     DateTime @default(now())
+
+  @@unique([currency, source, date])
+  @@map("exchange_rates")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String
+  oldData    Json?
+  newData    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}
+
+model SmtpConfig {
+  id       String @id @default(cuid())
+  userId   String @unique
+  host     String
+  port     Int    @default(587)
+  secure   Boolean @default(true)
+  username String
+  password String
+  fromName String?
+  fromEmail String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("smtp_configs")
 }
