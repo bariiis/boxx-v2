@@ -1,4 +1,5 @@
 import { getProducts } from "@/lib/actions/product-actions"
+import { AdminPagination } from "@/components/admin/pagination"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search } from "lucide-react"
@@ -16,6 +17,10 @@ export default async function ProductsPage({
   const type = params.type as "STANDALONE" | "CONFIGURABLE" | "COMPONENT" | undefined
 
   const { products, total, totalPages } = await getProducts({ search, page, type })
+
+  const preservedParams: Record<string, string> = {}
+  if (search) preservedParams.search = search
+  if (type) preservedParams.type = type
 
   return (
     <div className="space-y-6">
@@ -73,17 +78,12 @@ export default async function ProductsPage({
 
       <ProductList products={products} />
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <Button key={i + 1} variant={page === i + 1 ? "default" : "outline"} size="sm" asChild>
-              <Link href={`/admin/products?page=${i + 1}${type ? `&type=${type}` : ""}`}>
-                {i + 1}
-              </Link>
-            </Button>
-          ))}
-        </div>
-      )}
+      <AdminPagination
+        basePath="/admin/products"
+        currentPage={page}
+        totalPages={totalPages}
+        searchParams={preservedParams}
+      />
     </div>
   )
 }

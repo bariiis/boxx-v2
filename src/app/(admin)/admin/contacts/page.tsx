@@ -2,6 +2,7 @@ import { getContacts } from "@/lib/actions/contact-actions"
 import { db } from "@/lib/db"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { AdminPagination } from "@/components/admin/pagination"
 import {
   Table,
   TableBody,
@@ -132,22 +133,12 @@ export default async function ContactsPage({
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <Button
-              key={i + 1}
-              variant={page === i + 1 ? "default" : "outline"}
-              size="sm"
-              asChild
-            >
-              <Link href={`/admin/contacts?page=${i + 1}${search ? `&search=${search}` : ""}`}>
-                {i + 1}
-              </Link>
-            </Button>
-          ))}
-        </div>
-      )}
+      <AdminPagination
+        basePath="/admin/contacts"
+        currentPage={page}
+        totalPages={totalPages}
+        searchParams={search ? { search } : {}}
+      />
     </div>
   )
 }

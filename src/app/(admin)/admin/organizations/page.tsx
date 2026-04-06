@@ -1,7 +1,7 @@
 import { getOrganizations } from "@/lib/actions/organization-actions"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { orgStatusConfig, StatusBadge } from "@/lib/status-colors"
+import { AdminPagination } from "@/components/admin/pagination"
 import {
   Table,
   TableBody,
@@ -121,24 +121,15 @@ export default async function OrganizationsPage({
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <Button
-              key={i + 1}
-              variant={page === i + 1 ? "default" : "outline"}
-              size="sm"
-              asChild
-            >
-              <Link
-                href={`/admin/organizations?page=${i + 1}${search ? `&search=${search}` : ""}${status ? `&status=${status}` : ""}`}
-              >
-                {i + 1}
-              </Link>
-            </Button>
-          ))}
-        </div>
-      )}
+      <AdminPagination
+        basePath="/admin/organizations"
+        currentPage={page}
+        totalPages={totalPages}
+        searchParams={{
+          ...(search ? { search } : {}),
+          ...(status ? { status } : {}),
+        }}
+      />
     </div>
   )
 }

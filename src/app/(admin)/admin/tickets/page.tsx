@@ -9,6 +9,8 @@ import { format } from "date-fns"
 import { tr } from "date-fns/locale"
 import { TicketSearch } from "@/components/admin/ticket-search"
 import { ticketStatusConfig, ticketPriorityConfig, StatusBadge } from "@/lib/status-colors"
+import { StatusFilter } from "@/components/admin/status-filter"
+import { AdminPagination } from "@/components/admin/pagination"
 
 export default async function TicketsPage({
   searchParams,
@@ -21,6 +23,10 @@ export default async function TicketsPage({
   const status = params.status as "OPEN" | "AWAITING_REPLY" | "RESOLVED" | "CLOSED" | undefined
 
   const { tickets, total, totalPages } = await getTickets({ search, page, status })
+
+  const preservedParams: Record<string, string> = {}
+  if (search) preservedParams.search = search
+  if (status) preservedParams.status = status
 
   return (
     <div className="space-y-6">
@@ -39,27 +45,12 @@ export default async function TicketsPage({
 
       <div className="flex items-center gap-4">
         <TicketSearch defaultSearch={search} status={status} />
-        <div className="flex flex-wrap gap-2">
-          {[
-            { label: "Tümü", value: undefined, class: "" },
-            ...Object.entries(ticketStatusConfig).map(([k, v]) => ({ label: v.label, value: k, class: v.class })),
-          ].map((f) => {
-            const isActive = status === f.value
-            return (
-              <Link
-                key={f.label}
-                href={`/admin/tickets${f.value ? `?status=${f.value}` : ""}${search ? `${f.value ? "&" : "?"}search=${search}` : ""}`}
-                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
-                  isActive && f.class ? f.class + " ring-2 ring-offset-1 ring-current" :
-                  isActive ? "bg-primary text-primary-foreground" :
-                  "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                {f.label}
-              </Link>
-            )
-          })}
-        </div>
+        <StatusFilter
+          basePath="/admin/tickets"
+          config={ticketStatusConfig}
+          currentStatus={status || null}
+          searchParams={search ? { search } : {}}
+        />
       </div>
 
       <div className="rounded-md border">
@@ -86,65 +77,58 @@ export default async function TicketsPage({
                 </TableCell>
               </TableRow>
             ) : (
-              tickets.map((t) => {
-                return (
-                  <TableRow key={t.id}>
-                    <TableCell>
-                      <Link href={`/admin/tickets/${t.id}`} className="font-mono font-medium hover:underline">
-                        {t.ticketNumber}
-                      </Link>
-                    </TableCell>
-                    <TableCell>
-                      <Link href={`/admin/tickets/${t.id}`} className="hover:underline">
-                        {t.subject}
-                      </Link>
-                      <div className="flex gap-2 mt-0.5">
-                        {t.messages.length > 0 && (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <MessageSquare className="size-3" />{t.messages.length}
-                          </span>
-                        )}
-                        {t.attachments.length > 0 && (
-                          <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Paperclip className="size-3" />{t.attachments.length}
-                          </span>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">{t.organization?.name || "-"}</TableCell>
-                    <TableCell><StatusBadge config={ticketPriorityConfig} status={t.priority} /></TableCell>
-                    <TableCell><StatusBadge config={ticketStatusConfig} status={t.status} /></TableCell>
-                    <TableCell className="text-muted-foreground">{t.category?.name || "-"}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {t.assignedTo ? `${t.assignedTo.name} ${t.assignedTo.surname}` : "-"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {format(t.createdAt, "dd MMM yyyy", { locale: tr })}
-                    </TableCell>
-                    <TableCell>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/admin/tickets/${t.id}`}>Aç</Link>
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })
+              tickets.map((t) => (
+                <TableRow key={t.id}>
+                  <TableCell>
+                    <Link href={`/admin/tickets/${t.id}`} className="font-mono font-medium hover:underline">
+                      {t.ticketNumber}
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Link href={`/admin/tickets/${t.id}`} className="hover:underline">
+                      {t.subject}
+                    </Link>
+                    <div className="mt-0.5 flex gap-2">
+                      {t.messages.length > 0 && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <MessageSquare className="size-3" />{t.messages.length}
+                        </span>
+                      )}
+                      {t.attachments.length > 0 && (
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Paperclip className="size-3" />{t.attachments.length}
+                        </span>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">{t.organization?.name || "-"}</TableCell>
+                  <TableCell><StatusBadge config={ticketPriorityConfig} status={t.priority} /></TableCell>
+                  <TableCell><StatusBadge config={ticketStatusConfig} status={t.status} /></TableCell>
+                  <TableCell className="text-muted-foreground">{t.category?.name || "-"}</TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {t.assignedTo ? `${t.assignedTo.name} ${t.assignedTo.surname}` : "-"}
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {format(t.createdAt, "dd MMM yyyy", { locale: tr })}
+                  </TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="sm" asChild>
+                      <Link href={`/admin/tickets/${t.id}`}>Aç</Link>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
             )}
           </TableBody>
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <Button key={i + 1} variant={page === i + 1 ? "default" : "outline"} size="sm" asChild>
-              <Link href={`/admin/tickets?page=${i + 1}${status ? `&status=${status}` : ""}${search ? `&search=${search}` : ""}`}>
-                {i + 1}
-              </Link>
-            </Button>
-          ))}
-        </div>
-      )}
+      <AdminPagination
+        basePath="/admin/tickets"
+        currentPage={page}
+        totalPages={totalPages}
+        searchParams={preservedParams}
+      />
     </div>
   )
 }

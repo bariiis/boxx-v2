@@ -1,4 +1,5 @@
 import { getSolutions } from "@/lib/actions/solution-actions"
+import { AdminPagination } from "@/components/admin/pagination"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -90,15 +91,11 @@ export default async function SolutionsAdminPage({
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <Button key={i + 1} variant={page === i + 1 ? "default" : "outline"} size="sm" asChild>
-              <Link href={`/admin/solutions?page=${i + 1}`}>{i + 1}</Link>
-            </Button>
-          ))}
-        </div>
-      )}
+      <AdminPagination
+        basePath="/admin/solutions"
+        currentPage={page}
+        totalPages={totalPages}
+      />
     </div>
   )
 }

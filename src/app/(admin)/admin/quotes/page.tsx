@@ -9,6 +9,8 @@ import { format } from "date-fns"
 import { tr } from "date-fns/locale"
 import { QuoteSearch } from "@/components/admin/quote-search"
 import { quoteStatusConfig, StatusBadge } from "@/lib/status-colors"
+import { StatusFilter } from "@/components/admin/status-filter"
+import { AdminPagination } from "@/components/admin/pagination"
 
 const currencySymbols: Record<string, string> = {
   TRY: "₺", USD: "$", EUR: "€", GBP: "£",
@@ -25,6 +27,10 @@ export default async function QuotesPage({
   const status = params.status as "DRAFT" | "SENT" | "VIEWED" | "APPROVED" | "REJECTED" | "REVISED" | undefined
 
   const { quotes, total, totalPages } = await getQuotes({ search, page, status })
+
+  const preservedParams: Record<string, string> = {}
+  if (search) preservedParams.search = search
+  if (status) preservedParams.status = status
 
   return (
     <div className="space-y-6">
@@ -43,27 +49,12 @@ export default async function QuotesPage({
 
       <div className="flex items-center gap-4">
         <QuoteSearch defaultSearch={search} status={status} />
-        <div className="flex flex-wrap gap-2">
-          {[
-            { label: "Tümü", value: undefined, class: "" },
-            ...Object.entries(quoteStatusConfig).map(([k, v]) => ({ label: v.label, value: k, class: v.class })),
-          ].map((f) => {
-            const isActive = status === f.value
-            return (
-              <Link
-                key={f.label}
-                href={`/admin/quotes${f.value ? `?status=${f.value}` : ""}${search ? `${f.value ? "&" : "?"}search=${search}` : ""}`}
-                className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
-                  isActive && f.class ? f.class + " ring-2 ring-offset-1 ring-current" :
-                  isActive ? "bg-primary text-primary-foreground" :
-                  "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                {f.label}
-              </Link>
-            )
-          })}
-        </div>
+        <StatusFilter
+          basePath="/admin/quotes"
+          config={quoteStatusConfig}
+          currentStatus={status || null}
+          searchParams={search ? { search } : {}}
+        />
       </div>
 
       <div className="rounded-md border">
@@ -134,17 +125,12 @@ export default async function QuotesPage({
         </Table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="flex justify-center gap-2">
-          {Array.from({ length: totalPages }, (_, i) => (
-            <Button key={i + 1} variant={page === i + 1 ? "default" : "outline"} size="sm" asChild>
-              <Link href={`/admin/quotes?page=${i + 1}${status ? `&status=${status}` : ""}${search ? `&search=${search}` : ""}`}>
-                {i + 1}
-              </Link>
-            </Button>
-          ))}
-        </div>
-      )}
+      <AdminPagination
+        basePath="/admin/quotes"
+        currentPage={page}
+        totalPages={totalPages}
+        searchParams={preservedParams}
+      />
     </div>
   )
 }
