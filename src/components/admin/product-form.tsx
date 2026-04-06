@@ -11,7 +11,7 @@ import {
   Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { createProduct, updateProduct } from "@/lib/actions/product-actions"
+import { createProduct, updateProduct, generateSku } from "@/lib/actions/product-actions"
 import { SpecsEditor, type SpecEntry } from "@/components/admin/specs-editor"
 import { toast } from "sonner"
 import type { Product, ProductCategory, ComponentSpec } from "@/generated/prisma"
@@ -37,6 +37,15 @@ export function ProductForm({ product, categories }: ProductFormProps) {
   const [isSaleOpen, setIsSaleOpen] = useState(product?.isSaleOpen ?? true)
   const [name, setName] = useState(product?.name || "")
   const [slug, setSlug] = useState(product?.slug || "")
+  const [sku, setSku] = useState(product?.sku || "")
+  const isEditing = !!product
+
+  // Auto-generate SKU for new products
+  useState(() => {
+    if (!isEditing && !sku) {
+      generateSku().then(setSku)
+    }
+  })
   const [specs, setSpecs] = useState<SpecEntry[]>(() => {
     const raw = product?.specs
     if (!raw) return []
@@ -59,7 +68,6 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     }
     return []
   })
-  const isEditing = !!product
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -113,8 +121,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="sku">SKU *</Label>
-                <Input id="sku" name="sku" required defaultValue={product?.sku || ""} placeholder="STX-WS-001" />
+                <Label htmlFor="sku">SKU <span className="text-destructive">*</span></Label>
+                <Input id="sku" name="sku" required value={sku} onChange={(e) => setSku(e.target.value)} placeholder="STX-0001" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="type">Ürün Tipi *</Label>

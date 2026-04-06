@@ -130,6 +130,16 @@ export async function getProduct(id: string) {
   })
 }
 
+export async function generateSku() {
+  const last = await db.product.findFirst({
+    where: { sku: { startsWith: "STX-" } },
+    orderBy: { sku: "desc" },
+    select: { sku: true },
+  })
+  const lastNum = last ? parseInt(last.sku.replace(/^STX-0*/, "")) || 0 : 0
+  return `STX-${String(lastNum + 1).padStart(4, "0")}`
+}
+
 export async function createProduct(data: {
   sku: string
   name: string
