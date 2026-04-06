@@ -15,7 +15,8 @@ import {
 import {
   LayoutDashboard,
   Building2,
-  Users,
+  UserRound,
+  UserCog,
   FileText,
   HeadphonesIcon,
   Hash,
@@ -27,9 +28,17 @@ import {
   ShoppingCart,
   Mail,
   LogOut,
+  ChevronUp,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+
+interface AdminUser {
+  name: string
+  email: string
+  role: string
+  image?: string
+}
 
 const menuGroups = [
   {
@@ -42,8 +51,8 @@ const menuGroups = [
     label: "CRM",
     items: [
       { title: "Organizasyonlar", href: "/admin/organizations", icon: Building2 },
-      { title: "Kişiler", href: "/admin/contacts", icon: Users },
-      { title: "Çalışanlar", href: "/admin/employees", icon: Users },
+      { title: "Kişiler", href: "/admin/contacts", icon: UserRound },
+      { title: "Çalışanlar", href: "/admin/employees", icon: UserCog },
     ],
   },
   {
@@ -83,19 +92,36 @@ const menuGroups = [
   },
 ]
 
-export function AdminSidebar({ logo, companyName }: { logo?: string; companyName?: string }) {
+export function AdminSidebar({
+  logo,
+  companyName,
+  user,
+}: {
+  logo?: string
+  companyName?: string
+  user?: AdminUser
+}) {
   const pathname = usePathname()
+
+  const initials = user?.name
+    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "?"
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b px-6 py-4">
-        <Link href="/admin" className="flex items-center gap-2">
+      <SidebarHeader className="border-b px-5 py-4">
+        <Link href="/admin" className="flex items-center gap-2.5">
           {logo ? (
-            <img src={logo} alt={companyName || "Logo"} className="h-8 w-auto object-contain" />
+            <img src={logo} alt={companyName || "Logo"} className="h-7 w-auto object-contain" />
           ) : (
-            <span className="text-xl font-bold tracking-tight">{companyName || "STUUX"}</span>
+            <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-sm font-bold text-primary-foreground">
+              {(companyName || "S")[0]}
+            </div>
           )}
-          <span className="text-xs text-muted-foreground">Admin</span>
+          <div className="flex flex-col">
+            <span className="text-sm font-semibold tracking-tight">{companyName || "STUUX"}</span>
+            <span className="text-[10px] uppercase tracking-widest text-muted-foreground">Admin Panel</span>
+          </div>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -126,13 +152,27 @@ export function AdminSidebar({ logo, companyName }: { logo?: string; companyName
           </SidebarGroup>
         ))}
       </SidebarContent>
-      <SidebarFooter className="border-t p-4">
+      <SidebarFooter className="border-t p-3">
+        {user && (
+          <div className="mb-2 flex items-center gap-2.5 rounded-md px-2 py-1.5">
+            {user.image ? (
+              <img src={user.image} alt={user.name} className="size-7 rounded-full object-cover" />
+            ) : (
+              <div className="flex size-7 items-center justify-center rounded-full bg-muted text-[10px] font-medium">
+                {initials}
+              </div>
+            )}
+            <div className="flex-1 truncate">
+              <p className="truncate text-xs font-medium">{user.name}</p>
+              <p className="truncate text-[10px] text-muted-foreground">{user.email}</p>
+            </div>
+          </div>
+        )}
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              className="w-full text-destructive"
+              className="w-full text-muted-foreground hover:text-destructive"
               onClick={async () => {
-                // Get CSRF token first, then POST signout
                 const csrfRes = await fetch("/api/auth/csrf")
                 const { csrfToken } = await csrfRes.json()
                 await fetch("/api/auth/signout", {

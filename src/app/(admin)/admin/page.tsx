@@ -8,17 +8,10 @@ import {
 import { getDashboardStats } from "@/lib/actions/dashboard-actions"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
-import { quoteStatusConfig, orderStatusConfig, ticketPriorityConfig, StatusBadge } from "@/lib/status-colors"
+import { quoteStatusConfig, orderStatusConfig, ticketPriorityConfig, ticketStatusConfig, StatusBadge } from "@/lib/status-colors"
 
 const currencySymbols: Record<string, string> = {
   TRY: "₺", USD: "$", EUR: "€", GBP: "£",
-}
-
-const priorityColors: Record<string, string> = {
-  LOW: "text-muted-foreground",
-  NORMAL: "text-blue-600",
-  HIGH: "text-orange-600",
-  URGENT: "text-red-600",
 }
 
 export default async function AdminDashboard() {
@@ -83,7 +76,6 @@ export default async function AdminDashboard() {
             ) : (
               <div className="space-y-3">
                 {stats.recentQuotes.map((q) => {
-                  const _qs = q.status
                   const sym = currencySymbols[q.currency] || "$"
                   return (
                     <Link key={q.id} href={`/admin/quotes/${q.id}`} className="flex items-center justify-between rounded-md p-2 hover:bg-muted/50 transition-colors">
@@ -121,7 +113,6 @@ export default async function AdminDashboard() {
             ) : (
               <div className="space-y-3">
                 {stats.recentOrders.map((o) => {
-                  const _os = o.status
                   const sym = currencySymbols[o.currency] || "$"
                   const total = o.totalAmount + o.vatAmount
                   return (
@@ -164,9 +155,7 @@ export default async function AdminDashboard() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs">{t.ticketNumber}</span>
-                        <span className={`text-[10px] font-bold ${priorityColors[t.priority] || ""}`}>
-                          {t.priority === "URGENT" ? "ACİL" : t.priority === "HIGH" ? "YÜKSEK" : ""}
-                        </span>
+                        <StatusBadge config={ticketPriorityConfig} status={t.priority} />
                       </div>
                       <p className="text-sm truncate">{t.subject}</p>
                       <p className="text-xs text-muted-foreground">
