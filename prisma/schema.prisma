@@ -322,6 +322,7 @@ model ProductCategory {
   id          String  @id @default(cuid())
   name        String
   nameEn      String?
+  subtitle    String?
   slug        String  @unique
   description String? @db.Text
   parentId    String?

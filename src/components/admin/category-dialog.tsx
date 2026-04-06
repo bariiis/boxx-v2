@@ -35,6 +35,7 @@ export function CategoryDialog() {
       await createCategory({
         name: fd.get("name") as string,
         nameEn: (fd.get("nameEn") as string) || undefined,
+        subtitle: (fd.get("subtitle") as string) || undefined,
         slug: fd.get("slug") as string,
       })
       toast.success("Kategori oluşturuldu")
@@ -73,6 +74,10 @@ export function CategoryDialog() {
           <div className="space-y-2">
             <Label htmlFor="cat-nameEn">Kategori Adı (EN)</Label>
             <Input id="cat-nameEn" name="nameEn" />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="cat-subtitle">Alt Başlık</Label>
+            <Input id="cat-subtitle" name="subtitle" placeholder="Menüde görünecek kısa açıklama" />
           </div>
           <div className="space-y-2">
             <Label htmlFor="cat-slug">Slug *</Label>

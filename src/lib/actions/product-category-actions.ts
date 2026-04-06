@@ -21,6 +21,7 @@ export async function getProductCategoryTree() {
 export async function createProductCategory(data: {
   name: string
   nameEn?: string
+  subtitle?: string
   slug: string
   description?: string
   parentId?: string
@@ -33,7 +34,7 @@ export async function createProductCategory(data: {
 
 export async function updateProductCategory(
   id: string,
-  data: { name?: string; nameEn?: string; slug?: string; description?: string; parentId?: string | null; sortOrder?: number; isActive?: boolean }
+  data: { name?: string; nameEn?: string; subtitle?: string; slug?: string; description?: string; parentId?: string | null; sortOrder?: number; isActive?: boolean }
 ) {
   await db.productCategory.update({ where: { id }, data })
   revalidatePath("/admin/products/categories")

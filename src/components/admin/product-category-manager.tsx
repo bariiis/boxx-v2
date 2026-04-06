@@ -19,7 +19,7 @@ import {
 import { toast } from "sonner"
 
 interface CategoryNode {
-  id: string; name: string; nameEn: string | null; slug: string
+  id: string; name: string; nameEn: string | null; subtitle: string | null; slug: string
   description: string | null; parentId: string | null; sortOrder: number; isActive: boolean
   children: CategoryNode[]
 }
@@ -71,7 +71,8 @@ function CategoryCard({ category: cat, depth, onDone }: { category: CategoryNode
                 {cat.nameEn && <span className="text-sm font-normal text-muted-foreground">({cat.nameEn})</span>}
                 {!cat.isActive && <Badge variant="secondary">Pasif</Badge>}
               </CardTitle>
-              <p className="text-xs text-muted-foreground font-mono">/{cat.slug}</p>
+              {cat.subtitle && <p className="text-xs text-muted-foreground">{cat.subtitle}</p>}
+              <p className="text-[10px] text-muted-foreground font-mono">/{cat.slug}</p>
             </div>
           </div>
           <div className="flex items-center gap-1">
@@ -105,6 +106,7 @@ function CategoryCard({ category: cat, depth, onDone }: { category: CategoryNode
             </button>
           )}
           <span className="text-sm font-medium">{cat.name}</span>
+          {cat.subtitle && <span className="text-xs text-muted-foreground">— {cat.subtitle}</span>}
           {cat.nameEn && <span className="text-xs text-muted-foreground">({cat.nameEn})</span>}
           <span className="text-[10px] text-muted-foreground font-mono">/{cat.slug}</span>
           {!cat.isActive && <Badge variant="secondary" className="text-[10px]">Pasif</Badge>}
@@ -131,15 +133,16 @@ function AddDialog({ parentId, parentName, onDone }: { parentId?: string; parent
   const [loading, setLoading] = useState(false)
   const [name, setName] = useState("")
   const [nameEn, setNameEn] = useState("")
+  const [subtitle, setSubtitle] = useState("")
   const [slug, setSlug] = useState("")
 
   async function handle() {
     if (!name || !slug) return toast.error("Ad ve slug gerekli")
     setLoading(true)
     try {
-      await createProductCategory({ name, nameEn: nameEn || undefined, slug, parentId })
+      await createProductCategory({ name, nameEn: nameEn || undefined, subtitle: subtitle || undefined, slug, parentId })
       toast.success(parentId ? "Alt kategori eklendi" : "Ana kategori eklendi")
-      setOpen(false); setName(""); setNameEn(""); setSlug(""); onDone()
+      setOpen(false); setName(""); setNameEn(""); setSubtitle(""); setSlug(""); onDone()
     } catch { toast.error("Hata — slug benzersiz olmalı") }
     finally { setLoading(false) }
   }
@@ -165,6 +168,10 @@ function AddDialog({ parentId, parentName, onDone }: { parentId?: string; parent
             <Input value={nameEn} onChange={(e) => setNameEn(e.target.value)} placeholder="ör: Workstations" />
           </div>
           <div className="space-y-2">
+            <Label>Alt Başlık</Label>
+            <Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="ör: Küçük ve kompakt" />
+          </div>
+          <div className="space-y-2">
             <Label>Slug *</Label>
             <Input value={slug} onChange={(e) => setSlug(e.target.value)} />
           </div>
@@ -183,6 +190,7 @@ function EditDialog({ category, onDone }: { category: CategoryNode; onDone: () =
   const [loading, setLoading] = useState(false)
   const [name, setName] = useState(category.name)
   const [nameEn, setNameEn] = useState(category.nameEn || "")
+  const [subtitle, setSubtitle] = useState(category.subtitle || "")
   const [slug, setSlug] = useState(category.slug)
   const [isActive, setIsActive] = useState(category.isActive)
   const [sortOrder, setSortOrder] = useState(category.sortOrder)
@@ -190,7 +198,7 @@ function EditDialog({ category, onDone }: { category: CategoryNode; onDone: () =
   async function handle() {
     setLoading(true)
     try {
-      await updateProductCategory(category.id, { name, nameEn: nameEn || undefined, slug, isActive, sortOrder })
+      await updateProductCategory(category.id, { name, nameEn: nameEn || undefined, subtitle: subtitle || undefined, slug, isActive, sortOrder })
       toast.success("Güncellendi"); setOpen(false); onDone()
     } catch { toast.error("Hata") }
     finally { setLoading(false) }
@@ -204,6 +212,7 @@ function EditDialog({ category, onDone }: { category: CategoryNode; onDone: () =
         <div className="space-y-4">
           <div className="space-y-2"><Label>Ad (TR)</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
           <div className="space-y-2"><Label>Ad (EN)</Label><Input value={nameEn} onChange={(e) => setNameEn(e.target.value)} /></div>
+          <div className="space-y-2"><Label>Alt Başlık</Label><Input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="Menüde görünecek kısa açıklama" /></div>
           <div className="space-y-2"><Label>Slug</Label><Input value={slug} onChange={(e) => setSlug(e.target.value)} /></div>
           <div className="space-y-2"><Label>Sıralama</Label><Input type="number" value={sortOrder} onChange={(e) => setSortOrder(parseInt(e.target.value) || 0)} /></div>
           <div className="flex items-center gap-3"><Switch checked={isActive} onCheckedChange={setIsActive} /><Label>{isActive ? "Aktif" : "Pasif"}</Label></div>

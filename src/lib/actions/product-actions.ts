@@ -41,6 +41,7 @@ export async function getAllCategories() {
 export async function createCategory(data: {
   name: string
   nameEn?: string
+  subtitle?: string
   slug: string
   description?: string
   parentId?: string
