@@ -98,21 +98,21 @@ export function EmployeeForm({ employee, smtpConfig }: EmployeeFormProps) {
           <CardContent className="space-y-4">
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="name">Ad *</Label>
+                <Label htmlFor="name">Ad <span className="text-destructive">*</span></Label>
                 <Input id="name" name="name" required defaultValue={employee?.name || ""} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="surname">Soyad *</Label>
+                <Label htmlFor="surname">Soyad <span className="text-destructive">*</span></Label>
                 <Input id="surname" name="surname" required defaultValue={employee?.surname || ""} />
               </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="username">Kullanıcı Adı *</Label>
+                <Label htmlFor="username">Kullanıcı Adı <span className="text-destructive">*</span></Label>
                 <Input id="username" name="username" required defaultValue={employee?.username || ""} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="email">E-posta *</Label>
+                <Label htmlFor="email">E-posta <span className="text-destructive">*</span></Label>
                 <Input id="email" name="email" type="email" required defaultValue={employee?.email || ""} />
               </div>
             </div>
@@ -126,7 +126,7 @@ export function EmployeeForm({ employee, smtpConfig }: EmployeeFormProps) {
                 <Input id="password" name="password" type="password" required={!isEditing} minLength={6} />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="role">Rol *</Label>
+                <Label htmlFor="role">Rol <span className="text-destructive">*</span></Label>
                 <Select name="role" defaultValue={employee?.role || "EMPLOYEE"}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -223,11 +223,11 @@ function EmployeeSmtpCard({ userId, config, employeeEmail }: { userId: string; c
           </p>
           <div className="grid gap-4 sm:grid-cols-3">
             <div className="space-y-2">
-              <Label>SMTP Sunucu *</Label>
+              <Label>SMTP Sunucu <span className="text-destructive">*</span></Label>
               <Input name="smtp_host" required defaultValue={config?.host || "smtp.yandex.com"} />
             </div>
             <div className="space-y-2">
-              <Label>Port *</Label>
+              <Label>Port <span className="text-destructive">*</span></Label>
               <Input name="smtp_port" type="number" required defaultValue={config?.port || 465} />
             </div>
             <div className="flex items-end gap-2 pb-1">
@@ -237,11 +237,11 @@ function EmployeeSmtpCard({ userId, config, employeeEmail }: { userId: string; c
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label>E-posta (Kullanıcı Adı) *</Label>
+              <Label>E-posta (Kullanıcı Adı) <span className="text-destructive">*</span></Label>
               <Input name="smtp_username" required defaultValue={config?.username || employeeEmail} />
             </div>
             <div className="space-y-2">
-              <Label>Şifre *</Label>
+              <Label>Şifre <span className="text-destructive">*</span></Label>
               <Input name="smtp_password" type="password" required defaultValue={config?.password || ""} />
             </div>
           </div>

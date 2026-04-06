@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { createOrganization, updateOrganization } from "@/lib/actions/organization-actions"
 import { toast } from "sonner"
 import type { Organization } from "@/generated/prisma"
@@ -96,10 +96,11 @@ export function OrganizationForm({ organization }: OrganizationFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>Temel Bilgiler</CardTitle>
+            <CardDescription>Organizasyon tipi ve vergi bilgileri</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Organizasyon Adı *</Label>
+              <Label htmlFor="name">Organizasyon Adı <span className="text-destructive">*</span></Label>
               <Input
                 id="name"
                 name="name"
@@ -109,7 +110,7 @@ export function OrganizationForm({ organization }: OrganizationFormProps) {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="type">Tip *</Label>
+                <Label htmlFor="type">Tip <span className="text-destructive">*</span></Label>
                 <Select name="type" defaultValue={organization?.type || "COMPANY"}>
                   <SelectTrigger>
                     <SelectValue />
@@ -178,6 +179,7 @@ export function OrganizationForm({ organization }: OrganizationFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>İletişim Bilgileri</CardTitle>
+            <CardDescription>Telefon ve web adresi</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -202,6 +204,7 @@ export function OrganizationForm({ organization }: OrganizationFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>Adres Bilgileri</CardTitle>
+            <CardDescription>Fiziksel adres ve konum</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -245,6 +248,7 @@ export function OrganizationForm({ organization }: OrganizationFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>Notlar</CardTitle>
+            <CardDescription>Dahili notlar, müşteriye görünmez</CardDescription>
           </CardHeader>
           <CardContent>
             <Textarea

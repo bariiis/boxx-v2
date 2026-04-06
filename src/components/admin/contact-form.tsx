@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { OrganizationCombobox } from "@/components/admin/organization-combobox"
 import { createContact, updateContact } from "@/lib/actions/contact-actions"
 import { toast } from "sonner"
@@ -61,19 +61,20 @@ export function ContactForm({ contact }: ContactFormProps) {
       <Card>
         <CardHeader>
           <CardTitle>Kişi Bilgileri</CardTitle>
+          <CardDescription>Kişi iletişim ve organizasyon bilgileri</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-[100px_1fr_1fr]">
+          <div className="grid gap-4 sm:grid-cols-[140px_1fr_1fr]">
             <div className="space-y-2">
               <Label htmlFor="title">Ünvan</Label>
               <Input id="title" name="title" placeholder="Dr." defaultValue={contact?.title || ""} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="firstName">Ad *</Label>
+              <Label htmlFor="firstName">Ad <span className="text-destructive">*</span></Label>
               <Input id="firstName" name="firstName" required defaultValue={contact?.firstName || ""} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName">Soyad *</Label>
+              <Label htmlFor="lastName">Soyad <span className="text-destructive">*</span></Label>
               <Input id="lastName" name="lastName" required defaultValue={contact?.lastName || ""} />
             </div>
           </div>

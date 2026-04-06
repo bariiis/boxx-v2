@@ -139,9 +139,14 @@ export function SettingsForm({ settings }: SettingsFormProps) {
         </Card>
       </div>
 
-      <Button type="submit" disabled={loading}>
-        {loading ? "Kaydediliyor..." : "Ayarları Kaydet"}
-      </Button>
+      <div className="flex gap-4">
+        <Button type="submit" disabled={loading}>
+          {loading ? "Kaydediliyor..." : "Ayarları Kaydet"}
+        </Button>
+        <Button type="reset" variant="outline">
+          Sıfırla
+        </Button>
+      </div>
     </form>
   )
 }
