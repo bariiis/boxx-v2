@@ -75,7 +75,7 @@ export default async function CategoryPage({
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        {/* Ana kategoriler */}
+        {/* Ana kategoriler — her zaman göster */}
         {allCategories.length > 0 && (
           <div className="mb-4 flex flex-wrap gap-2">
             <Link href="/urunler">
@@ -83,39 +83,56 @@ export default async function CategoryPage({
                 Tüm Ürünler
               </Badge>
             </Link>
-            {allCategories.map((cat) => (
-              <Link key={cat.id} href={`/urunler/kategori/${cat.slug}`}>
-                <Badge
-                  variant={cat.slug === slug ? "default" : "outline"}
-                  className="cursor-pointer px-3 py-1.5 text-sm transition-colors hover:bg-accent"
-                >
-                  {cat.name}
-                </Badge>
-              </Link>
-            ))}
+            {allCategories.map((cat) => {
+              // Aktif üst kategori: ya doğrudan bu slug, ya da parent'ı bu olan bir alt kategori
+              const isActiveParent = cat.slug === slug || cat.slug === category.parent?.slug
+              return (
+                <Link key={cat.id} href={`/urunler/kategori/${cat.slug}`}>
+                  <Badge
+                    variant={isActiveParent ? "default" : "outline"}
+                    className="cursor-pointer px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+                  >
+                    {cat.name}
+                  </Badge>
+                </Link>
+              )
+            })}
           </div>
         )}
 
-        {/* Alt kategoriler */}
-        {category.children.length > 0 && (
-          <div className="mb-8 flex flex-wrap gap-2">
-            <Link href={`/urunler/kategori/${slug}`}>
-              <Badge variant="default" className="cursor-pointer px-3 py-1.5 text-sm">
-                Tümü
-              </Badge>
-            </Link>
-            {category.children.map((child) => (
-              <Link key={child.id} href={`/urunler/kategori/${child.slug}`}>
+        {/* Alt kategoriler — üst kategorininkileri veya kardeşleri göster */}
+        {(() => {
+          // Eğer bu bir üst kategoriyse, kendi children'ını göster
+          // Eğer bu bir alt kategoriyse, parent'ın children'ını göster (kardeşleri)
+          const parentSlug = category.parent?.slug || slug
+          const parentCat = category.parent
+            ? allCategories.find((c) => c.slug === category.parent!.slug)
+            : allCategories.find((c) => c.slug === slug)
+          const subcategories = parentCat?.children || category.children
+
+          return subcategories.length > 0 ? (
+            <div className="mb-8 flex flex-wrap gap-2">
+              <Link href={`/urunler/kategori/${parentSlug}`}>
                 <Badge
-                  variant="outline"
+                  variant={!category.parent && category.children.length > 0 ? "default" : "outline"}
                   className="cursor-pointer px-3 py-1.5 text-sm transition-colors hover:bg-accent"
                 >
-                  {child.name}
+                  Tümü
                 </Badge>
               </Link>
-            ))}
-          </div>
-        )}
+              {subcategories.map((child) => (
+                <Link key={child.id} href={`/urunler/kategori/${child.slug}`}>
+                  <Badge
+                    variant={child.slug === slug ? "default" : "outline"}
+                    className="cursor-pointer px-3 py-1.5 text-sm transition-colors hover:bg-accent"
+                  >
+                    {child.name}
+                  </Badge>
+                </Link>
+              ))}
+            </div>
+          ) : null
+        })()}
 
         {/* Product Grid */}
         {products.length > 0 ? (
