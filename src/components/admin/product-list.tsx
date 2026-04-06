@@ -7,9 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { GripVertical, Package } from "lucide-react"
-import { reorderProducts } from "@/lib/actions/product-actions"
+import { GripVertical, Package, Trash2 } from "lucide-react"
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+} from "@/components/ui/dialog"
+import { reorderProducts, deleteProduct } from "@/lib/actions/product-actions"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 const typeLabels: Record<string, string> = {
   STANDALONE: "Tek Ürün",
@@ -38,6 +42,25 @@ interface ProductItem {
 
 export function ProductList({ products: initialProducts }: { products: ProductItem[] }) {
   const [products, setProducts] = useState(initialProducts)
+  const [deleteTarget, setDeleteTarget] = useState<ProductItem | null>(null)
+  const [deleting, setDeleting] = useState(false)
+  const router = useRouter()
+
+  async function handleDelete() {
+    if (!deleteTarget) return
+    setDeleting(true)
+    try {
+      await deleteProduct(deleteTarget.id)
+      setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id))
+      toast.success("Ürün silindi")
+      setDeleteTarget(null)
+      router.refresh()
+    } catch {
+      toast.error("Ürün silinemedi — bağlı teklifler veya siparişler olabilir")
+    } finally {
+      setDeleting(false)
+    }
+  }
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null)
 
   const key = initialProducts.map((p) => p.id).join(",")
@@ -89,6 +112,7 @@ export function ProductList({ products: initialProducts }: { products: ProductIt
   }
 
   return (
+    <>
     <div className="rounded-md border">
       <Table>
         <TableHeader>
@@ -146,14 +170,42 @@ export function ProductList({ products: initialProducts }: { products: ProductIt
                 </div>
               </TableCell>
               <TableCell>
-                <Button variant="ghost" size="sm" asChild>
-                  <Link href={`/admin/products/${product.id}`}>Düzenle</Link>
-                </Button>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="sm" asChild>
+                    <Link href={`/admin/products/${product.id}`}>Düzenle</Link>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="size-8 text-destructive hover:text-destructive"
+                    onClick={() => setDeleteTarget(product)}
+                  >
+                    <Trash2 className="size-4" />
+                  </Button>
+                </div>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
     </div>
+
+      <Dialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ürünü Sil</DialogTitle>
+            <DialogDescription>
+              <strong>{deleteTarget?.name}</strong> ({deleteTarget?.sku}) silinecek. Bu işlem geri alınamaz.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteTarget(null)}>İptal</Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? "Siliniyor..." : "Sil"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
