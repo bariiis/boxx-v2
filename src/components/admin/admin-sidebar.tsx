@@ -29,6 +29,7 @@ import {
   Mail,
   LogOut,
   ChevronUp,
+  Layers,
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -81,6 +82,7 @@ const menuGroups = [
     label: "İçerik",
     items: [
       { title: "Çözümler", href: "/admin/solutions", icon: Globe },
+      { title: "Landing Pages", href: "/admin/landing-pages", icon: Layers },
     ],
   },
   {

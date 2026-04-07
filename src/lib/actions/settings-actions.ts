@@ -19,7 +19,14 @@ export async function updateSettings(data: Record<string, string>) {
     await db.setting.upsert({
       where: { key },
       update: { value },
-      create: { key, value, group: key.startsWith("company") ? "general" : "quote" },
+      create: {
+        key,
+        value,
+        group:
+          key.startsWith("company") || key === "header_menu" || key === "footer_columns"
+            ? "general"
+            : "quote",
+      },
     })
   }
   revalidatePath("/admin/settings")

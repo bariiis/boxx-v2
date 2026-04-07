@@ -21,7 +21,12 @@ interface SolutionMenuItem {
   solutions: { title: string; slug: string; icon: string | null }[]
 }
 
-const mainNav = [
+interface NavItem {
+  title: string
+  href: string
+}
+
+const defaultMainNav: NavItem[] = [
   { title: "Ürünler", href: "/urunler" },
   { title: "Hakkımızda", href: "/hakkimizda" },
   { title: "Destek", href: "/destek" },
@@ -32,9 +37,11 @@ interface PublicHeaderProps {
   logo?: string
   companyName?: string
   solutionMenu?: SolutionMenuItem[]
+  mainNav?: NavItem[]
 }
 
-export function PublicHeader({ logo, companyName, solutionMenu = [] }: PublicHeaderProps) {
+export function PublicHeader({ logo, companyName, solutionMenu = [], mainNav: mainNavProp }: PublicHeaderProps) {
+  const mainNav = mainNavProp && mainNavProp.length > 0 ? mainNavProp : defaultMainNav
   const pathname = usePathname()
   const [megaOpen, setMegaOpen] = useState(false)
   const [activeSubcat, setActiveSubcat] = useState<string | null>(null)

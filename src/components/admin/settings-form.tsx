@@ -124,6 +124,74 @@ export function SettingsForm({ settings }: SettingsFormProps) {
           </CardContent>
         </Card>
 
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Public Site - Header Menü</CardTitle>
+            <CardDescription>
+              Public sitedeki üst menü linkleri. JSON formatında: <code>{`[{"title":"Ürünler","href":"/urunler"}]`}</code>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              name="header_menu"
+              rows={6}
+              defaultValue={
+                settings.header_menu ||
+                JSON.stringify(
+                  [
+                    { title: "Ürünler", href: "/urunler" },
+                    { title: "Hakkımızda", href: "/hakkimizda" },
+                    { title: "Destek", href: "/destek" },
+                    { title: "İletişim", href: "/iletisim" },
+                  ],
+                  null,
+                  2
+                )
+              }
+              className="font-mono text-xs"
+            />
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Public Site - Footer Kolonları</CardTitle>
+            <CardDescription>
+              JSON formatında: <code>{`[{"title":"Şirket","links":[{"label":"Hakkımızda","href":"/hakkimizda"}]}]`}</code>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Textarea
+              name="footer_columns"
+              rows={10}
+              defaultValue={
+                settings.footer_columns ||
+                JSON.stringify(
+                  [
+                    {
+                      title: "Ürünler",
+                      links: [
+                        { label: "İş İstasyonları", href: "/urunler" },
+                        { label: "GPU Sunucular", href: "/urunler" },
+                      ],
+                    },
+                    {
+                      title: "Şirket",
+                      links: [
+                        { label: "Hakkımızda", href: "/hakkimizda" },
+                        { label: "İletişim", href: "/iletisim" },
+                      ],
+                    },
+                  ],
+                  null,
+                  2
+                )
+              }
+              className="font-mono text-xs"
+            />
+          </CardContent>
+        </Card>
+
         <Card>
           <CardHeader>
             <CardTitle>Varsayılan Notlar</CardTitle>

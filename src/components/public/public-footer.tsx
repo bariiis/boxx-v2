@@ -1,6 +1,11 @@
 import Link from "next/link"
 
-const footerLinks = [
+interface FooterLinkGroup {
+  title: string
+  links: { label: string; href: string }[]
+}
+
+const defaultFooterLinks: FooterLinkGroup[] = [
   {
     title: "Ürünler",
     links: [
@@ -38,7 +43,14 @@ const footerLinks = [
   },
 ]
 
-export function PublicFooter({ companyName }: { companyName?: string }) {
+export function PublicFooter({
+  companyName,
+  groups,
+}: {
+  companyName?: string
+  groups?: FooterLinkGroup[]
+}) {
+  const footerLinks = groups && groups.length > 0 ? groups : defaultFooterLinks
   return (
     <footer className="border-t bg-muted/30">
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
