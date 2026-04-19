@@ -34,7 +34,7 @@ function StaticFallback() {
   )
 }
 
-export function HeroScene({ modelUrl }: HeroModelProps) {
+export function HeroScene({ modelUrl, modelFitSize }: HeroModelProps) {
   const reduced = useReducedMotion()
 
   if (reduced) return <StaticFallback />
@@ -53,7 +53,7 @@ export function HeroScene({ modelUrl }: HeroModelProps) {
         <directionalLight position={[-4, -2, -2]} intensity={0.3} color="#22D3EE" />
         <Environment preset="city" />
         <Suspense fallback={<PlaceholderServer />}>
-          {modelUrl ? <GltfModel url={modelUrl} /> : <PlaceholderServer />}
+          {modelUrl ? <GltfModel url={modelUrl} fitSize={modelFitSize} /> : <PlaceholderServer />}
         </Suspense>
       </Canvas>
     </CanvasBoundary>
