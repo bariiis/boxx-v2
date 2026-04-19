@@ -1,17 +1,25 @@
 "use client"
 
-import { Bounds, Center, useGLTF } from "@react-three/drei"
+import { Center, useGLTF } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
-import { useRef } from "react"
+import { useMemo, useRef } from "react"
 import * as THREE from "three"
 
 interface GltfModelProps {
   url: string
+  /** Target size the model should fit into (in world units). Default 3.5. */
+  fitSize?: number
 }
 
-export function GltfModel({ url }: GltfModelProps) {
+export function GltfModel({ url, fitSize = 3.5 }: GltfModelProps) {
   const { scene } = useGLTF(url)
   const group = useRef<THREE.Group>(null)
+
+  const scale = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene)
+    const size = box.getSize(new THREE.Vector3()).length()
+    return size > 0 ? fitSize / size : 1
+  }, [scene, fitSize])
 
   useFrame((state) => {
     if (!group.current) return
@@ -21,12 +29,10 @@ export function GltfModel({ url }: GltfModelProps) {
   })
 
   return (
-    <Bounds fit clip margin={1.2}>
+    <group ref={group} scale={scale}>
       <Center>
-        <group ref={group}>
-          <primitive object={scene} />
-        </group>
+        <primitive object={scene} />
       </Center>
-    </Bounds>
+    </group>
   )
 }
