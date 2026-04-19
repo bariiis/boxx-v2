@@ -38,5 +38,4 @@ export default auth((req) => {
 
 export const config = {
   matcher: ["/admin/:path*", "/portal/:path*", "/login", "/register"],
-  runtime: "nodejs",
 }
