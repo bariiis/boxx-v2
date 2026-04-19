@@ -1,37 +1,33 @@
 "use client"
 
-import { Float, useGLTF } from "@react-three/drei"
+import { Bounds, Center, Float, useGLTF } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import { useRef } from "react"
 import * as THREE from "three"
 
 interface GltfModelProps {
   url: string
-  scale?: number
-  position?: [number, number, number]
-  rotationY?: number
 }
 
-export function GltfModel({
-  url,
-  scale = 1,
-  position = [0, 0, 0],
-  rotationY = 0,
-}: GltfModelProps) {
+export function GltfModel({ url }: GltfModelProps) {
   const { scene } = useGLTF(url)
   const group = useRef<THREE.Group>(null)
 
   useFrame((state) => {
     if (!group.current) return
     const t = state.clock.getElapsedTime()
-    group.current.rotation.y = rotationY + Math.sin(t * 0.2) * 0.3
+    group.current.rotation.y = Math.sin(t * 0.2) * 0.3
   })
 
   return (
     <Float speed={1.2} rotationIntensity={0.2} floatIntensity={0.5}>
-      <group ref={group} position={position} scale={scale}>
-        <primitive object={scene} />
-      </group>
+      <Bounds fit clip observe margin={1.2}>
+        <Center>
+          <group ref={group}>
+            <primitive object={scene} />
+          </group>
+        </Center>
+      </Bounds>
     </Float>
   )
 }
