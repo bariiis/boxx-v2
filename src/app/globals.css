@@ -236,3 +236,40 @@
   height: 1px;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
 }
+
+/* ============================================================
+   HOME V2 — hybrid scroll theme tokens
+   Body background follows the section currently in view.
+   ============================================================ */
+:root {
+  --home-bg-dark: #0A0A0B;
+  --home-bg-light: #FAFAFA;
+  --home-surface-dark: #111113;
+  --home-surface-light: #FFFFFF;
+  --home-border-dark: #1F1F23;
+  --home-border-light: #E5E5E7;
+  --home-fg-dark: #F5F5F7;
+  --home-fg-light: #0A0A0B;
+  --home-muted-dark: #A1A1A6;
+  --home-muted-light: #57575B;
+  --home-brand: #FF6A2C;
+  --home-data: #22D3EE;
+}
+
+body[data-home-theme] {
+  transition: background-color 400ms ease-in-out, color 400ms ease-in-out;
+}
+body[data-home-theme="dark"] {
+  background-color: var(--home-bg-dark);
+  color: var(--home-fg-dark);
+}
+body[data-home-theme="light"] {
+  background-color: var(--home-bg-light);
+  color: var(--home-fg-light);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-home-theme] {
+    transition: none;
+  }
+}
