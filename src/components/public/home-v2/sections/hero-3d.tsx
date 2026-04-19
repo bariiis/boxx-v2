@@ -27,7 +27,7 @@ export function HeroSection({ data }: HeroSectionProps) {
     >
       <NoiseOverlay />
       <div className="absolute inset-0 -z-0 opacity-80">
-        <HeroScene />
+        <HeroScene modelUrl="/models/retro-computer.glb" />
       </div>
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 grid gap-12 md:grid-cols-12 items-center">
         <div className="md:col-span-7 space-y-8">

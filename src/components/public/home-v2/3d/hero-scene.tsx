@@ -2,8 +2,9 @@
 
 import { Canvas } from "@react-three/fiber"
 import { Environment, PerspectiveCamera } from "@react-three/drei"
-import { Component, type ReactNode } from "react"
+import { Component, Suspense, type ReactNode } from "react"
 import { PlaceholderServer } from "./placeholder-server"
+import { GltfModel } from "./gltf-model"
 import type { HeroModelProps } from "./types"
 import { useReducedMotion } from "../hooks/use-reduced-motion"
 
@@ -51,7 +52,9 @@ export function HeroScene({ modelUrl }: HeroModelProps) {
         <directionalLight position={[4, 4, 4]} intensity={0.8} />
         <directionalLight position={[-4, -2, -2]} intensity={0.3} color="#22D3EE" />
         <Environment preset="city" />
-        {modelUrl ? null : <PlaceholderServer />}
+        <Suspense fallback={<PlaceholderServer />}>
+          {modelUrl ? <GltfModel url={modelUrl} /> : <PlaceholderServer />}
+        </Suspense>
       </Canvas>
     </CanvasBoundary>
   )
