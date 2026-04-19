@@ -1,0 +1,71 @@
+{
+  "hero": {
+    "eyebrow": "BOXX \u00b7 2026",
+    "headline": "Donan\u0131m\u0131n s\u0131n\u0131rlar\u0131n\u0131",
+    "headlineHighlight": "a\u015fan i\u015f i\u00e7in",
+    "tagline": "St\u00fcdyolardan ara\u015ft\u0131rma laboratuvarlar\u0131na, m\u00fchendislik ekiplerinden veri merkezlerine \u2014 BOXX, senaryona g\u00f6re tasarlanm\u0131\u015f i\u015f istasyonlar\u0131, GPU sunucular\u0131 ve depolama \u00e7\u00f6z\u00fcmlerini tek elden sunar.",
+    "primaryCtaLabel": "Kata\u011fu Ke\u015ffet",
+    "primaryCtaHref": "/urunler",
+    "secondaryCtaLabel": "Kendine \u00d6zel Yap\u0131land\u0131r",
+    "secondaryCtaHref": "/yapilandir"
+  },
+  "featuredProducts": [
+    {
+      "id": "prod-w680-pro",
+      "slug": "boxx-w680-pro",
+      "name": "BOXX W680 Pro",
+      "tagline": "Intel Xeon W tabanl\u0131, \u00e7ift RTX 6000 Ada destekli profesyonel tower.",
+      "specs": ["Xeon W-3495X", "2x RTX 6000 Ada", "256 GB ECC", "4 TB NVMe"],
+      "priceLabel": "285.000 TL'den ba\u015flar",
+      "image": "/images/products/w680-pro.webp"
+    },
+    {
+      "id": "prod-raxx-h100",
+      "slug": "boxx-raxx-h100",
+      "name": "BOXX RAXX H100",
+      "tagline": "8x NVIDIA H100 SXM5 ile donat\u0131lm\u0131\u015f 4U AI e\u011fitimi ve HPC sunucusu.",
+      "specs": ["8x H100 80GB", "4. nesil NVLink mesh", "2x Xeon 8480+", "2 TB ECC"],
+      "priceLabel": "6.850.000 TL'den ba\u015flar",
+      "image": "/images/products/raxx-h100.webp"
+    },
+    {
+      "id": "prod-comino-grando",
+      "slug": "comino-grando",
+      "name": "Comino Grando",
+      "tagline": "S\u0131v\u0131 so\u011futmal\u0131 6x RTX 4090 GPU sunucu; render farm ve AI \u00e7\u0131kar\u0131m\u0131 i\u00e7in.",
+      "specs": ["6x RTX 4090", "EPYC 9354", "384 GB ECC", "S\u0131v\u0131 so\u011futma"],
+      "priceLabel": "1.650.000 TL'den ba\u015flar",
+      "image": "/images/products/comino-grando.webp"
+    },
+    {
+      "id": "prod-apexx-t4",
+      "slug": "boxx-apexx-t4",
+      "name": "BOXX APEXX T4",
+      "tagline": "Threadripper Pro tabanl\u0131 VFX ve render iste\u011fine yönelik tower.",
+      "specs": ["Threadripper Pro 7985WX", "2x RTX 5000 Ada", "512 GB ECC", "8 TB NVMe"],
+      "priceLabel": "420.000 TL'den ba\u015flar",
+      "image": "/images/products/apexx-t4.webp"
+    },
+    {
+      "id": "prod-apexx-w4l",
+      "slug": "boxx-apexx-w4l",
+      "name": "BOXX APEXX W4L",
+      "tagline": "Kompakt, ISV sertifikal\u0131 mimar/mühendis istasyonu.",
+      "specs": ["Xeon W-2495X", "RTX 4500 Ada", "128 GB ECC", "2 TB NVMe"],
+      "priceLabel": "180.000 TL'den ba\u015flar",
+      "image": "/images/products/apexx-w4l.webp"
+    }
+  ],
+  "customerLogos": [
+    { "id": "cl-anima", "name": "Anima St\u00fcdyo", "logoUrl": "/images/customers/anima.svg" },
+    { "id": "cl-bkm", "name": "BKM Yap\u0131m", "logoUrl": "/images/customers/bkm.svg" },
+    { "id": "cl-roketsan", "name": "Roketsan", "logoUrl": "/images/customers/roketsan.svg" },
+    { "id": "cl-arcelik", "name": "Ar\u00e7elik", "logoUrl": "/images/customers/arcelik.svg" },
+    { "id": "cl-tai", "name": "TUSA\u015e", "logoUrl": "/images/customers/tai.svg" },
+    { "id": "cl-koc", "name": "Ko\u00e7 \u00dcniversitesi", "logoUrl": "/images/customers/koc-uni.svg" },
+    { "id": "cl-tubitak", "name": "T\u00dcB\u0130TAK", "logoUrl": "/images/customers/tubitak.svg" },
+    { "id": "cl-tofas", "name": "Tofa\u015f", "logoUrl": "/images/customers/tofas.svg" },
+    { "id": "cl-ford", "name": "Ford Otosan", "logoUrl": "/images/customers/ford-otosan.svg" },
+    { "id": "cl-odtu", "name": "ODT\u00dc", "logoUrl": "/images/customers/odtu.svg" }
+  ]
+}
