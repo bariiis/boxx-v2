@@ -66,14 +66,17 @@ export function PublicHeader({ logo, companyName, solutionMenu = [], mainNav: ma
   })()
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 dark:border-slate-800/80">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           {logo ? (
             <img src={logo} alt={companyName || "Logo"} className="h-8 w-auto object-contain" />
           ) : (
-            <span className="text-xl font-bold tracking-tight">{companyName || "STUUX"}</span>
+            <span className="font-['Space_Grotesk'] text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              {companyName || "STUUX"}
+              <span aria-hidden className="text-orange-500">.</span>
+            </span>
           )}
         </Link>
 
@@ -87,12 +90,13 @@ export function PublicHeader({ logo, companyName, solutionMenu = [], mainNav: ma
           >
             <button
               className={cn(
-                "flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                pathname.startsWith("/cozumler") && "text-foreground",
+                "relative flex items-center gap-1 rounded-md px-3 py-2 font-['Space_Grotesk'] text-sm font-medium text-slate-600 transition-colors duration-150 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white",
+                pathname.startsWith("/cozumler") &&
+                  "text-slate-900 dark:text-white after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:bg-orange-500",
               )}
             >
               Çözümler
-              <ChevronRight className={cn("size-3 transition-transform", megaOpen && "rotate-90")} />
+              <ChevronRight className={cn("size-3 transition-transform duration-150", megaOpen && "rotate-90")} />
             </button>
 
             {megaOpen && (
@@ -175,29 +179,42 @@ export function PublicHeader({ logo, companyName, solutionMenu = [], mainNav: ma
             )}
           </div>
 
-          {mainNav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                pathname === item.href && "text-foreground"
-              )}
-            >
-              {item.title}
-            </Link>
-          ))}
+          {mainNav.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "relative rounded-md px-3 py-2 font-['Space_Grotesk'] text-sm font-medium text-slate-600 transition-colors duration-150 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white",
+                  isActive &&
+                    "text-slate-900 dark:text-white after:absolute after:bottom-0 after:left-3 after:right-3 after:h-0.5 after:bg-orange-500",
+                )}
+              >
+                {item.title}
+              </Link>
+            )
+          })}
         </nav>
 
         {/* Right */}
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" asChild className="hidden sm:flex">
+          <Button
+            variant="outline"
+            size="sm"
+            asChild
+            className="hidden border-slate-200 font-['Space_Grotesk'] text-slate-700 hover:border-orange-400 hover:text-orange-600 dark:border-slate-800 dark:text-slate-200 dark:hover:border-orange-500 dark:hover:text-orange-300 sm:flex"
+          >
             <Link href="/login">
               <User className="mr-2 size-4" />
               Giriş
             </Link>
           </Button>
-          <Button size="sm" asChild className="hidden sm:flex">
+          <Button
+            size="sm"
+            asChild
+            className="hidden bg-orange-500 font-['Space_Grotesk'] font-semibold text-white shadow-sm shadow-orange-500/30 hover:bg-orange-600 sm:flex"
+          >
             <Link href="/iletisim">Uzmanla Konuş</Link>
           </Button>
 

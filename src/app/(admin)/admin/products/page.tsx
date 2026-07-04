@@ -1,26 +1,32 @@
-import { getProducts } from "@/lib/actions/product-actions"
+import { getProducts, getAllCategories } from "@/lib/actions/product-actions"
 import { AdminPagination } from "@/components/admin/pagination"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, Search } from "lucide-react"
 import Link from "next/link"
 import { ProductList } from "@/components/admin/product-list"
+import { ProductCategoryFilter } from "@/components/admin/product-category-filter"
 
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; page?: string; type?: string }>
+  searchParams: Promise<{ search?: string; page?: string; type?: string; category?: string }>
 }) {
   const params = await searchParams
   const search = params.search || ""
   const page = parseInt(params.page || "1")
   const type = params.type as "STANDALONE" | "CONFIGURABLE" | "COMPONENT" | undefined
+  const categoryId = params.category || undefined
 
-  const { products, total, totalPages } = await getProducts({ search, page, type })
+  const [{ products, total, totalPages }, categories] = await Promise.all([
+    getProducts({ search, page, type, categoryId }),
+    getAllCategories(),
+  ])
 
   const preservedParams: Record<string, string> = {}
   if (search) preservedParams.search = search
   if (type) preservedParams.type = type
+  if (categoryId) preservedParams.category = categoryId
 
   return (
     <div className="space-y-6">
@@ -42,14 +48,21 @@ export default async function ProductsPage({
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex flex-wrap items-center gap-4">
         <form className="flex gap-2" action="/admin/products">
           {type && <input type="hidden" name="type" value={type} />}
+          {categoryId && <input type="hidden" name="category" value={categoryId} />}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input name="search" defaultValue={search} placeholder="Ürün adı veya SKU ara..." className="pl-9 w-64" />
           </div>
         </form>
+        <ProductCategoryFilter
+          categories={categories}
+          selectedId={categoryId}
+          search={search}
+          type={type}
+        />
         {search && (
           <Button variant="ghost" size="sm" asChild>
             <Link href={`/admin/products${type ? `?type=${type}` : ""}`}>Temizle</Link>
@@ -61,18 +74,23 @@ export default async function ProductsPage({
             { label: "Tek Ürün", value: "STANDALONE" },
             { label: "Konfigüre Edilebilir", value: "CONFIGURABLE" },
             { label: "Bileşen", value: "COMPONENT" },
-          ].map((f) => (
-            <Button
-              key={f.label}
-              variant={type === f.value ? "default" : "outline"}
-              size="sm"
-              asChild
-            >
-              <Link href={`/admin/products${f.value ? `?type=${f.value}` : ""}${search ? `${f.value ? "&" : "?"}search=${search}` : ""}`}>
-                {f.label}
-              </Link>
-            </Button>
-          ))}
+          ].map((f) => {
+            const qp = new URLSearchParams()
+            if (f.value) qp.set("type", f.value)
+            if (search) qp.set("search", search)
+            if (categoryId) qp.set("category", categoryId)
+            const qs = qp.toString()
+            return (
+              <Button
+                key={f.label}
+                variant={type === f.value ? "default" : "outline"}
+                size="sm"
+                asChild
+              >
+                <Link href={`/admin/products${qs ? `?${qs}` : ""}`}>{f.label}</Link>
+              </Button>
+            )
+          })}
         </div>
       </div>
 

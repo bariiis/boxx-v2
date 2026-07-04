@@ -52,6 +52,8 @@ import type { SpecFieldType } from "@/generated/prisma"
 interface PresetField {
   id: string
   key: string
+  label: string | null
+  unit: string | null
   fieldType: SpecFieldType
   options: unknown
   defaultValue: string | null
@@ -320,6 +322,8 @@ function PresetDetail({
 
   async function handleAddField(data: {
     key: string
+    label?: string
+    unit?: string
     fieldType: SpecFieldType
     options?: string[]
     defaultValue?: string
@@ -340,6 +344,8 @@ function PresetDetail({
     id: string,
     data: {
       key?: string
+      label?: string | null
+      unit?: string | null
       fieldType?: SpecFieldType
       options?: string[] | null
       defaultValue?: string | null
@@ -534,10 +540,22 @@ function PresetDetail({
                     <GripVertical className="size-4 text-muted-foreground/50" />
                   </div>
                   <div
-                    className="flex cursor-pointer items-center gap-2"
+                    className="flex cursor-pointer items-center gap-2 min-w-0"
                     onClick={() => setEditFieldId(field.id)}
                   >
-                    <span className="text-sm font-medium">{field.key}</span>
+                    <span className="text-sm font-medium truncate">
+                      {field.label || field.key}
+                    </span>
+                    {field.label && (
+                      <code className="text-[10px] text-muted-foreground/70 font-mono">
+                        {field.key}
+                      </code>
+                    )}
+                    {field.unit && (
+                      <Badge variant="secondary" className="text-[10px]">
+                        {field.unit}
+                      </Badge>
+                    )}
                     {opts.length > 0 && (
                       <Badge variant="outline" className="text-[10px]">
                         {opts.length} seçenek
@@ -629,6 +647,8 @@ function FieldAddRow({
 }: {
   onSave: (data: {
     key: string
+    label?: string
+    unit?: string
     fieldType: SpecFieldType
     options?: string[]
     defaultValue?: string
@@ -636,6 +656,8 @@ function FieldAddRow({
   onCancel: () => void
 }) {
   const [key, setKey] = useState("")
+  const [label, setLabel] = useState("")
+  const [unit, setUnit] = useState("")
   const [fieldType, setFieldType] = useState<SpecFieldType>("TEXT")
   const [defaultValue, setDefaultValue] = useState("")
   const [optionsText, setOptionsText] = useState("")
@@ -651,6 +673,8 @@ function FieldAddRow({
         : undefined
     onSave({
       key: key.trim(),
+      label: label.trim() || undefined,
+      unit: unit.trim() || undefined,
       fieldType,
       options,
       defaultValue: defaultValue || undefined,
@@ -659,14 +683,14 @@ function FieldAddRow({
 
   return (
     <div className="space-y-3 rounded-lg border bg-muted/30 p-4">
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-2">
-          <Label className="text-xs">Alan Adı *</Label>
+          <Label className="text-xs">Key (İngilizce, sabit) *</Label>
           <Input
             value={key}
             onChange={(e) => setKey(e.target.value)}
-            placeholder="ör: İşlemci, GPU Bellek, Form Faktörü"
-            className="h-8 text-sm"
+            placeholder="ör: cpuTdpWatts, ramCapacityGb"
+            className="h-8 text-sm font-mono"
             autoFocus
             onKeyDown={(e) => {
               if (e.key === "Enter") {
@@ -675,7 +699,30 @@ function FieldAddRow({
               }
             }}
           />
+          <p className="text-[10px] text-muted-foreground">
+            Configurator engine bu adı okur, sabit bırakın.
+          </p>
         </div>
+        <div className="space-y-2">
+          <Label className="text-xs">Görünen Ad (Türkçe)</Label>
+          <Input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="ör: İşlemci TDP"
+            className="h-8 text-sm"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs">Birim (suffix)</Label>
+          <Input
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+            placeholder="ör: W, GB, mm"
+            className="h-8 text-sm"
+          />
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <Label className="text-xs">Alan Tipi</Label>
           <Select
@@ -742,6 +789,8 @@ function FieldEditRow({
   field: PresetField
   onSave: (data: {
     key?: string
+    label?: string | null
+    unit?: string | null
     fieldType?: SpecFieldType
     options?: string[] | null
     defaultValue?: string | null
@@ -750,6 +799,8 @@ function FieldEditRow({
 }) {
   const opts = Array.isArray(field.options) ? (field.options as string[]) : []
   const [key, setKey] = useState(field.key)
+  const [label, setLabel] = useState(field.label || "")
+  const [unit, setUnit] = useState(field.unit || "")
   const [fieldType, setFieldType] = useState(field.fieldType)
   const [defaultValue, setDefaultValue] = useState(field.defaultValue || "")
   const [optionsText, setOptionsText] = useState(opts.join("\n"))
@@ -765,6 +816,8 @@ function FieldEditRow({
         : null
     onSave({
       key: key.trim(),
+      label: label.trim() || null,
+      unit: unit.trim() || null,
       fieldType,
       options: newOptions,
       defaultValue: defaultValue || null,
@@ -775,14 +828,37 @@ function FieldEditRow({
     <div className="space-y-3 rounded-lg border-2 border-primary/30 bg-muted/30 p-4">
       <div className="grid gap-3 sm:grid-cols-3">
         <div className="space-y-2">
-          <Label className="text-xs">Alan Adı *</Label>
+          <Label className="text-xs">Key (sabit) *</Label>
           <Input
             value={key}
             onChange={(e) => setKey(e.target.value)}
-            className="h-8 text-sm"
+            className="h-8 text-sm font-mono"
             autoFocus
           />
+          <p className="text-[10px] text-muted-foreground">
+            Engine bu adı okur, değiştirmeyin.
+          </p>
         </div>
+        <div className="space-y-2">
+          <Label className="text-xs">Görünen Ad</Label>
+          <Input
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="ör: İşlemci TDP"
+            className="h-8 text-sm"
+          />
+        </div>
+        <div className="space-y-2">
+          <Label className="text-xs">Birim</Label>
+          <Input
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+            placeholder="W, GB, mm"
+            className="h-8 text-sm"
+          />
+        </div>
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
         <div className="space-y-2">
           <Label className="text-xs">Alan Tipi</Label>
           <Select

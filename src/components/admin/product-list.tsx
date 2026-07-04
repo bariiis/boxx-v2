@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
-import { GripVertical, Package, Trash2, Copy } from "lucide-react"
+import { GripVertical, Package, Trash2, Copy, Pencil, Eye } from "lucide-react"
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
 } from "@/components/ui/dialog"
@@ -35,6 +35,7 @@ interface ProductItem {
   stock: number
   isActive: boolean
   isSaleOpen: boolean
+  slug: string
   sortOrder: number
   category: { id: string; name: string } | null
   images: { id: string }[]
@@ -181,8 +182,15 @@ export function ProductList({ products: initialProducts }: { products: ProductIt
               </TableCell>
               <TableCell>
                 <div className="flex gap-1">
-                  <Button variant="ghost" size="sm" asChild>
-                    <Link href={`/admin/products/${product.id}`}>Düzenle</Link>
+                  <Button variant="ghost" size="icon" className="size-8" title="Düzenle" asChild>
+                    <Link href={`/admin/products/${product.id}`}>
+                      <Pencil className="size-4" />
+                    </Link>
+                  </Button>
+                  <Button variant="ghost" size="icon" className="size-8" title="Ön İzleme" asChild>
+                    <Link href={`/urunler/${product.slug}`} target="_blank">
+                      <Eye className="size-4" />
+                    </Link>
                   </Button>
                   <Button
                     variant="ghost"

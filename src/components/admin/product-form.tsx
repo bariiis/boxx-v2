@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,9 +16,24 @@ import { SpecsEditor, type SpecEntry } from "@/components/admin/specs-editor"
 import { toast } from "sonner"
 import type { Product, ProductCategory, ComponentSpec } from "@/generated/prisma"
 
+interface SolutionOption {
+  id: string
+  title: string
+  slug: string
+  categoryName: string | null
+}
+
 interface ProductFormProps {
-  product?: (Product & { category?: ProductCategory | null; componentSpecs?: ComponentSpec | null }) | null
+  product?:
+    | (Product & {
+        category?: ProductCategory | null
+        componentSpecs?: ComponentSpec | null
+        solutionProducts?: { solutionId: string }[]
+        tags?: string[]
+      })
+    | null
   categories: { id: string; name: string; depth: number; parentId: string | null }[]
+  solutions?: SolutionOption[]
 }
 
 function slugify(text: string) {
@@ -30,22 +45,31 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, "")
 }
 
-export function ProductForm({ product, categories }: ProductFormProps) {
+export function ProductForm({ product, categories, solutions = [] }: ProductFormProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [isActive, setIsActive] = useState(product?.isActive ?? true)
   const [isSaleOpen, setIsSaleOpen] = useState(product?.isSaleOpen ?? true)
+  const [showPrice, setShowPrice] = useState(product?.showPrice ?? true)
+  const [productTypeState, setProductTypeState] = useState(product?.type || "STANDALONE")
   const [name, setName] = useState(product?.name || "")
   const [slug, setSlug] = useState(product?.slug || "")
   const [sku, setSku] = useState(product?.sku || "")
+  const [tags, setTags] = useState<string[]>(product?.tags ?? [])
+  const [tagInput, setTagInput] = useState("")
+  const [selectedSolutionIds, setSelectedSolutionIds] = useState<string[]>(
+    product?.solutionProducts?.map((sp) => sp.solutionId) ?? []
+  )
+  const [solutionQuery, setSolutionQuery] = useState("")
   const isEditing = !!product
 
   // Auto-generate SKU for new products
-  useState(() => {
+  useEffect(() => {
     if (!isEditing && !sku) {
       generateSku().then(setSku)
     }
-  })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
   const [specs, setSpecs] = useState<SpecEntry[]>(() => {
     const raw = product?.specs
     if (!raw) return []
@@ -53,6 +77,8 @@ export function ProductForm({ product, categories }: ProductFormProps) {
     if (Array.isArray(raw)) {
       return (raw as Record<string, unknown>[]).map((e) => ({
         key: String(e.key ?? ""),
+        label: e.label ? String(e.label) : undefined,
+        unit: e.unit ? String(e.unit) : undefined,
         value: String(e.value ?? ""),
         type: (e.type as SpecEntry["type"]) || "TEXT",
         options: Array.isArray(e.options) ? (e.options as string[]) : undefined,
@@ -92,7 +118,10 @@ export function ProductForm({ product, categories }: ProductFormProps) {
       categoryId: (fd.get("categoryId") as string) || undefined,
       isActive,
       isSaleOpen,
+      showPrice,
       specs,
+      tags,
+      solutionIds: selectedSolutionIds,
     }
 
     try {
@@ -104,8 +133,9 @@ export function ProductForm({ product, categories }: ProductFormProps) {
         toast.success("Ürün oluşturuldu")
       }
       router.push("/admin/products")
-    } catch {
-      toast.error("Bir hata oluştu")
+    } catch (err) {
+      console.error("Product save error:", err)
+      toast.error(err instanceof Error ? `Hata: ${err.message}` : "Bir hata oluştu")
     } finally {
       setLoading(false)
     }
@@ -113,6 +143,27 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      {/* Üst bar: butonlar + durum switch'leri */}
+      <div className="sticky top-16 z-20 flex flex-wrap items-center gap-4 rounded-lg border bg-card p-3 shadow-sm">
+        <Button type="submit" disabled={loading}>
+          {loading ? (isEditing ? "Güncelleniyor..." : "Oluşturuluyor...") : (isEditing ? "Güncelle" : "Oluştur")}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => router.back()}>İptal</Button>
+        <div className="mx-2 h-6 w-px bg-border" />
+        <div className="flex items-center gap-2">
+          <Switch checked={isActive} onCheckedChange={setIsActive} />
+          <Label className="text-sm">Aktif</Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <Switch checked={isSaleOpen} onCheckedChange={setIsSaleOpen} />
+          <Label className="text-sm">Satışa Açık</Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <Switch checked={showPrice} onCheckedChange={setShowPrice} />
+          <Label className="text-sm">Fiyatı Göster</Label>
+        </div>
+      </div>
+
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -126,7 +177,7 @@ export function ProductForm({ product, categories }: ProductFormProps) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="type">Ürün Tipi *</Label>
-                <Select name="type" defaultValue={product?.type || "STANDALONE"}>
+                <Select name="type" value={productTypeState} onValueChange={(v) => setProductTypeState(v as typeof productTypeState)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="STANDALONE">Tek Ürün</SelectItem>
@@ -239,16 +290,6 @@ export function ProductForm({ product, categories }: ProductFormProps) {
                 <Input id="dimensions" name="dimensions" placeholder="50x40x20 cm" defaultValue={product?.dimensions || ""} />
               </div>
             </div>
-            <div className="flex items-center gap-6 pt-2">
-              <div className="flex items-center gap-3">
-                <Switch checked={isActive} onCheckedChange={setIsActive} />
-                <Label>Aktif</Label>
-              </div>
-              <div className="flex items-center gap-3">
-                <Switch checked={isSaleOpen} onCheckedChange={setIsSaleOpen} />
-                <Label>Satışa Açık</Label>
-              </div>
-            </div>
           </CardContent>
         </Card>
 
@@ -270,20 +311,176 @@ export function ProductForm({ product, categories }: ProductFormProps) {
 
         <Card className="md:col-span-2">
           <CardHeader>
+            <CardTitle>Çözümler</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {selectedSolutionIds.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {selectedSolutionIds.map((id) => {
+                  const sol = solutions.find((s) => s.id === id)
+                  if (!sol) return null
+                  return (
+                    <span
+                      key={id}
+                      className="inline-flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-sm"
+                    >
+                      <span>{sol.title}</span>
+                      {sol.categoryName && (
+                        <span className="text-xs text-muted-foreground">· {sol.categoryName}</span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setSelectedSolutionIds((prev) => prev.filter((x) => x !== id))
+                        }
+                        className="rounded-full text-muted-foreground hover:text-destructive"
+                        aria-label={`${sol.title} çözümünü kaldır`}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  )
+                })}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="solutionSearch">Çözüm ekle</Label>
+              <Input
+                id="solutionSearch"
+                placeholder="Çözüm adı veya kategori ile ara..."
+                value={solutionQuery}
+                onChange={(e) => setSolutionQuery(e.target.value)}
+              />
+              {solutionQuery.trim() && (
+                <div className="max-h-56 overflow-y-auto rounded-md border bg-background">
+                  {solutions
+                    .filter((s) => {
+                      if (selectedSolutionIds.includes(s.id)) return false
+                      const q = solutionQuery.toLowerCase().trim()
+                      return (
+                        s.title.toLowerCase().includes(q) ||
+                        (s.categoryName?.toLowerCase().includes(q) ?? false)
+                      )
+                    })
+                    .slice(0, 20)
+                    .map((s) => (
+                      <button
+                        key={s.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedSolutionIds((prev) => [...prev, s.id])
+                          setSolutionQuery("")
+                        }}
+                        className="flex w-full items-center justify-between gap-3 border-b px-3 py-2 text-left text-sm last:border-b-0 hover:bg-muted"
+                      >
+                        <span>{s.title}</span>
+                        {s.categoryName && (
+                          <span className="text-xs text-muted-foreground">{s.categoryName}</span>
+                        )}
+                      </button>
+                    ))}
+                  {solutions.filter((s) => {
+                    if (selectedSolutionIds.includes(s.id)) return false
+                    const q = solutionQuery.toLowerCase().trim()
+                    return (
+                      s.title.toLowerCase().includes(q) ||
+                      (s.categoryName?.toLowerCase().includes(q) ?? false)
+                    )
+                  }).length === 0 && (
+                    <div className="px-3 py-6 text-center text-sm text-muted-foreground">
+                      Sonuç yok
+                    </div>
+                  )}
+                </div>
+              )}
+              {solutions.length === 0 && (
+                <p className="text-xs text-muted-foreground">
+                  Henüz çözüm tanımlanmamış. Önce{" "}
+                  <a href="/admin/solutions" className="underline">
+                    çözümler
+                  </a>{" "}
+                  oluşturun.
+                </p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>Etiketler</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-2 rounded-full border bg-muted/40 px-3 py-1 text-sm"
+                  >
+                    <span>{tag}</span>
+                    <button
+                      type="button"
+                      onClick={() => setTags((prev) => prev.filter((t) => t !== tag))}
+                      className="rounded-full text-muted-foreground hover:text-destructive"
+                      aria-label={`${tag} etiketini kaldır`}
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <div className="space-y-2">
+              <Label htmlFor="tagInput">Yeni etiket</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="tagInput"
+                  placeholder="Etiket yazıp Enter'a basın..."
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === ",") {
+                      e.preventDefault()
+                      const v = tagInput.trim().replace(/,$/, "").trim()
+                      if (v && !tags.includes(v)) {
+                        setTags((prev) => [...prev, v])
+                      }
+                      setTagInput("")
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const v = tagInput.trim()
+                    if (v && !tags.includes(v)) {
+                      setTags((prev) => [...prev, v])
+                    }
+                    setTagInput("")
+                  }}
+                >
+                  Ekle
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Örnek: AI, render, 3D, workstation. Enter veya virgül ile ekleyin.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-2">
+          <CardHeader>
             <CardTitle>Teknik Özellikler</CardTitle>
           </CardHeader>
           <CardContent>
-            <SpecsEditor specs={specs} onChange={setSpecs} />
+            <SpecsEditor specs={specs} onChange={setSpecs} productType={productTypeState} />
           </CardContent>
         </Card>
       </div>
 
-      <div className="flex gap-4">
-        <Button type="submit" disabled={loading}>
-          {loading ? (isEditing ? "Güncelleniyor..." : "Oluşturuluyor...") : (isEditing ? "Güncelle" : "Oluştur")}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>İptal</Button>
-      </div>
     </form>
   )
 }

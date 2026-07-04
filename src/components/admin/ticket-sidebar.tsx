@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select"
@@ -16,6 +15,7 @@ import { Trash2 } from "lucide-react"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
+import type { TicketStatus, TicketPriority } from "@/generated/prisma"
 
 interface TicketData {
   id: string
@@ -34,16 +34,51 @@ interface TicketData {
 interface TicketSidebarProps {
   ticket: TicketData
   employees: { id: string; name: string | null; surname: string | null }[]
+  categories: { id: string; name: string }[]
 }
 
-export function TicketSidebar({ ticket, employees }: TicketSidebarProps) {
+const NONE = "__none__"
+
+export function TicketSidebar({ ticket, employees, categories }: TicketSidebarProps) {
   const router = useRouter()
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
-  async function handleUpdate(field: string, value: string) {
+  async function handleStatusChange(value: string) {
     try {
-      await updateTicket(ticket.id, { [field]: value })
+      await updateTicket(ticket.id, { status: value as TicketStatus })
+      toast.success("Güncellendi")
+      router.refresh()
+    } catch {
+      toast.error("Hata oluştu")
+    }
+  }
+
+  async function handlePriorityChange(value: string) {
+    try {
+      await updateTicket(ticket.id, { priority: value as TicketPriority })
+      toast.success("Güncellendi")
+      router.refresh()
+    } catch {
+      toast.error("Hata oluştu")
+    }
+  }
+
+  async function handleAssigneeChange(value: string) {
+    const assignedToId = value === NONE ? null : value
+    try {
+      await updateTicket(ticket.id, { assignedToId })
+      toast.success("Güncellendi")
+      router.refresh()
+    } catch {
+      toast.error("Hata oluştu")
+    }
+  }
+
+  async function handleCategoryChange(value: string) {
+    const categoryId = value === NONE ? null : value
+    try {
+      await updateTicket(ticket.id, { categoryId })
       toast.success("Güncellendi")
       router.refresh()
     } catch {
@@ -68,8 +103,8 @@ export function TicketSidebar({ ticket, employees }: TicketSidebarProps) {
     <div className="space-y-4">
       <Card>
         <CardHeader><CardTitle className="text-sm">Durum</CardTitle></CardHeader>
-        <CardContent className="space-y-3">
-          <Select defaultValue={ticket.status} onValueChange={(v) => handleUpdate("status", v)}>
+        <CardContent>
+          <Select key={ticket.status} defaultValue={ticket.status} onValueChange={handleStatusChange}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="OPEN">Açık</SelectItem>
@@ -84,7 +119,7 @@ export function TicketSidebar({ ticket, employees }: TicketSidebarProps) {
       <Card>
         <CardHeader><CardTitle className="text-sm">Öncelik</CardTitle></CardHeader>
         <CardContent>
-          <Select defaultValue={ticket.priority} onValueChange={(v) => handleUpdate("priority", v)}>
+          <Select key={ticket.priority} defaultValue={ticket.priority} onValueChange={handlePriorityChange}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="LOW">Düşük</SelectItem>
@@ -99,11 +134,35 @@ export function TicketSidebar({ ticket, employees }: TicketSidebarProps) {
       <Card>
         <CardHeader><CardTitle className="text-sm">Atanan</CardTitle></CardHeader>
         <CardContent>
-          <Select defaultValue={ticket.assignedTo?.id || ""} onValueChange={(v) => handleUpdate("assignedToId", v)}>
-            <SelectTrigger><SelectValue placeholder="Atanmadı" /></SelectTrigger>
+          <Select
+            key={ticket.assignedTo?.id ?? NONE}
+            defaultValue={ticket.assignedTo?.id ?? NONE}
+            onValueChange={handleAssigneeChange}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
+              <SelectItem value={NONE}>Atanmadı</SelectItem>
               {employees.map((e) => (
                 <SelectItem key={e.id} value={e.id}>{e.name} {e.surname}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader><CardTitle className="text-sm">Kategori</CardTitle></CardHeader>
+        <CardContent>
+          <Select
+            key={ticket.category?.id ?? NONE}
+            defaultValue={ticket.category?.id ?? NONE}
+            onValueChange={handleCategoryChange}
+          >
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>Kategori yok</SelectItem>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
               ))}
             </SelectContent>
           </Select>
@@ -123,12 +182,6 @@ export function TicketSidebar({ ticket, employees }: TicketSidebarProps) {
             <div className="flex justify-between">
               <span className="text-muted-foreground">Kişi</span>
               <span>{ticket.contact.firstName} {ticket.contact.lastName}</span>
-            </div>
-          )}
-          {ticket.category && (
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Kategori</span>
-              <span>{ticket.category.name}</span>
             </div>
           )}
           {ticket.serialNumber && (

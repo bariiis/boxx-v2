@@ -353,6 +353,7 @@ model Product {
   stock           Int         @default(0)
   isActive        Boolean     @default(true)
   isSaleOpen      Boolean     @default(true)
+  showPrice       Boolean     @default(true)
   warrantyMonths  Int         @default(24)
   weight          Float?
   dimensions      String?
@@ -362,6 +363,8 @@ model Product {
   heroSubtitle    String?     @db.Text
   heroVideo       String?
   features        Json?
+  configuratorMeta Json? // { singleSelectCategories: ["gpu","ram"], ... }
+  tags            String[]    @default([])
   sortOrder       Int         @default(0)
   categoryId      String?
   createdAt       DateTime    @default(now())
@@ -380,6 +383,8 @@ model Product {
   faqs            ProductFaq[]
   benchmarks      BenchmarkChart[] @relation("ProductBenchmarks")
   landingPages    LandingPage[]
+  basekitOptions      ConfiguratorOption[] @relation("BasekitOptions")
+  componentInOptions  ConfiguratorOption[] @relation("ComponentInOptions")
 
   @@map("products")
 }
@@ -449,6 +454,17 @@ model ComponentSpec {
   maxGpuCount     Int?
   extraSpecs      Json?
 
+  // === Resource consumer fields (configurator engine) ===
+  pcieSlotWidth    Float?  // GPU/expansion: 1, 2, 2.5, 3, 3.5
+  pcieLanesUsed    Int?    // GPU:16, NVMe:4, NIC:8 etc.
+  lengthMm         Int?    // GPU physical length
+  ramCapacityGb    Int?    // single module capacity
+  storageGb        Int?    // single drive capacity
+  storageInterface String? // "nvme_m2" | "sata_2_5" | "sata_3_5"
+  socketRequired   String? // CPU socket needed (e.g. "sTR5", "LGA1700")
+  psuWatts         Int?    // PSU output wattage
+  idleWatts        Int?    // RAM/storage idle draw for power calc
+
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@map("component_specs")
@@ -467,6 +483,36 @@ model CompatibilityRule {
   updatedAt   DateTime @updatedAt
 
   @@map("compatibility_rules")
+}
+
+// ==========================================
+// CONFIGURATOR OPTIONS
+// Per-basekit list of selectable components per category.
+// ==========================================
+model ConfiguratorOption {
+  id               String  @id @default(cuid())
+  basekitId        String
+  componentId      String
+  category         String  // cpu | gpu | ram | nvme | ssd | hdd | psu | cooling
+                           // | expansion_card | network_card
+                           // | os | raid_config | power_cable
+                           // | warranty | service | software_license
+                           // | peripheral | shipping | rack_kit | customization
+  priceDelta       Int     @default(0) // in minor units (kuruş/cents)
+  isDefault        Boolean @default(false)
+  isRecommended    Boolean @default(false)
+  affectsResources Boolean @default(true) // false = pure add-on (warranty, software, etc.)
+  minQty           Int     @default(0)
+  maxQty           Int?    // null = engine computes from resource limits
+  sortOrder        Int     @default(0)
+  createdAt        DateTime @default(now())
+
+  basekit   Product @relation("BasekitOptions",     fields: [basekitId],   references: [id], onDelete: Cascade)
+  component Product @relation("ComponentInOptions", fields: [componentId], references: [id], onDelete: Cascade)
+
+  @@unique([basekitId, componentId, category])
+  @@index([basekitId, category])
+  @@map("configurator_options")
 }
 
 // ==========================================
@@ -496,6 +542,8 @@ model SpecPresetField {
   id           String        @id @default(cuid())
   presetId     String
   key          String
+  label        String?
+  unit         String?
   fieldType    SpecFieldType @default(TEXT)
   options      Json?
   defaultValue String?
@@ -882,6 +930,7 @@ model LandingPage {
   metaDescription String?
   productId       String?
   isActive        Boolean  @default(true)
+  theme           String?  @db.Text // JSON: { fonts:{heading,body}, colors:{...}, scale }
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -889,6 +938,19 @@ model LandingPage {
   sections LandingSection[]
 
   @@map("landing_pages")
+}
+
+model CustomFont {
+  id        String   @id @default(cuid())
+  name      String   // display name e.g. "Acme Sans"
+  family    String   // CSS font-family value
+  weight    Int      @default(400)
+  style     String   @default("normal") // normal | italic
+  fileUrl   String   // /uploads/fonts/xxx.woff2
+  format    String   @default("woff2")  // woff2 | woff | truetype | opentype
+  createdAt DateTime @default(now())
+
+  @@map("custom_fonts")
 }
 
 model LandingSection {

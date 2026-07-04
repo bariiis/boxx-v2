@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { useCompareStore, type CompareItem } from "@/lib/stores/compare-store"
 import { Button } from "@/components/ui/button"
 import { GitCompareArrows, Check } from "lucide-react"
@@ -18,9 +19,12 @@ interface CompareButtonProps {
 
 export function CompareButton({ product, size = "sm" }: CompareButtonProps) {
   const { has, add, remove, canAdd, items } = useCompareStore()
-  const isSelected = has(product.id)
-  const sameCategory = canAdd(product.rootCategorySlug)
-  const isFull = items.length >= 4
+  // Defer store reads to client to avoid hydration mismatch
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
+  const isSelected = mounted && has(product.id)
+  const sameCategory = !mounted || canAdd(product.rootCategorySlug)
+  const isFull = mounted && items.length >= 4
   const disabled = !isSelected && (!sameCategory || isFull)
 
   function handleToggle(e: React.MouseEvent) {

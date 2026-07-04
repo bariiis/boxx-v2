@@ -1,8 +1,6 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { ArrowLeft, ArrowRight } from "lucide-react"
+import { ArrowLeft, ArrowRight, Box } from "lucide-react"
 import {
   getPublicCategoryBySlug,
   getPublicProducts,
@@ -15,7 +13,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const category = await getPublicCategoryBySlug(slug)
   if (!category) return { title: "Kategori Bulunamadı" }
   return {
-    title: `${category.name} | STUUX Ürünler`,
+    title: `${category.name} | BOXX Ürünler`,
     description: category.description || `${category.name} kategorisindeki tüm ürünler.`,
   }
 }
@@ -39,159 +37,221 @@ export default async function CategoryPage({
 
   if (!category) notFound()
 
+  const parentSlug = category.parent?.slug || slug
+  const parentCat = category.parent
+    ? allCategories.find((c) => c.slug === category.parent!.slug)
+    : allCategories.find((c) => c.slug === slug)
+  const subcategories = parentCat?.children || category.children
+
   return (
-    <div>
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-background to-muted/30 py-16 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-br from-white via-orange-50/30 to-teal-50/20 dark:border-slate-800/80 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400/20 to-teal-400/10 blur-3xl"
+        />
+        <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-20">
           {/* Breadcrumb */}
-          <nav className="mb-4 flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/urunler" className="hover:text-foreground transition-colors">
+          <nav className="mb-5 flex items-center gap-1.5 font-['JetBrains_Mono'] text-[11px] uppercase tracking-[0.18em] text-slate-500">
+            <Link href="/" className="transition-colors hover:text-orange-600 dark:hover:text-orange-300">
+              Ana Sayfa
+            </Link>
+            <span aria-hidden>/</span>
+            <Link href="/urunler" className="transition-colors hover:text-orange-600 dark:hover:text-orange-300">
               Ürünler
             </Link>
-            <span>/</span>
             {category.parent && (
               <>
+                <span aria-hidden>/</span>
                 <Link
                   href={`/urunler/kategori/${category.parent.slug}`}
-                  className="hover:text-foreground transition-colors"
+                  className="transition-colors hover:text-orange-600 dark:hover:text-orange-300"
                 >
                   {category.parent.name}
                 </Link>
-                <span>/</span>
               </>
             )}
-            <span className="text-foreground">{category.name}</span>
+            <span aria-hidden>/</span>
+            <span className="text-slate-700 dark:text-slate-200">{category.name}</span>
           </nav>
 
-          <h1 className="text-3xl font-bold sm:text-4xl">{category.name}</h1>
-          {category.description && (
-            <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-              {category.description}
-            </p>
-          )}
-          <p className="mt-2 text-sm text-muted-foreground">{total} ürün</p>
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-2xl">
+              <div className="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.22em] text-orange-600 dark:text-orange-400">
+                Ürün Kategorisi · {total} ürün
+              </div>
+              <h1 className="mt-2 font-['Space_Grotesk'] text-4xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-5xl">
+                {category.name}
+                <span aria-hidden className="text-orange-500">.</span>
+              </h1>
+              {category.description && (
+                <p className="mt-4 text-base leading-relaxed text-slate-600 dark:text-slate-300 sm:text-lg">
+                  {category.description}
+                </p>
+              )}
+            </div>
+            <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <Box className="size-8 text-orange-500" />
+            </div>
+          </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        {/* Ana kategoriler — her zaman göster */}
-        {allCategories.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
-            <Link href="/urunler">
-              <Badge variant="outline" className="cursor-pointer px-3 py-1.5 text-sm transition-colors hover:bg-accent">
-                Tüm Ürünler
-              </Badge>
-            </Link>
-            {allCategories.map((cat) => {
-              // Aktif üst kategori: ya doğrudan bu slug, ya da parent'ı bu olan bir alt kategori
-              const isActiveParent = cat.slug === slug || cat.slug === category.parent?.slug
-              return (
-                <Link key={cat.id} href={`/urunler/kategori/${cat.slug}`}>
-                  <Badge
-                    variant={isActiveParent ? "default" : "outline"}
-                    className="cursor-pointer px-3 py-1.5 text-sm transition-colors hover:bg-accent"
-                  >
-                    {cat.name}
-                  </Badge>
-                </Link>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Alt kategoriler — üst kategorininkileri veya kardeşleri göster */}
-        {(() => {
-          // Eğer bu bir üst kategoriyse, kendi children'ını göster
-          // Eğer bu bir alt kategoriyse, parent'ın children'ını göster (kardeşleri)
-          const parentSlug = category.parent?.slug || slug
-          const parentCat = category.parent
-            ? allCategories.find((c) => c.slug === category.parent!.slug)
-            : allCategories.find((c) => c.slug === slug)
-          const subcategories = parentCat?.children || category.children
-
-          return subcategories.length > 0 ? (
-            <div className="mb-8 flex flex-wrap gap-2">
-              <Link href={`/urunler/kategori/${parentSlug}`}>
-                <Badge
-                  variant={!category.parent && category.children.length > 0 ? "default" : "outline"}
-                  className="cursor-pointer px-3 py-1.5 text-sm transition-colors hover:bg-accent"
-                >
-                  Tümü
-                </Badge>
-              </Link>
+      {/* Filter bar: main + sub categories */}
+      <section className="sticky top-16 z-30 border-b border-slate-200/80 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70 dark:border-slate-800/80 dark:bg-slate-950/90">
+        <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:px-6">
+          {allCategories.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 overflow-x-auto">
+              <CategoryPill href="/urunler" active={false} label="Tüm Ürünler" />
+              {allCategories.map((cat) => {
+                const isActiveParent =
+                  cat.slug === slug || cat.slug === category.parent?.slug
+                return (
+                  <CategoryPill
+                    key={cat.id}
+                    href={`/urunler/kategori/${cat.slug}`}
+                    active={isActiveParent}
+                    label={cat.name}
+                  />
+                )
+              })}
+            </div>
+          )}
+          {subcategories.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 overflow-x-auto border-t border-slate-100 pt-3 dark:border-slate-800">
+              <CategoryPill
+                href={`/urunler/kategori/${parentSlug}`}
+                active={!category.parent && category.children.length > 0}
+                label="Tümü"
+                subtle
+              />
               {subcategories.map((child) => (
-                <Link key={child.id} href={`/urunler/kategori/${child.slug}`}>
-                  <Badge
-                    variant={child.slug === slug ? "default" : "outline"}
-                    className="cursor-pointer px-3 py-1.5 text-sm transition-colors hover:bg-accent"
-                  >
-                    {child.name}
-                  </Badge>
-                </Link>
+                <CategoryPill
+                  key={child.id}
+                  href={`/urunler/kategori/${child.slug}`}
+                  active={child.slug === slug}
+                  label={child.name}
+                  subtle
+                />
               ))}
             </div>
-          ) : null
-        })()}
+          )}
+        </div>
+      </section>
 
-        {/* Product Grid */}
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 md:py-14">
         {products.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
-          <div className="py-20 text-center">
-            <p className="text-lg font-medium">Bu kategoride henüz ürün yok</p>
-            <p className="mt-2 text-muted-foreground">
+          <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center dark:border-slate-800 dark:bg-slate-950/60">
+            <Box className="size-8 text-slate-400" />
+            <h4 className="font-['Space_Grotesk'] text-base font-semibold text-slate-900 dark:text-white">
+              Bu kategoride henüz ürün yok
+            </h4>
+            <p className="max-w-sm text-sm text-slate-500">
               Yakında yeni ürünler eklenecek.
             </p>
-            <Button variant="outline" className="mt-4" asChild>
-              <Link href="/urunler">
-                <ArrowLeft className="mr-2 size-4" />
-                Tüm Ürünlere Dön
-              </Link>
-            </Button>
+            <Link
+              href="/urunler"
+              className="mt-2 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-1.5 font-['Space_Grotesk'] text-xs font-semibold text-slate-700 transition hover:border-orange-400 hover:text-orange-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200"
+            >
+              <ArrowLeft className="size-3" />
+              Tüm Ürünlere Dön
+            </Link>
           </div>
         )}
 
-        {/* Pagination */}
         {totalPages > 1 && (
           <div className="mt-12 flex items-center justify-center gap-2">
             {page > 1 && (
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/urunler/kategori/${slug}?sayfa=${page - 1}`}>
-                  Önceki
-                </Link>
-              </Button>
+              <Link
+                href={`/urunler/kategori/${slug}?sayfa=${page - 1}`}
+                className="rounded-full border border-slate-200 bg-white px-4 py-1.5 font-['Space_Grotesk'] text-xs font-medium text-slate-600 transition hover:border-orange-400 hover:text-orange-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+              >
+                ← Önceki
+              </Link>
             )}
-            <span className="px-4 text-sm text-muted-foreground">
-              Sayfa {page} / {totalPages}
+            <span className="px-4 font-['JetBrains_Mono'] text-xs uppercase tracking-wider text-slate-500">
+              {page} / {totalPages}
             </span>
             {page < totalPages && (
-              <Button variant="outline" size="sm" asChild>
-                <Link href={`/urunler/kategori/${slug}?sayfa=${page + 1}`}>
-                  Sonraki
-                </Link>
-              </Button>
+              <Link
+                href={`/urunler/kategori/${slug}?sayfa=${page + 1}`}
+                className="rounded-full border border-slate-200 bg-white px-4 py-1.5 font-['Space_Grotesk'] text-xs font-medium text-slate-600 transition hover:border-orange-400 hover:text-orange-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300"
+              >
+                Sonraki →
+              </Link>
             )}
           </div>
         )}
 
-        {/* CTA */}
-        <div className="mt-16 rounded-lg bg-muted/50 p-8 text-center">
-          <h3 className="text-xl font-bold">Özel Konfigürasyon mu İstiyorsunuz?</h3>
-          <p className="mt-2 text-muted-foreground">
-            İhtiyacınıza uygun sistemi birlikte tasarlayalım.
+        <div className="mt-16 rounded-2xl border border-slate-200 bg-gradient-to-br from-orange-50/60 via-white to-teal-50/30 p-8 text-center dark:border-slate-800 dark:from-orange-500/5 dark:via-slate-950 dark:to-teal-500/5 sm:p-10">
+          <div className="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.22em] text-orange-600 dark:text-orange-400">
+            Özel ihtiyaç mı var?
+          </div>
+          <h3 className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            {category.name.toLowerCase()} için sana özel yapılandıralım
+          </h3>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+            İhtiyacına uygun sistemi birlikte tasarlayalım.
           </p>
-          <Button className="mt-4" asChild>
-            <Link href="/iletisim">
-              Teklif İste <ArrowRight className="ml-2 size-4" />
-            </Link>
-          </Button>
+          <Link
+            href="/iletisim"
+            className="mt-6 inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white shadow-sm shadow-orange-500/30 transition hover:bg-orange-600"
+          >
+            Teklif İste
+            <ArrowRight className="size-4" />
+          </Link>
         </div>
       </section>
     </div>
+  )
+}
+
+function CategoryPill({
+  href,
+  active,
+  label,
+  subtle,
+}: {
+  href: string
+  active: boolean
+  label: string
+  subtle?: boolean
+}) {
+  const base =
+    "inline-flex shrink-0 items-center rounded-full px-3 py-1 font-['Space_Grotesk'] text-xs font-medium transition"
+  if (active) {
+    return (
+      <Link
+        href={href}
+        className={`${base} bg-orange-500 text-white shadow shadow-orange-500/20`}
+      >
+        {label}
+      </Link>
+    )
+  }
+  if (subtle) {
+    return (
+      <Link
+        href={href}
+        className={`${base} text-slate-500 hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-300`}
+      >
+        {label}
+      </Link>
+    )
+  }
+  return (
+    <Link
+      href={href}
+      className={`${base} border border-slate-200 bg-white text-slate-600 hover:border-orange-400 hover:text-orange-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300`}
+    >
+      {label}
+    </Link>
   )
 }

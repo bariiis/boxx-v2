@@ -85,7 +85,7 @@ export function QuotePublicView({ quote, token, companyLogo, companyName, defaul
   const sym = currencySymbols[quote.currency] || "$"
 
   // Calculate totals
-  const subtotal = items.reduce((sum, item) => {
+  const rawSubtotal = items.reduce((sum, item) => {
     let itemTotal = item.unitPrice * item.quantity
     if (item.isConfig) {
       itemTotal += item.configItems
@@ -94,6 +94,10 @@ export function QuotePublicView({ quote, token, companyLogo, companyName, defaul
     }
     return sum + (item.isOptional ? 0 : itemTotal)
   }, 0)
+  const discountAmt = quote.discountPercent
+    ? rawSubtotal * (quote.discountPercent / 100)
+    : (quote.discountAmount || 0)
+  const subtotal = rawSubtotal - discountAmt
   const vatAmount = subtotal * (quote.vatRate / 100)
   const grandTotal = subtotal + vatAmount
 
@@ -246,12 +250,14 @@ export function QuotePublicView({ quote, token, companyLogo, companyName, defaul
           <div className="ml-auto w-72">
             <div className="flex justify-between border-b py-2 text-sm">
               <span className="text-muted-foreground">Ara Toplam:</span>
-              <span className="font-medium">{fmt(subtotal, sym)}</span>
+              <span className="font-medium">{fmt(rawSubtotal, sym)}</span>
             </div>
-            {quote.discountPercent && quote.discountPercent > 0 && (
+            {discountAmt > 0 && (
               <div className="flex justify-between border-b py-2 text-sm">
-                <span className="text-muted-foreground">İndirim (%{quote.discountPercent}):</span>
-                <span className="font-medium text-green-600">-{fmt(subtotal * quote.discountPercent / 100, sym)}</span>
+                <span className="text-muted-foreground">
+                  {quote.discountPercent ? `İndirim (%${quote.discountPercent}):` : "İndirim:"}
+                </span>
+                <span className="font-medium text-green-600">-{fmt(discountAmt, sym)}</span>
               </div>
             )}
             <div className="flex justify-between border-b-2 border-slate-300 py-2 text-sm">

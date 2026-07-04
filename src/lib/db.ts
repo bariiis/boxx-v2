@@ -6,10 +6,10 @@ const globalForPrisma = globalThis as unknown as {
   prismaVersion: string | undefined
 }
 
-const PRISMA_VERSION = "v2" // bump this after schema changes to invalidate cached client
+const PRISMA_VERSION = "v7" // bump this after schema changes to invalidate cached client
 
 function createPrismaClient() {
-  const adapter = new PrismaPg(process.env.DATABASE_URL!)
+  const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! })
   return new PrismaClient({ adapter })
 }
 

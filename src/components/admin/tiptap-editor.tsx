@@ -7,6 +7,8 @@ import LinkExt from "@tiptap/extension-link"
 import Placeholder from "@tiptap/extension-placeholder"
 import TextAlign from "@tiptap/extension-text-align"
 import Underline from "@tiptap/extension-underline"
+import { TextStyle } from "@tiptap/extension-text-style"
+import { Extension } from "@tiptap/core"
 import { Button } from "@/components/ui/button"
 import {
   Bold, Italic, Underline as UnderlineIcon, Strikethrough,
@@ -17,6 +19,42 @@ import {
 } from "lucide-react"
 import { useCallback, useRef } from "react"
 import { toast } from "sonner"
+
+// Custom FontSize extension — stores font-size as inline style via TextStyle
+const FontSize = Extension.create({
+  name: "fontSize",
+  addGlobalAttributes() {
+    return [
+      {
+        types: ["textStyle"],
+        attributes: {
+          fontSize: {
+            default: null,
+            parseHTML: (el) => (el as HTMLElement).style.fontSize || null,
+            renderHTML: (attrs) =>
+              attrs.fontSize ? { style: `font-size: ${attrs.fontSize}` } : {},
+          },
+        },
+      },
+    ]
+  },
+  addCommands() {
+    return {
+      setFontSize:
+        (size: string) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ({ chain }: { chain: () => any }) =>
+          chain().setMark("textStyle", { fontSize: size }).run(),
+      unsetFontSize:
+        () =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ({ chain }: { chain: () => any }) =>
+          chain().setMark("textStyle", { fontSize: null }).removeEmptyTextStyle().run(),
+    }
+  },
+})
+
+const FONT_SIZES = ["12px", "14px", "16px", "18px", "20px", "24px", "28px", "32px", "36px", "48px", "64px"]
 
 interface TiptapEditorProps {
   content?: string
@@ -30,6 +68,8 @@ export function TiptapEditor({ content = "", onChange, placeholder = "İçerik y
     extensions: [
       StarterKit,
       Underline,
+      TextStyle,
+      FontSize,
       Image.configure({ inline: false, allowBase64: true }),
       LinkExt.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder }),
@@ -84,6 +124,29 @@ export function TiptapEditor({ content = "", onChange, placeholder = "İçerik y
     <div className="rounded-md border">
       {/* Toolbar */}
       <div className="flex flex-wrap gap-0.5 border-b bg-muted/30 p-1.5">
+        {/* Font size */}
+        <select
+          title="Yazı Boyutu"
+          className="h-8 rounded border border-input bg-background px-1.5 text-xs focus:outline-none"
+          value={editor.getAttributes("textStyle").fontSize ?? ""}
+          onChange={(e) => {
+            const val = e.target.value
+            const chain = editor.chain().focus() as unknown as Record<string, (...a: unknown[]) => { run: () => void }>
+            if (val) {
+              chain.setFontSize(val).run()
+            } else {
+              chain.unsetFontSize().run()
+            }
+          }}
+        >
+          <option value="">Boyut</option>
+          {FONT_SIZES.map((s) => (
+            <option key={s} value={s}>{s}</option>
+          ))}
+        </select>
+
+        <div className="mx-1 w-px bg-border" />
+
         <ToolbarButton onClick={() => editor.chain().focus().toggleBold().run()} active={editor.isActive("bold")} title="Kalın">
           <Bold className="size-4" />
         </ToolbarButton>
@@ -218,6 +281,7 @@ export function TiptapEditor({ content = "", onChange, placeholder = "İçerik y
         }
         .tiptap-content .tiptap strong { font-weight: 700; }
         .tiptap-content .tiptap em { font-style: italic; }
+        .tiptap-content .tiptap span[style*="font-size"] { line-height: 1.3; }
         .tiptap-content .tiptap p.is-editor-empty:first-child::before {
           content: attr(data-placeholder);
           float: left;

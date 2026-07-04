@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation"
-import { getProduct, getAllCategories } from "@/lib/actions/product-actions"
-import { getProductSections, getProductFaqs } from "@/lib/actions/product-landing-actions"
+import { getProduct, getAllCategories, getSolutionsForPicker } from "@/lib/actions/product-actions"
+import { listConfiguratorOptions, getConfiguratorMeta } from "@/lib/actions/configurator-actions"
 import { ProductForm } from "@/components/admin/product-form"
 import { ProductImageManager } from "@/components/admin/product-image-manager"
-import { ProductLandingEditor } from "@/components/admin/product-landing-editor"
+import { ConfiguratorOptionsManager } from "@/components/admin/configurator-options-manager"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 export default async function ProductDetailPage({
@@ -12,14 +12,17 @@ export default async function ProductDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const [product, categories, sections, faqs] = await Promise.all([
+  const [product, categories, solutions] = await Promise.all([
     getProduct(id),
     getAllCategories(),
-    getProductSections(id),
-    getProductFaqs(id),
+    getSolutionsForPicker(),
   ])
 
   if (!product) notFound()
+
+  const isConfigurable = product.type === "CONFIGURABLE"
+  const configuratorOptions = isConfigurable ? await listConfiguratorOptions(id) : []
+  const configuratorMeta = isConfigurable ? await getConfiguratorMeta(id) : {}
 
   return (
     <div className="space-y-6">
@@ -30,12 +33,14 @@ export default async function ProductDetailPage({
           <TabsTrigger value="images">
             Görseller ({product.images.length})
           </TabsTrigger>
-          <TabsTrigger value="landing">
-            Landing Page ({sections.length})
-          </TabsTrigger>
+          {isConfigurable && (
+            <TabsTrigger value="configurator">
+              Configurator ({configuratorOptions.length})
+            </TabsTrigger>
+          )}
         </TabsList>
         <TabsContent value="info">
-          <ProductForm product={product} categories={categories} />
+          <ProductForm product={product} categories={categories} solutions={solutions} />
         </TabsContent>
         <TabsContent value="images">
           <ProductImageManager
@@ -44,19 +49,15 @@ export default async function ProductDetailPage({
             heroImage={product.heroImage}
           />
         </TabsContent>
-        <TabsContent value="landing">
-          <ProductLandingEditor
-            productId={product.id}
-            product={{
-              heroTitle: product.heroTitle,
-              heroSubtitle: product.heroSubtitle,
-              heroVideo: product.heroVideo,
-              features: product.features,
-            }}
-            sections={sections}
-            faqs={faqs}
-          />
-        </TabsContent>
+        {isConfigurable && (
+          <TabsContent value="configurator">
+            <ConfiguratorOptionsManager
+              basekitId={product.id}
+              options={configuratorOptions}
+              singleSelectCategories={configuratorMeta.singleSelectCategories ?? []}
+            />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   )

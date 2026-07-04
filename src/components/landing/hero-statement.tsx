@@ -15,7 +15,23 @@ interface HeroStatementProps {
   secondaryCtaHref?: string
   image?: string
   imageAlt?: string
+  imageAspect?: "16/9" | "4/3" | "1/1" | "21/9" | "3/2" | "9/16" | "auto"
+  imageFit?: "cover" | "contain"
+  imageMaxWidth?: number
+  imageBg?: string
+  /** @deprecated No longer used — theme panel now controls all colors. */
   dark?: boolean
+  demoteHeading?: boolean
+}
+
+const ASPECT_CLASS: Record<NonNullable<HeroStatementProps["imageAspect"]>, string> = {
+  "16/9": "aspect-[16/9]",
+  "4/3": "aspect-[4/3]",
+  "1/1": "aspect-square",
+  "21/9": "aspect-[21/9]",
+  "3/2": "aspect-[3/2]",
+  "9/16": "aspect-[9/16]",
+  auto: "",
 }
 
 export function HeroStatement({
@@ -28,23 +44,28 @@ export function HeroStatement({
   secondaryCtaHref,
   image,
   imageAlt = "",
-  dark = true,
+  imageAspect = "16/9",
+  imageFit = "cover",
+  imageMaxWidth = 1000,
+  imageBg,
+  demoteHeading = false,
 }: HeroStatementProps) {
   const words = headline.split(" ")
+  const Heading = demoteHeading ? "h2" : "h1"
 
   return (
     <section
-      className={`relative min-h-screen flex items-center justify-center overflow-hidden ${
-        dark ? "bg-[#0a0a0a] text-white" : "bg-white text-[#0a0a0a]"
-      }`}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden"
+      style={{ backgroundColor: "var(--lp-bg)", color: "var(--lp-fg)" }}
     >
-      {/* Subtle gradient overlay */}
+      {/* Subtle radial overlay using muted tone */}
       <div
-        className={`absolute inset-0 ${
-          dark
-            ? "bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.03)_0%,transparent_70%)]"
-            : "bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.02)_0%,transparent_70%)]"
-        }`}
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, var(--lp-muted) 0%, transparent 70%)",
+          opacity: 0.35,
+        }}
       />
 
       <div className="relative z-10 mx-auto max-w-[1200px] px-5 py-32 text-center sm:px-8">
@@ -54,16 +75,15 @@ export function HeroStatement({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className={`mb-8 text-xs font-medium uppercase tracking-[0.08em] sm:text-sm ${
-              dark ? "text-neutral-500" : "text-neutral-400"
-            }`}
+            className="mb-8 text-xs font-medium uppercase tracking-[0.08em] sm:text-sm"
+            style={{ color: "var(--lp-muted-fg)" }}
           >
             {subheadline}
           </motion.p>
         )}
 
         {/* Animated headline - word by word */}
-        <h1 className="font-medium leading-[0.95] tracking-[-0.03em]">
+        <Heading className="font-medium leading-[0.95] tracking-[-0.03em]">
           <span className="block text-[clamp(3rem,8vw,7.5rem)]">
             {words.map((word, i) => (
               <motion.span
@@ -81,7 +101,7 @@ export function HeroStatement({
               </motion.span>
             ))}
           </span>
-        </h1>
+        </Heading>
 
         {/* Description */}
         {description && (
@@ -93,9 +113,8 @@ export function HeroStatement({
               delay: 0.5 + words.length * 0.08,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className={`mx-auto mt-8 max-w-[560px] text-[clamp(1rem,1.4vw,1.25rem)] leading-relaxed ${
-              dark ? "text-neutral-400" : "text-neutral-500"
-            }`}
+            className="mx-auto mt-8 max-w-[560px] text-[clamp(1rem,1.4vw,1.25rem)] leading-relaxed"
+            style={{ color: "var(--lp-muted-fg)" }}
           >
             {description}
           </motion.p>
@@ -114,11 +133,11 @@ export function HeroStatement({
         >
           <Link
             href={ctaHref}
-            className={`group inline-flex items-center gap-2 rounded-full px-8 py-4 text-sm font-medium transition-all duration-200 ${
-              dark
-                ? "bg-white text-black hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(255,255,255,0.15)]"
-                : "bg-[#0a0a0a] text-white hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(0,0,0,0.15)]"
-            }`}
+            className="group inline-flex items-center gap-2 rounded-full px-8 py-4 text-sm font-medium transition-all duration-200 hover:-translate-y-0.5"
+            style={{
+              backgroundColor: "var(--lp-primary)",
+              color: "var(--lp-primary-fg)",
+            }}
           >
             {ctaText}
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
@@ -126,11 +145,11 @@ export function HeroStatement({
           {secondaryCtaText && secondaryCtaHref && (
             <Link
               href={secondaryCtaHref}
-              className={`inline-flex items-center gap-2 rounded-full border px-8 py-4 text-sm font-medium transition-all duration-200 ${
-                dark
-                  ? "border-neutral-700 text-neutral-300 hover:border-neutral-500 hover:text-white"
-                  : "border-neutral-300 text-neutral-600 hover:border-neutral-400 hover:text-black"
-              }`}
+              className="inline-flex items-center gap-2 rounded-full border px-8 py-4 text-sm font-medium transition-all duration-200"
+              style={{
+                borderColor: "var(--lp-border)",
+                color: "var(--lp-muted-fg)",
+              }}
             >
               {secondaryCtaText}
             </Link>
@@ -147,16 +166,29 @@ export function HeroStatement({
               delay: 0.9 + words.length * 0.08,
               ease: [0.16, 1, 0.3, 1],
             }}
-            className="relative mx-auto mt-16 aspect-[16/9] max-w-[1000px] overflow-hidden rounded-xl"
+            className={`relative mx-auto mt-16 overflow-hidden rounded-xl ${ASPECT_CLASS[imageAspect]}`}
+            style={{
+              maxWidth: `${imageMaxWidth}px`,
+              ...(imageBg ? { background: imageBg } : {}),
+            }}
           >
-            <Image
-              src={image}
-              alt={imageAlt}
-              fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 100vw, 1000px"
-              priority
-            />
+            {imageAspect === "auto" ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={image}
+                alt={imageAlt}
+                className="mx-auto h-auto w-full"
+              />
+            ) : (
+              <Image
+                src={image}
+                alt={imageAlt}
+                fill
+                className={imageFit === "contain" ? "object-contain" : "object-cover"}
+                sizes="(max-width: 1024px) 100vw, 1000px"
+                priority
+              />
+            )}
           </motion.div>
         )}
       </div>

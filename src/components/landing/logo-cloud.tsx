@@ -26,7 +26,7 @@ export function LogoCloud({
 
   return (
     <section className={`py-16 md:py-24 ${dark ? "bg-[#0a0a0a] text-white" : "bg-white text-[#0a0a0a]"}`}>
-      <div className="relative mx-auto max-w-3xl px-4">
+      <div className="relative mx-auto w-full max-w-[1680px] px-4 md:px-6 lg:px-8">
         {(headline || subheadline) && (
           <h2 className="mb-5 text-center text-xl font-medium tracking-tight md:text-3xl">
             {subheadline && (
@@ -53,7 +53,8 @@ export function LogoCloud({
               <img
                 key={i}
                 alt={logo.alt}
-                className={`pointer-events-none h-4 select-none md:h-5 ${dark ? "invert" : ""}`}
+                className="pointer-events-none h-4 select-none md:h-5"
+                style={dark ? { filter: "brightness(0) invert(1)" } : undefined}
                 loading="lazy"
                 src={logo.src}
               />

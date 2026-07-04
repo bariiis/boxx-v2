@@ -87,7 +87,8 @@ export function BentoGrid({
                 <img
                   src={slots[0].image}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover opacity-40"
+                  className="absolute bottom-3 right-3 rounded-md object-contain"
+                  style={{ height: 50, width: "auto" }}
                 />
               )}
               <div className="relative flex h-full flex-col p-6">
@@ -109,7 +110,8 @@ export function BentoGrid({
                 <img
                   src={slots[1].image}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover opacity-30"
+                  className="absolute bottom-3 right-3 rounded-md object-contain"
+                  style={{ height: 50, width: "auto" }}
                 />
               )}
               <div className="relative flex h-full flex-col justify-between p-6">
@@ -131,7 +133,8 @@ export function BentoGrid({
                 <img
                   src={slots[2].image}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover opacity-40"
+                  className="absolute bottom-3 right-3 rounded-md object-contain"
+                  style={{ height: 50, width: "auto" }}
                 />
               ) : (
                 <div
@@ -162,7 +165,8 @@ export function BentoGrid({
                 <img
                   src={slots[3].image}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover opacity-30"
+                  className="absolute bottom-3 right-3 rounded-md object-contain"
+                  style={{ height: 50, width: "auto" }}
                 />
               )}
               <div className="relative flex h-full flex-col justify-between p-6">
@@ -191,7 +195,8 @@ export function BentoGrid({
                 <img
                   src={slots[4].image}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover opacity-30"
+                  className="absolute bottom-3 right-3 rounded-md object-contain"
+                  style={{ height: 50, width: "auto" }}
                 />
               )}
               <div className="relative p-6">
@@ -208,7 +213,8 @@ export function BentoGrid({
                 <img
                   src={slots[5].image}
                   alt=""
-                  className="absolute inset-0 h-full w-full object-cover opacity-30"
+                  className="absolute bottom-3 right-3 rounded-md object-contain"
+                  style={{ height: 50, width: "auto" }}
                 />
               )}
               <div className="relative flex h-full w-full items-center p-6">

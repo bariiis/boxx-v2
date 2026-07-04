@@ -88,9 +88,37 @@ export async function getProducts({
   search?: string
   page?: number
   limit?: number
+  /** Single category ID or comma-separated list. If a parent is given, all its
+   *  descendant category IDs are auto-included. */
   categoryId?: string
   type?: ProductType
 } = {}) {
+  // Expand categoryId(s) to include child categories of any selected parent.
+  let categoryIdSet: string[] | undefined
+  if (categoryId) {
+    const initial = categoryId.split(",").filter(Boolean)
+    const all = await db.productCategory.findMany({
+      select: { id: true, parentId: true },
+    })
+    const childrenOf = new Map<string, string[]>()
+    for (const c of all) {
+      if (c.parentId) {
+        if (!childrenOf.has(c.parentId)) childrenOf.set(c.parentId, [])
+        childrenOf.get(c.parentId)!.push(c.id)
+      }
+    }
+    const expanded = new Set<string>()
+    const stack = [...initial]
+    while (stack.length) {
+      const id = stack.pop()!
+      if (expanded.has(id)) continue
+      expanded.add(id)
+      const kids = childrenOf.get(id) ?? []
+      for (const k of kids) stack.push(k)
+    }
+    categoryIdSet = [...expanded]
+  }
+
   const where = {
     ...(search && {
       OR: [
@@ -98,7 +126,7 @@ export async function getProducts({
         { sku: { contains: search, mode: "insensitive" as const } },
       ],
     }),
-    ...(categoryId && { categoryId }),
+    ...(categoryIdSet && categoryIdSet.length > 0 && { categoryId: { in: categoryIdSet } }),
     ...(type && { type }),
   }
 
@@ -126,8 +154,38 @@ export async function getProduct(id: string) {
       category: true,
       images: { orderBy: { sortOrder: "asc" } },
       componentSpecs: true,
+      solutionProducts: { select: { solutionId: true } },
     },
   })
+}
+
+export async function getSolutionsForPicker() {
+  const solutions = await db.solution.findMany({
+    where: { isActive: true },
+    select: {
+      id: true,
+      title: true,
+      slug: true,
+      icon: true,
+      category: {
+        select: {
+          id: true,
+          name: true,
+          parent: { select: { id: true, name: true } },
+        },
+      },
+    },
+    orderBy: [{ category: { sortOrder: "asc" } }, { sortOrder: "asc" }, { title: "asc" }],
+  })
+  return solutions.map((s) => ({
+    id: s.id,
+    title: s.title,
+    slug: s.slug,
+    icon: s.icon,
+    categoryName: s.category?.parent
+      ? `${s.category.parent.name} › ${s.category.name}`
+      : s.category?.name ?? null,
+  }))
 }
 
 export async function duplicateProduct(id: string) {
@@ -167,8 +225,32 @@ export async function duplicateProduct(id: string) {
       dimensions: source.dimensions,
       categoryId: source.categoryId,
       specs: source.specs ?? undefined,
+      configuratorMeta: source.configuratorMeta ?? undefined,
     },
   })
+
+  // Copy configurator options (basekit → component mappings)
+  if (source.type === "CONFIGURABLE") {
+    const sourceOptions = await db.configuratorOption.findMany({
+      where: { basekitId: source.id },
+    })
+    if (sourceOptions.length > 0) {
+      await db.configuratorOption.createMany({
+        data: sourceOptions.map((o) => ({
+          basekitId: duplicate.id,
+          componentId: o.componentId,
+          category: o.category,
+          priceDelta: o.priceDelta,
+          isDefault: o.isDefault,
+          isRecommended: o.isRecommended,
+          affectsResources: o.affectsResources,
+          minQty: o.minQty,
+          maxQty: o.maxQty,
+          sortOrder: o.sortOrder,
+        })),
+      })
+    }
+  }
 
   revalidatePath("/admin/products")
   return duplicate
@@ -198,18 +280,27 @@ export async function createProduct(data: {
   stock?: number
   isActive?: boolean
   isSaleOpen?: boolean
+  showPrice?: boolean
   warrantyMonths?: number
   weight?: number
   dimensions?: string
   categoryId?: string
   specs?: { key: string; value: string }[]
+  tags?: string[]
+  solutionIds?: string[]
 }) {
-  const { categoryId, specs, ...rest } = data
+  const { categoryId, specs, tags, solutionIds, ...rest } = data
   const product = await db.product.create({
     data: {
       ...rest,
+      ...(tags && { tags }),
       ...(specs && { specs: specs as never }),
       ...(categoryId && { category: { connect: { id: categoryId } } }),
+      ...(solutionIds && solutionIds.length > 0 && {
+        solutionProducts: {
+          create: solutionIds.map((solutionId) => ({ solutionId })),
+        },
+      }),
     },
   })
   revalidatePath("/admin/products")
@@ -232,18 +323,22 @@ export async function updateProduct(
     stock?: number
     isActive?: boolean
     isSaleOpen?: boolean
+    showPrice?: boolean
     warrantyMonths?: number
     weight?: number
     dimensions?: string
     categoryId?: string | null
     specs?: { key: string; value: string }[]
+    tags?: string[]
+    solutionIds?: string[]
   }
 ) {
-  const { categoryId, specs, ...rest } = data
+  const { categoryId, specs, tags, solutionIds, ...rest } = data
   const product = await db.product.update({
     where: { id },
     data: {
       ...rest,
+      ...(tags !== undefined && { tags }),
       ...(specs && { specs: specs as never }),
       ...(categoryId === null
         ? { category: { disconnect: true } }
@@ -252,8 +347,21 @@ export async function updateProduct(
           : {}),
     },
   })
+
+  if (solutionIds !== undefined) {
+    await db.solutionProduct.deleteMany({ where: { productId: id } })
+    if (solutionIds.length > 0) {
+      await db.solutionProduct.createMany({
+        data: solutionIds.map((solutionId) => ({ solutionId, productId: id })),
+        skipDuplicates: true,
+      })
+    }
+  }
+
   revalidatePath("/admin/products")
   revalidatePath(`/admin/products/${id}`)
+  revalidatePath(`/urunler/${product.slug}`)
+  revalidatePath("/urunler")
   return product
 }
 
@@ -277,6 +385,7 @@ export async function searchProducts(query: string) {
   return db.product.findMany({
     where: {
       OR: [
+        { id: query },
         { name: { contains: query, mode: "insensitive" } },
         { sku: { contains: query, mode: "insensitive" } },
       ],
@@ -285,6 +394,57 @@ export async function searchProducts(query: string) {
     select: { id: true, name: true, sku: true, price: true, stock: true, type: true },
     take: 15,
   })
+}
+
+export async function getProductForLandingHero(productId: string) {
+  const product = await db.product.findUnique({
+    where: { id: productId, isActive: true },
+    include: {
+      category: {
+        select: {
+          id: true, name: true, slug: true,
+          parent: { select: { id: true, name: true, slug: true } },
+        },
+      },
+      images: { orderBy: { sortOrder: "asc" } },
+      solutionProducts: {
+        include: {
+          solution: {
+            select: { id: true, title: true, slug: true, icon: true, isActive: true },
+          },
+        },
+      },
+    },
+  })
+  if (!product) return null
+  const useCases = product.solutionProducts.map((sp) => ({
+    id: sp.solution.id,
+    name: sp.solution.title,
+    slug: sp.solution.slug,
+    icon: sp.solution.icon,
+  }))
+  return {
+    product: {
+      id: product.id,
+      name: product.name,
+      nameEn: product.nameEn,
+      slug: product.slug,
+      sku: product.sku,
+      type: product.type,
+      description: product.description,
+      price: product.price,
+      currency: product.currency,
+      showPrice: product.showPrice,
+      heroImage: product.heroImage,
+      sortOrder: product.sortOrder,
+      createdAt: product.createdAt,
+      images: product.images.map((img) => ({ id: img.id, url: img.url, alt: img.alt })),
+      category: product.category,
+      specs: product.specs,
+    },
+    useCases,
+    tags: product.tags ?? [],
+  }
 }
 
 // ==========================================

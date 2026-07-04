@@ -14,6 +14,7 @@ export interface HeroGradientProps {
   secondaryCtaText?: string
   secondaryCtaHref?: string
   image?: string
+  demoteHeading?: boolean
 }
 
 export function HeroGradient({
@@ -26,9 +27,14 @@ export function HeroGradient({
   secondaryCtaText,
   secondaryCtaHref,
   image,
+  demoteHeading = false,
 }: HeroGradientProps) {
+  const Heading = demoteHeading ? "h2" : "h1"
   return (
-    <section className="relative w-full overflow-hidden bg-neutral-950 text-white">
+    <section
+      className="relative w-full overflow-hidden"
+      style={{ backgroundColor: "var(--lp-bg)", color: "var(--lp-fg)" }}
+    >
       {/* Animated gradient blobs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-40 -left-40 size-[500px] rounded-full bg-gradient-to-br from-blue-500/40 via-indigo-500/30 to-transparent blur-3xl animate-pulse" />
@@ -60,7 +66,7 @@ export function HeroGradient({
           </div>
         )}
 
-        <h1 className="mx-auto max-w-4xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
+        <Heading className="mx-auto max-w-4xl text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
           {headline}
           {highlight && (
             <>
@@ -70,16 +76,23 @@ export function HeroGradient({
               </span>
             </>
           )}
-        </h1>
+        </Heading>
 
         {description && (
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-white/70 sm:text-xl">
+          <p
+            className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed sm:text-xl"
+            style={{ color: "var(--lp-muted-fg)" }}
+          >
             {description}
           </p>
         )}
 
         <div className="mt-10 flex flex-wrap justify-center gap-3">
-          <Button asChild size="lg" className="bg-white text-neutral-900 hover:bg-white/90">
+          <Button
+            asChild
+            size="lg"
+            style={{ backgroundColor: "var(--lp-primary)", color: "var(--lp-primary-fg)" }}
+          >
             <Link href={ctaHref}>
               {ctaText}
               <ArrowRight className="ml-2 size-4" />
@@ -99,11 +112,8 @@ export function HeroGradient({
 
         {image && (
           <div className="relative mx-auto mt-16 max-w-5xl">
-            <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20 blur-2xl" />
-            <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-2xl">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image} alt="" className="w-full" />
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={image} alt="" className="w-full" />
           </div>
         )}
       </div>

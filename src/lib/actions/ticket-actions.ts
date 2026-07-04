@@ -139,6 +139,11 @@ export async function updateTicket(
       ? { connect: { id: data.assignedToId } }
       : { disconnect: true }
   }
+  if (data.categoryId !== undefined) {
+    updateData.category = data.categoryId
+      ? { connect: { id: data.categoryId } }
+      : { disconnect: true }
+  }
 
   await db.ticket.update({ where: { id }, data: updateData })
   revalidatePath(`/admin/tickets/${id}`)

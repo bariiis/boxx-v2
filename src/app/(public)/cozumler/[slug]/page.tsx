@@ -74,44 +74,54 @@ export default async function SolutionPage({
 
         {/* Content */}
         <div className="container relative z-10 flex flex-col items-center mx-auto max-w-4xl px-4 sm:px-6">
-          <h1 className="max-w-[704px] text-balance text-center text-5xl font-medium leading-none tracking-tighter text-black lg:text-[56px] md:text-5xl sm:text-[32px]">
+          <h1 className="max-w-[704px] text-balance text-center font-['Space_Grotesk'] text-5xl font-semibold leading-none tracking-tight text-slate-900 lg:text-[56px] md:text-5xl sm:text-[32px]">
             {solution.title}
+            <span aria-hidden className="text-orange-500">.</span>
           </h1>
 
           {solution.subtitle && (
-            <p className="mt-4 max-w-[704px] text-center text-lg leading-snug tracking-tight text-black/70 md:max-w-xl sm:mt-3 sm:text-base">
+            <p className="mt-4 max-w-[704px] text-center text-lg leading-snug tracking-tight text-slate-600 md:max-w-xl sm:mt-3 sm:text-base">
               {solution.subtitle}
             </p>
           )}
 
           {/* Breadcrumb */}
-          <nav className="mt-6 flex items-center justify-center gap-1.5 text-sm text-black/50">
-            <Link href="/" className="hover:text-black transition-colors">Ana Sayfa</Link>
-            <span>/</span>
-            <Link href="/cozumler" className="hover:text-black transition-colors">Çözümler</Link>
+          <nav className="mt-6 flex items-center justify-center gap-1.5 font-['JetBrains_Mono'] text-[11px] uppercase tracking-[0.15em] text-slate-500">
+            <Link href="/" className="transition-colors hover:text-orange-600">
+              Ana Sayfa
+            </Link>
+            <span aria-hidden>/</span>
+            <Link href="/cozumler" className="transition-colors hover:text-orange-600">
+              Çözümler
+            </Link>
             {parentCategory && (
               <>
-                <span>/</span>
-                <span>{parentCategory}</span>
+                <span aria-hidden>/</span>
+                <span className="text-slate-700">{parentCategory}</span>
               </>
             )}
             {solution.category?.parent && (
               <>
-                <span>/</span>
-                <span>{solution.category.name}</span>
+                <span aria-hidden>/</span>
+                <span className="text-slate-700">{solution.category.name}</span>
               </>
             )}
           </nav>
 
-          <div className="mt-6 flex justify-center gap-4">
-            <Button size="lg" asChild>
-              <Link href="/iletisim">
-                Teklif İste <ArrowRight className="ml-2 size-4" />
-              </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="bg-white" asChild>
-              <Link href="/urunler">Ürünleri İncele</Link>
-            </Button>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/iletisim"
+              className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white shadow-sm shadow-orange-500/30 transition hover:bg-orange-600"
+            >
+              Teklif İste
+              <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              href="/urunler"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-slate-700 transition hover:border-orange-400 hover:text-orange-600"
+            >
+              Ürünleri İncele
+            </Link>
           </div>
         </div>
       </section>
@@ -207,15 +217,31 @@ export default async function SolutionPage({
       )}
 
       {/* CTA */}
-      <section className="border-t py-20">
+      <section className="border-t border-slate-200/80 py-20 dark:border-slate-800/80">
         <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
-          <h2 className="text-3xl font-bold tracking-tight">{solution.title} İçin Donanım Önerileri</h2>
-          <p className="mt-4 text-lg text-muted-foreground">
-            Uzman ekibimiz iş akışınıza en uygun konfigürasyonu belirleyecek.
+          <div className="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.22em] text-orange-600 dark:text-orange-400">
+            Hazır mısın?
+          </div>
+          <h2 className="mt-2 font-['Space_Grotesk'] text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
+            {solution.title} için donanım önerileri
+          </h2>
+          <p className="mt-4 text-base text-slate-600 dark:text-slate-400 sm:text-lg">
+            Uzman ekibimiz iş akışına en uygun konfigürasyonu belirleyecek.
           </p>
-          <div className="mt-8 flex justify-center gap-4">
-            <Button size="lg" asChild><Link href="/iletisim">Uzmanla Konuş</Link></Button>
-            <Button size="lg" variant="outline" asChild><Link href="/urunler">Konfiguratör</Link></Button>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link
+              href="/iletisim"
+              className="inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white shadow-sm shadow-orange-500/30 transition hover:bg-orange-600"
+            >
+              Uzmanla Konuş
+              <ArrowRight className="size-4" />
+            </Link>
+            <Link
+              href="/urunler"
+              className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-6 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-slate-700 transition hover:border-orange-400 hover:text-orange-600 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-orange-500 dark:hover:text-orange-300"
+            >
+              Konfigüratör
+            </Link>
           </div>
         </div>
       </section>

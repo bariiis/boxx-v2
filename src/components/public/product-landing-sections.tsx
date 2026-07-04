@@ -51,21 +51,75 @@ export function ProductLandingSections({ product, sections, faqs }: ProductLandi
 
   return (
     <div>
-      {/* Hero */}
+      {/* Hero — 3-column layout */}
       {product.heroTitle && (
-        <section className="relative overflow-hidden bg-gradient-to-b from-slate-900 to-slate-800 text-white">
-          <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:py-28">
-            <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
-              <div>
-                <h1 className="text-3xl font-bold sm:text-4xl lg:text-5xl leading-tight">
+        <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800 text-white">
+          {/* Subtle grid pattern overlay */}
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSA2MCAwIEwgMCAwIDAgNjAiIGZpbGw9Im5vbmUiIHN0cm9rZT0icmdiYSgyNTUsMjU1LDI1NSwwLjAzKSIgc3Ryb2tlLXdpZHRoPSIxIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI2dyaWQpIi8+PC9zdmc+')] opacity-60" />
+
+          <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-24">
+            <div className="grid items-center gap-6 lg:grid-cols-[220px_1fr_1fr] lg:gap-8 xl:grid-cols-[260px_1fr_1fr] xl:gap-10">
+
+              {/* Left Column — Feature stat boxes */}
+              <div className="flex gap-3 lg:flex-col lg:gap-4">
+                {features.slice(0, 3).map((feat, i) => {
+                  const Icon = iconMap[feat.icon] || Zap
+                  return (
+                    <div
+                      key={i}
+                      className="group relative flex-1 overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-sm transition-all hover:border-white/20 hover:bg-white/10 lg:aspect-square lg:flex-initial"
+                    >
+                      <div className="flex h-full flex-col justify-between">
+                        <div className="mb-2 flex size-9 items-center justify-center rounded-lg bg-primary/20">
+                          <Icon className="size-5 text-primary" />
+                        </div>
+                        <div>
+                          <p className="text-lg font-bold leading-tight xl:text-xl">{feat.title}</p>
+                          <p className="mt-0.5 text-xs text-slate-400 line-clamp-2">{feat.description}</p>
+                        </div>
+                      </div>
+                      {/* Corner accent */}
+                      <div className="absolute -right-3 -top-3 size-12 rounded-full bg-primary/5 transition-transform group-hover:scale-150" />
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Center Column — Product image */}
+              <div className="relative flex items-center justify-center">
+                {product.heroImage ? (
+                  <div className="relative aspect-square w-full max-w-lg overflow-hidden rounded-2xl">
+                    {/* Glow effect behind image */}
+                    <div className="absolute -inset-4 rounded-3xl bg-gradient-to-br from-primary/20 via-transparent to-blue-500/10 blur-2xl" />
+                    <div className="relative aspect-square overflow-hidden rounded-2xl border border-white/10">
+                      <Image
+                        src={product.heroImage}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 1024px) 100vw, 40vw"
+                        priority
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex aspect-square w-full max-w-lg items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                    <Server className="size-24 text-white/10" />
+                  </div>
+                )}
+              </div>
+
+              {/* Right Column — Title, subtitle, CTA */}
+              <div className="flex flex-col justify-center">
+                <h1 className="text-3xl font-bold leading-tight sm:text-4xl xl:text-5xl">
                   {product.heroTitle}
                 </h1>
                 {product.heroSubtitle && (
-                  <p className="mt-6 text-lg text-slate-300 leading-relaxed">
+                  <p className="mt-4 text-base leading-relaxed text-slate-300 xl:text-lg">
                     {product.heroSubtitle}
                   </p>
                 )}
-                <div className="mt-8 flex flex-wrap gap-4">
+                <div className="mt-8 flex flex-wrap gap-3">
                   <Button size="lg" asChild>
                     <Link href={`/iletisim?urun=${product.slug}`}>
                       Teklif İste <ArrowRight className="ml-2 size-4" />
@@ -76,18 +130,7 @@ export function ProductLandingSections({ product, sections, faqs }: ProductLandi
                   </Button>
                 </div>
               </div>
-              {product.heroImage && (
-                <div className="relative aspect-[4/3] overflow-hidden rounded-xl">
-                  <Image
-                    src={product.heroImage}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 1024px) 100vw, 50vw"
-                    priority
-                  />
-                </div>
-              )}
+
             </div>
           </div>
         </section>

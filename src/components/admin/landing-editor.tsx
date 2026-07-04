@@ -27,6 +27,9 @@ import {
   PanelRightClose,
   PanelRightOpen,
   RefreshCw,
+  Archive,
+  ArchiveRestore,
+  X,
 } from "lucide-react"
 import {
   DndContext,
@@ -61,6 +64,7 @@ import {
   type SectionCategory,
 } from "@/lib/landing-section-types"
 import { LandingSectionConfigEditor } from "./landing-section-config"
+import { Palette } from "lucide-react"
 
 type LandingSection = {
   id: string
@@ -78,6 +82,7 @@ type LandingData = {
   metaDescription: string | null
   isActive: boolean
   productId: string | null
+  theme: string | null
   sections: LandingSection[]
   product: { id: string; name: string; slug: string } | null
 }
@@ -89,6 +94,7 @@ const sectionTypeLabels: Record<string, string> = {
   "full-bleed-media": "Full-Bleed Media",
   "tech-specs": "Tech Specs",
   "purchase-cta": "Purchase CTA",
+  "liveblocks-home-hero": "Liveblocks Hero",
 }
 
 // Extract a meaningful preview from a section's config
@@ -123,7 +129,11 @@ function getSectionPreview(sectionType: string, configRaw: string): string {
   }
 }
 
-export function LandingEditor({ landing }: { landing: LandingData }) {
+export function LandingEditor({
+  landing,
+}: {
+  landing: LandingData
+}) {
   const router = useRouter()
   const [sections, setSections] = useState(landing.sections)
   const [selectedId, setSelectedId] = useState<string | null>(
@@ -134,7 +144,50 @@ export function LandingEditor({ landing }: { landing: LandingData }) {
   const [saving, setSaving] = useState(false)
   const [previewOpen, setPreviewOpen] = useState(false)
   const [previewKey, setPreviewKey] = useState(0)
-  const [activeCategory, setActiveCategory] = useState<SectionCategory | "all">("all")
+  const [activeCategory, setActiveCategory] = useState<SectionCategory | "all" | "archived">("all")
+  const [archivedTypes, setArchivedTypes] = useState<string[]>(() => {
+    if (typeof window === "undefined") return []
+    try {
+      return JSON.parse(localStorage.getItem("stuux_archived_section_types") || "[]")
+    } catch {
+      return []
+    }
+  })
+  const [deletedTypes, setDeletedTypes] = useState<string[]>(() => {
+    if (typeof window === "undefined") return []
+    try {
+      return JSON.parse(localStorage.getItem("stuux_deleted_section_types") || "[]")
+    } catch {
+      return []
+    }
+  })
+
+  function toggleArchive(type: string) {
+    setArchivedTypes((prev) => {
+      const next = prev.includes(type) ? prev.filter((t) => t !== type) : [...prev, type]
+      if (typeof window !== "undefined") {
+        localStorage.setItem("stuux_archived_section_types", JSON.stringify(next))
+      }
+      return next
+    })
+  }
+
+  function deleteType(type: string) {
+    setArchivedTypes((prev) => {
+      const next = prev.filter((t) => t !== type)
+      if (typeof window !== "undefined") {
+        localStorage.setItem("stuux_archived_section_types", JSON.stringify(next))
+      }
+      return next
+    })
+    setDeletedTypes((prev) => {
+      const next = [...prev, type]
+      if (typeof window !== "undefined") {
+        localStorage.setItem("stuux_deleted_section_types", JSON.stringify(next))
+      }
+      return next
+    })
+  }
 
   // Settings state
   const [title, setTitle] = useState(landing.title)
@@ -327,7 +380,7 @@ export function LandingEditor({ landing }: { landing: LandingData }) {
                       <Plus className="size-4" />
                     </Button>
                   } />
-                  <DialogContent className="max-w-5xl max-h-[85vh] overflow-y-auto">
+                  <DialogContent className="w-[96vw] !max-w-[96vw] sm:!max-w-[96vw] max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                       <DialogTitle>Section Ekle</DialogTitle>
                     </DialogHeader>
@@ -342,11 +395,11 @@ export function LandingEditor({ landing }: { landing: LandingData }) {
                             : "bg-muted hover:bg-muted/70"
                         }`}
                       >
-                        Tümü ({sectionTypes.length})
+                        Tümü ({sectionTypes.filter((st) => !archivedTypes.includes(st.type) && !deletedTypes.includes(st.type)).length})
                       </button>
                       {(Object.keys(SECTION_CATEGORY_LABELS) as SectionCategory[]).map((cat) => {
                         const count = sectionTypes.filter(
-                          (st) => getCategoryForType(st.type) === cat
+                          (st) => getCategoryForType(st.type) === cat && !archivedTypes.includes(st.type)
                         ).length
                         if (count === 0) return null
                         return (
@@ -364,31 +417,83 @@ export function LandingEditor({ landing }: { landing: LandingData }) {
                           </button>
                         )
                       })}
+                      <button
+                        type="button"
+                        onClick={() => setActiveCategory("archived")}
+                        className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                          activeCategory === "archived"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted hover:bg-muted/70"
+                        }`}
+                      >
+                        Arşiv ({archivedTypes.filter((t) => !deletedTypes.includes(t)).length})
+                      </button>
                     </div>
-                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
                       {sectionTypes
-                        .filter(
-                          (st) =>
-                            activeCategory === "all" ||
-                            getCategoryForType(st.type) === activeCategory
-                        )
-                        .map((st) => (
-                          <button
-                            key={st.type}
-                            onClick={() => handleAddSection(st)}
-                            className="group flex flex-col items-start rounded-xl border bg-card p-4 text-left transition-all hover:border-primary hover:shadow-md"
-                          >
-                            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                              {SECTION_CATEGORY_LABELS[getCategoryForType(st.type)]}
-                            </span>
-                            <span className="mt-1 font-medium group-hover:text-primary">
-                              {st.label}
-                            </span>
-                            <span className="mt-1 text-xs text-muted-foreground line-clamp-2">
-                              {st.description}
-                            </span>
-                          </button>
-                        ))}
+                        .filter((st) => {
+                          if (deletedTypes.includes(st.type)) return false
+                          const isArchived = archivedTypes.includes(st.type)
+                          if (activeCategory === "archived") return isArchived
+                          if (isArchived) return false
+                          if (activeCategory === "all") return true
+                          return getCategoryForType(st.type) === activeCategory
+                        })
+                        .map((st) => {
+                          const isArchived = archivedTypes.includes(st.type)
+                          return (
+                            <div
+                              key={st.type}
+                              className="group relative flex flex-col items-start rounded-xl border bg-card p-4 text-left transition-all hover:border-primary hover:shadow-md"
+                            >
+                              <div className="absolute right-2 top-2 flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    toggleArchive(st.type)
+                                  }}
+                                  className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                                  title={isArchived ? "Arşivden çıkar" : "Arşive gönder"}
+                                >
+                                  {isArchived ? (
+                                    <ArchiveRestore className="size-4" />
+                                  ) : (
+                                    <Archive className="size-4" />
+                                  )}
+                                </button>
+                                {isArchived && (
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      deleteType(st.type)
+                                    }}
+                                    className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-destructive"
+                                    title="Kalıcı olarak sil"
+                                  >
+                                    <X className="size-4" />
+                                  </button>
+                                )}
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleAddSection(st)}
+                                className="flex w-full flex-col items-start text-left"
+                              >
+                                <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+                                  {SECTION_CATEGORY_LABELS[getCategoryForType(st.type)]}
+                                </span>
+                                <span className="mt-1 font-medium group-hover:text-primary">
+                                  {st.label}
+                                </span>
+                                <span className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                                  {st.description}
+                                </span>
+                              </button>
+                            </div>
+                          )
+                        })}
                     </div>
                   </DialogContent>
                 </Dialog>
@@ -401,6 +506,7 @@ export function LandingEditor({ landing }: { landing: LandingData }) {
                 </p>
               )}
               <DndContext
+                id="landing-editor-dnd"
                 sensors={sensors}
                 collisionDetection={closestCenter}
                 onDragEnd={handleDragEnd}
@@ -468,7 +574,7 @@ export function LandingEditor({ landing }: { landing: LandingData }) {
               </CardHeader>
               <iframe
                 key={previewKey}
-                src={`/landing/${landing.slug}`}
+                src={`/landing/${landing.slug}?_v=${previewKey}`}
                 className="h-[calc(100vh-180px)] w-full border-0 bg-white"
                 title="Önizleme"
               />

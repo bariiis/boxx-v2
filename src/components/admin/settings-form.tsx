@@ -51,11 +51,11 @@ export function SettingsForm({ settings }: SettingsFormProps) {
           <CardContent className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="company_name">Şirket Adı</Label>
-              <Input id="company_name" name="company_name" defaultValue={settings.company_name || "STUUX"} />
+              <Input id="company_name" name="company_name" defaultValue={settings.company_name ?? "STUUX"} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="company_email">Şirket E-posta</Label>
-              <Input id="company_email" name="company_email" type="email" defaultValue={settings.company_email || ""} />
+              <Input id="company_email" name="company_email" type="email" defaultValue={settings.company_email ?? ""} />
             </div>
             <LogoUpload currentLogo={settings.company_logo} />
           </CardContent>
@@ -103,7 +103,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
             <div className="space-y-2">
               <Label htmlFor="default_quote_days">Varsayılan Geçerlilik (Gün)</Label>
               <Input id="default_quote_days" name="default_quote_days" type="number"
-                defaultValue={settings.default_quote_days || "10"} />
+                defaultValue={settings.default_quote_days ?? "10"} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="default_vat_rate">Varsayılan KDV Oranı (%)</Label>
@@ -119,7 +119,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="vat_rates">KDV Oranları (JSON)</Label>
-              <Input id="vat_rates" name="vat_rates" defaultValue={settings.vat_rates || "[0, 1, 10, 20]"} />
+              <Input id="vat_rates" name="vat_rates" defaultValue={settings.vat_rates ?? "[0, 1, 10, 20]"} />
             </div>
           </CardContent>
         </Card>
@@ -201,7 +201,7 @@ export function SettingsForm({ settings }: SettingsFormProps) {
             <Textarea
               name="default_quote_notes"
               rows={6}
-              defaultValue={settings.default_quote_notes || "Bu teklif belirtilen tarihler arasında geçerlidir."}
+              defaultValue={settings.default_quote_notes ?? "Bu teklif belirtilen tarihler arasında geçerlidir."}
             />
           </CardContent>
         </Card>

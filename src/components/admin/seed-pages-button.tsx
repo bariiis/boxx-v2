@@ -37,14 +37,14 @@ export function SeedPagesButton() {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger>
-        <Button variant="outline" asChild={false}>
-          <span className="inline-flex items-center">
+      <DialogTrigger
+        render={
+          <Button variant="outline">
             <Sparkles className="mr-2 size-4" />
             Statik Sayfaları İçe Aktar
-          </span>
-        </Button>
-      </DialogTrigger>
+          </Button>
+        }
+      />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Statik Sayfaları İçe Aktar</DialogTitle>

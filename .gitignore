@@ -41,3 +41,26 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# runtime uploads (user-generated content, not source)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# unused/leftover 3D scratch assets (not referenced by the app)
+/*.glb
+/public/Velociraptor.glb
+/public/models/retro-computer.glb
+
+# debug screenshots and design-reference scratch dirs
+/*.png
+/.playwright-mcp/
+/my-project-design/
+/_vt/
+
+# graphify tool cache/output
+/.graphify_*
+/src/graphify-out/
+
+# local agent/skill tooling caches
+/.agents/
+/.claude/skills/

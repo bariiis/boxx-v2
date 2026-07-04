@@ -69,6 +69,8 @@ export async function addPresetField(
   presetId: string,
   data: {
     key: string
+    label?: string
+    unit?: string
     fieldType?: SpecFieldType
     options?: string[]
     defaultValue?: string
@@ -84,6 +86,8 @@ export async function addPresetField(
     data: {
       presetId,
       key: data.key,
+      label: data.label || null,
+      unit: data.unit || null,
       fieldType: data.fieldType || "TEXT",
       options: data.options ? (data.options as never) : undefined,
       defaultValue: data.defaultValue,
@@ -98,6 +102,8 @@ export async function updatePresetField(
   id: string,
   data: {
     key?: string
+    label?: string | null
+    unit?: string | null
     fieldType?: SpecFieldType
     options?: string[] | null
     defaultValue?: string | null

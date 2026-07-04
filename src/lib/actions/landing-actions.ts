@@ -98,11 +98,16 @@ export async function updateLandingPage(
     metaDescription?: string
     productId?: string | null
     isActive?: boolean
+    theme?: Record<string, unknown> | null
   }
 ) {
+  const { theme, ...rest } = data
   const landing = await db.landingPage.update({
     where: { id },
-    data,
+    data: {
+      ...rest,
+      ...(theme !== undefined ? { theme: theme === null ? null : JSON.stringify(theme) } : {}),
+    },
   })
 
   revalidatePath("/admin/landing-pages")

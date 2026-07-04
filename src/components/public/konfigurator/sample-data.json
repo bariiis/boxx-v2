@@ -1,0 +1,1089 @@
+{
+  "_meta": {
+    "models": {
+      "baseProduct": "Konfigüratör açıldığında seçilen baz ürün. Her biri hangi kategori/opsiyonları desteklediğini ve varsayılan seçimini tanımlar.",
+      "componentCategory": "Sol panelde listelenen bileşen kategorisi (CPU, GPU, RAM, depolama, ağ, güç, soğutma, kasa, OS, garanti).",
+      "componentOption": "Bir kategori altındaki seçilebilir donanım/yazılım opsiyonu; fiyat delta, güç tüketimi ve uyumluluk etiketleri taşır.",
+      "selection": "Kullanıcının aktif konfigürasyonu; baz ürün + kategori bazlı opsiyon kimlikleri.",
+      "compatibilityWarning": "Belirli bir opsiyonun uyumsuzluğunu veya önerisini açıklayan uyarı satırı.",
+      "powerSummary": "Toplam TDP, PSU kapasitesi ve kullanım yüzdesi — sağ özet panelindeki güç mini kartı.",
+      "pricingSummary": "Alt toplam, garanti delta ve KDV hariç toplam — sağ özet panelinin fiyat kartı.",
+      "quoteFormValues": "Teklif iste inline formunun alan içeriği."
+    },
+    "relationships": [
+      "baseProduct has many componentCategory via availableOptionIds",
+      "baseProduct has many componentOption allowed per category",
+      "componentOption belongs to componentCategory",
+      "selection references baseProduct and componentOption ids",
+      "compatibilityWarning references componentOption and componentCategory",
+      "powerSummary is derived from selection.cpu/gpu/psu",
+      "pricingSummary is derived from baseProduct + selected options"
+    ]
+  },
+  "categories": [
+    {
+      "id": "cpu",
+      "label": "İşlemci (CPU)",
+      "shortDescription": "Ana hesaplama motoru; çekirdek sayısı ve saat hızını belirler.",
+      "icon": "Cpu",
+      "requirement": "required",
+      "helperTitle": "Neden önemli?",
+      "helperBody": "Render, simülasyon ve derleme gibi çok çekirdekli iş yüklerinde çekirdek adedi kritik. Tek kanallı iş yüklerinde (CAD, Photoshop filtreleri) saat hızı öncelikli."
+    },
+    {
+      "id": "gpu",
+      "label": "Grafik (GPU)",
+      "shortDescription": "Render, AI ve görüntü iş yükü hızlandırıcı.",
+      "icon": "Monitor",
+      "requirement": "required",
+      "helperTitle": "Tek mi, çift mi?",
+      "helperBody": "Çoklu GPU toplam VRAM ve render hızını artırır ancak PSU ve soğutma gereksinimini yükseltir. AI/ML fine-tune için daha fazla VRAM > çekirdek sayısı."
+    },
+    {
+      "id": "ram",
+      "label": "Bellek (RAM)",
+      "shortDescription": "Eşzamanlı açılabilen uygulama ve sahne boyutu.",
+      "icon": "MemoryStick",
+      "requirement": "required"
+    },
+    {
+      "id": "storage-primary",
+      "label": "Birincil Depolama",
+      "shortDescription": "İşletim sistemi ve aktif proje dosyaları için NVMe.",
+      "icon": "HardDrive",
+      "requirement": "required"
+    },
+    {
+      "id": "storage-secondary",
+      "label": "İkincil Depolama",
+      "shortDescription": "Arşiv, veri seti veya yedek için ek alan.",
+      "icon": "HardDrive",
+      "requirement": "optional",
+      "allowNone": true
+    },
+    {
+      "id": "network",
+      "label": "Ağ",
+      "shortDescription": "Kurumsal ağ ve yüksek hızlı veri transferi.",
+      "icon": "Network",
+      "requirement": "required"
+    },
+    {
+      "id": "psu",
+      "label": "Güç Kaynağı (PSU)",
+      "shortDescription": "Seçtiğin bileşenlerin toplam TDP'sini karşılayacak kapasite.",
+      "icon": "Zap",
+      "requirement": "required",
+      "helperTitle": "80+ Titanium neden?",
+      "helperBody": "Titanium sertifikalı PSU'lar %94+ verimle çalışır; daha az ısı, daha az fan sesi, yıllık elektrik tasarrufu."
+    },
+    {
+      "id": "cooling",
+      "label": "Soğutma",
+      "shortDescription": "Tam yükte sessiz, stabil çalışma için.",
+      "icon": "Snowflake",
+      "requirement": "required"
+    },
+    {
+      "id": "chassis",
+      "label": "Kasa & Form Faktör",
+      "shortDescription": "Masaüstü tower, sessiz tower veya rack form.",
+      "icon": "Package",
+      "requirement": "required"
+    },
+    {
+      "id": "os",
+      "label": "İşletim Sistemi",
+      "shortDescription": "Önceden yüklenmiş OS ve sürücü paketi.",
+      "icon": "Terminal",
+      "requirement": "optional",
+      "allowNone": true
+    },
+    {
+      "id": "warranty",
+      "label": "Garanti & Destek",
+      "shortDescription": "Standart 3 yıl + uzatma ve yerinde müdahale.",
+      "icon": "ShieldCheck",
+      "requirement": "required"
+    }
+  ],
+  "options": [
+    {
+      "id": "cpu-w-2495x",
+      "categoryId": "cpu",
+      "name": "Intel Xeon W-2495X",
+      "brand": "Intel",
+      "description": "24 çekirdek / 48 iş parçacığı — CAD ve orta yoğunluklu iş yükleri için.",
+      "specs": [
+        { "label": "Çekirdek", "value": "24 / 48 thread" },
+        { "label": "Temel", "value": "2.6 GHz — 4.8 GHz" },
+        { "label": "Önbellek", "value": "45 MB L3" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 165000,
+      "currency": "TRY",
+      "powerDraw": 225,
+      "recommendation": "budget",
+      "stock": "available",
+      "compatibilityTags": ["platform-xeon-w"],
+      "requiresTags": ["platform-xeon-w"]
+    },
+    {
+      "id": "cpu-w-3465x",
+      "categoryId": "cpu",
+      "name": "Intel Xeon W-3465X",
+      "brand": "Intel",
+      "description": "28 çekirdek; 3D render ve ağır simülasyonlar için dengeli seçim.",
+      "specs": [
+        { "label": "Çekirdek", "value": "28 / 56 thread" },
+        { "label": "Temel", "value": "2.5 GHz — 4.8 GHz" },
+        { "label": "Önbellek", "value": "75 MB L3" }
+      ],
+      "priceDelta": 42000,
+      "absolutePrice": 207000,
+      "currency": "TRY",
+      "powerDraw": 300,
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["platform-xeon-w"],
+      "requiresTags": ["platform-xeon-w"]
+    },
+    {
+      "id": "cpu-w-3495x",
+      "categoryId": "cpu",
+      "name": "Intel Xeon W-3495X",
+      "brand": "Intel",
+      "description": "56 çekirdek — LLM fine-tune, büyük sahne render ve CFD için.",
+      "specs": [
+        { "label": "Çekirdek", "value": "56 / 112 thread" },
+        { "label": "Temel", "value": "1.9 GHz — 4.8 GHz" },
+        { "label": "Önbellek", "value": "105 MB L3" }
+      ],
+      "priceDelta": 148000,
+      "absolutePrice": 313000,
+      "currency": "TRY",
+      "powerDraw": 350,
+      "recommendation": null,
+      "stock": "low",
+      "compatibilityTags": ["platform-xeon-w"],
+      "requiresTags": ["platform-xeon-w"]
+    },
+    {
+      "id": "cpu-xeon-8480",
+      "categoryId": "cpu",
+      "name": "2x Intel Xeon Platinum 8480+",
+      "brand": "Intel",
+      "description": "Çift soketli 56 çekirdekli sunucu sınıfı işlemci.",
+      "specs": [
+        { "label": "Çekirdek", "value": "2x 56 / 112 thread" },
+        { "label": "Temel", "value": "2.0 GHz — 3.8 GHz" },
+        { "label": "Önbellek", "value": "105 MB L3 (soket başına)" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 1850000,
+      "currency": "TRY",
+      "powerDraw": 700,
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["platform-xeon-sp"],
+      "requiresTags": ["platform-xeon-sp"]
+    },
+    {
+      "id": "cpu-xeon-8592",
+      "categoryId": "cpu",
+      "name": "2x Intel Xeon Platinum 8592+",
+      "brand": "Intel",
+      "description": "Enterprise tier; daha yüksek saat ve geliştirilmiş AI hızlandırma.",
+      "specs": [
+        { "label": "Çekirdek", "value": "2x 64 / 128 thread" },
+        { "label": "Temel", "value": "1.9 GHz — 3.9 GHz" },
+        { "label": "AMX", "value": "İleri AI hızlandırma" }
+      ],
+      "priceDelta": 160000,
+      "absolutePrice": 2010000,
+      "currency": "TRY",
+      "powerDraw": 700,
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["platform-xeon-sp"],
+      "requiresTags": ["platform-xeon-sp"]
+    },
+
+    {
+      "id": "gpu-rtx-4000",
+      "categoryId": "gpu",
+      "name": "NVIDIA RTX 4000 Ada",
+      "brand": "NVIDIA",
+      "description": "Tekli slot, 20 GB VRAM. CAD, fotoğraf ve hafif render için.",
+      "specs": [
+        { "label": "VRAM", "value": "20 GB GDDR6" },
+        { "label": "Çıkış", "value": "4x DisplayPort 1.4a" },
+        { "label": "TDP", "value": "130 W" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 72000,
+      "currency": "TRY",
+      "powerDraw": 130,
+      "recommendation": "budget",
+      "stock": "available",
+      "compatibilityTags": ["slot-single-width"]
+    },
+    {
+      "id": "gpu-rtx-5000",
+      "categoryId": "gpu",
+      "name": "NVIDIA RTX 5000 Ada",
+      "brand": "NVIDIA",
+      "description": "32 GB VRAM; render ve AI inference için dengeli güç.",
+      "specs": [
+        { "label": "VRAM", "value": "32 GB GDDR6" },
+        { "label": "CUDA", "value": "12,800 çekirdek" },
+        { "label": "TDP", "value": "250 W" }
+      ],
+      "priceDelta": 38000,
+      "absolutePrice": 110000,
+      "currency": "TRY",
+      "powerDraw": 250,
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["slot-double-width"]
+    },
+    {
+      "id": "gpu-rtx-6000",
+      "categoryId": "gpu",
+      "name": "NVIDIA RTX 6000 Ada",
+      "brand": "NVIDIA",
+      "description": "48 GB VRAM; üretim render, AI fine-tune ve sanal üretim için.",
+      "specs": [
+        { "label": "VRAM", "value": "48 GB GDDR6 ECC" },
+        { "label": "CUDA", "value": "18,176 çekirdek" },
+        { "label": "TDP", "value": "300 W" }
+      ],
+      "priceDelta": 92000,
+      "absolutePrice": 164000,
+      "currency": "TRY",
+      "powerDraw": 300,
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["slot-double-width"]
+    },
+    {
+      "id": "gpu-2x-rtx-6000",
+      "categoryId": "gpu",
+      "name": "2x NVIDIA RTX 6000 Ada",
+      "brand": "NVIDIA",
+      "description": "Çift kart — 96 GB toplam VRAM. PSU ≥ 1600W gerekir.",
+      "specs": [
+        { "label": "VRAM", "value": "2x 48 GB ECC" },
+        { "label": "CUDA", "value": "36,352 çekirdek" },
+        { "label": "TDP", "value": "600 W" }
+      ],
+      "priceDelta": 215000,
+      "absolutePrice": 287000,
+      "currency": "TRY",
+      "powerDraw": 600,
+      "recommendation": null,
+      "stock": "low",
+      "compatibilityTags": ["slot-double-width", "gpu-multi"],
+      "requiresTags": ["psu-1600-plus"]
+    },
+    {
+      "id": "gpu-8x-h100",
+      "categoryId": "gpu",
+      "name": "8x NVIDIA H100 SXM5 80GB",
+      "brand": "NVIDIA",
+      "description": "NVLink tam mesh — LLM eğitimi ve HPC için referans.",
+      "specs": [
+        { "label": "VRAM", "value": "640 GB HBM3 (8x 80 GB)" },
+        { "label": "NVLink", "value": "Tam mesh (900 GB/s)" },
+        { "label": "TDP", "value": "5600 W (8x 700 W)" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 4850000,
+      "currency": "TRY",
+      "powerDraw": 5600,
+      "recommendation": "recommended",
+      "stock": "low",
+      "compatibilityTags": ["sxm", "server-only"],
+      "requiresTags": ["platform-xeon-sp"]
+    },
+    {
+      "id": "gpu-8x-h100-ntx",
+      "categoryId": "gpu",
+      "name": "8x NVIDIA H100 + NVSwitch",
+      "brand": "NVIDIA",
+      "description": "NVSwitch ile GPU'lar arası 900 GB/s tam bant genişliği — en büyük modeller için.",
+      "specs": [
+        { "label": "VRAM", "value": "640 GB HBM3" },
+        { "label": "NVSwitch", "value": "Dahili kartlı" },
+        { "label": "TDP", "value": "5600 W" }
+      ],
+      "priceDelta": 450000,
+      "absolutePrice": 5300000,
+      "currency": "TRY",
+      "powerDraw": 5600,
+      "recommendation": null,
+      "stock": "low",
+      "compatibilityTags": ["sxm", "server-only"],
+      "requiresTags": ["platform-xeon-sp"]
+    },
+
+    {
+      "id": "ram-64",
+      "categoryId": "ram",
+      "name": "64 GB DDR5 ECC",
+      "brand": "Kingston",
+      "description": "4 kanal, 4800 MT/s. CAD ve hafif render için giriş seviyesi.",
+      "specs": [
+        { "label": "Konfig", "value": "2x 32 GB DIMM" },
+        { "label": "Hız", "value": "4800 MT/s" },
+        { "label": "ECC", "value": "Registered" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 28000,
+      "currency": "TRY",
+      "powerDraw": 10,
+      "recommendation": "budget",
+      "stock": "available",
+      "compatibilityTags": ["ddr5-ecc-workstation"]
+    },
+    {
+      "id": "ram-128",
+      "categoryId": "ram",
+      "name": "128 GB DDR5 ECC",
+      "brand": "Kingston",
+      "description": "Çoklu uygulama, orta-büyük sahne; render ve derleme için yeterli.",
+      "specs": [
+        { "label": "Konfig", "value": "4x 32 GB DIMM" },
+        { "label": "Hız", "value": "4800 MT/s" },
+        { "label": "ECC", "value": "Registered" }
+      ],
+      "priceDelta": 18000,
+      "absolutePrice": 46000,
+      "currency": "TRY",
+      "powerDraw": 18,
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["ddr5-ecc-workstation"]
+    },
+    {
+      "id": "ram-256",
+      "categoryId": "ram",
+      "name": "256 GB DDR5 ECC",
+      "brand": "Micron",
+      "description": "Büyük sahne ve LLM ön işlem; tüm 8 kanal dolu.",
+      "specs": [
+        { "label": "Konfig", "value": "8x 32 GB DIMM" },
+        { "label": "Hız", "value": "4800 MT/s" },
+        { "label": "ECC", "value": "Registered" }
+      ],
+      "priceDelta": 52000,
+      "absolutePrice": 80000,
+      "currency": "TRY",
+      "powerDraw": 32,
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["ddr5-ecc-workstation"]
+    },
+    {
+      "id": "ram-512",
+      "categoryId": "ram",
+      "name": "512 GB DDR5 ECC",
+      "brand": "Micron",
+      "description": "Üst sınır — büyük veri kümeleri, ANSYS FEA, AI ön işlem.",
+      "specs": [
+        { "label": "Konfig", "value": "8x 64 GB DIMM" },
+        { "label": "Hız", "value": "4800 MT/s" },
+        { "label": "ECC", "value": "Registered" }
+      ],
+      "priceDelta": 120000,
+      "absolutePrice": 148000,
+      "currency": "TRY",
+      "powerDraw": 40,
+      "recommendation": null,
+      "stock": "low",
+      "compatibilityTags": ["ddr5-ecc-workstation"]
+    },
+    {
+      "id": "ram-1tb",
+      "categoryId": "ram",
+      "name": "1 TB DDR5 ECC",
+      "brand": "Samsung",
+      "description": "Sunucu sınıfı; 16 kanal dolu başlangıç.",
+      "specs": [
+        { "label": "Konfig", "value": "16x 64 GB DIMM" },
+        { "label": "Hız", "value": "4800 MT/s" },
+        { "label": "ECC", "value": "Registered" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 320000,
+      "currency": "TRY",
+      "powerDraw": 80,
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["ddr5-ecc-server"]
+    },
+    {
+      "id": "ram-2tb",
+      "categoryId": "ram",
+      "name": "2 TB DDR5 ECC",
+      "brand": "Samsung",
+      "description": "LLM fine-tune iş yükü için önerilen.",
+      "specs": [
+        { "label": "Konfig", "value": "16x 128 GB DIMM" },
+        { "label": "Hız", "value": "4800 MT/s" },
+        { "label": "ECC", "value": "Registered" }
+      ],
+      "priceDelta": 240000,
+      "absolutePrice": 560000,
+      "currency": "TRY",
+      "powerDraw": 100,
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["ddr5-ecc-server"]
+    },
+    {
+      "id": "ram-4tb",
+      "categoryId": "ram",
+      "name": "4 TB DDR5 ECC",
+      "brand": "Samsung",
+      "description": "Maksimum kapasite — 70B+ model fine-tune için.",
+      "specs": [
+        { "label": "Konfig", "value": "32x 128 GB DIMM" },
+        { "label": "Hız", "value": "4400 MT/s" },
+        { "label": "ECC", "value": "Registered" }
+      ],
+      "priceDelta": 620000,
+      "absolutePrice": 940000,
+      "currency": "TRY",
+      "powerDraw": 140,
+      "recommendation": null,
+      "stock": "low",
+      "compatibilityTags": ["ddr5-ecc-server"]
+    },
+
+    {
+      "id": "st-nvme-1tb",
+      "categoryId": "storage-primary",
+      "name": "1 TB NVMe Gen4",
+      "brand": "Samsung",
+      "description": "Giriş NVMe; OS ve aktif projeler için.",
+      "specs": [
+        { "label": "Okuma", "value": "7000 MB/s" },
+        { "label": "Yazma", "value": "5000 MB/s" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 9000,
+      "currency": "TRY",
+      "powerDraw": 7,
+      "recommendation": "budget",
+      "stock": "available",
+      "compatibilityTags": ["nvme"]
+    },
+    {
+      "id": "st-nvme-2tb",
+      "categoryId": "storage-primary",
+      "name": "2 TB NVMe Gen4",
+      "brand": "Samsung",
+      "description": "Dengeli kapasite/hız. En çok tercih edilen.",
+      "specs": [
+        { "label": "Okuma", "value": "7000 MB/s" },
+        { "label": "Yazma", "value": "5100 MB/s" }
+      ],
+      "priceDelta": 8000,
+      "absolutePrice": 17000,
+      "currency": "TRY",
+      "powerDraw": 9,
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["nvme"]
+    },
+    {
+      "id": "st-nvme-4tb",
+      "categoryId": "storage-primary",
+      "name": "4 TB NVMe Gen4",
+      "brand": "Samsung",
+      "description": "Büyük proje kütüphanesi; video ve AI veri setleri.",
+      "specs": [
+        { "label": "Okuma", "value": "7300 MB/s" },
+        { "label": "Yazma", "value": "6000 MB/s" }
+      ],
+      "priceDelta": 22000,
+      "absolutePrice": 31000,
+      "currency": "TRY",
+      "powerDraw": 11,
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["nvme"]
+    },
+    {
+      "id": "st-nvme-8tb",
+      "categoryId": "storage-primary",
+      "name": "8 TB NVMe Gen5",
+      "brand": "Micron",
+      "description": "En yüksek hız sınıfı; 14 GB/s okuma.",
+      "specs": [
+        { "label": "Okuma", "value": "14,000 MB/s" },
+        { "label": "Yazma", "value": "12,000 MB/s" }
+      ],
+      "priceDelta": 62000,
+      "absolutePrice": 71000,
+      "currency": "TRY",
+      "powerDraw": 13,
+      "recommendation": null,
+      "stock": "low",
+      "compatibilityTags": ["nvme"]
+    },
+
+    {
+      "id": "st-none",
+      "categoryId": "storage-secondary",
+      "name": "Yok",
+      "brand": "—",
+      "description": "İkincil depolama eklenmeyecek.",
+      "specs": [],
+      "priceDelta": 0,
+      "absolutePrice": 0,
+      "currency": "TRY",
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": []
+    },
+    {
+      "id": "st-sata-4tb",
+      "categoryId": "storage-secondary",
+      "name": "4 TB SATA SSD",
+      "brand": "Samsung",
+      "description": "Büyük arşiv; düşük maliyetli yedek alanı.",
+      "specs": [
+        { "label": "Okuma", "value": "560 MB/s" },
+        { "label": "Dayanıklılık", "value": "2 DWPD" }
+      ],
+      "priceDelta": 12000,
+      "absolutePrice": 12000,
+      "currency": "TRY",
+      "powerDraw": 5,
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["sata"]
+    },
+    {
+      "id": "st-sata-8tb",
+      "categoryId": "storage-secondary",
+      "name": "8 TB SATA SSD",
+      "brand": "Samsung",
+      "description": "Büyük proje kütüphanesi için.",
+      "specs": [
+        { "label": "Okuma", "value": "560 MB/s" }
+      ],
+      "priceDelta": 26000,
+      "absolutePrice": 26000,
+      "currency": "TRY",
+      "powerDraw": 6,
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["sata"]
+    },
+    {
+      "id": "st-hdd-16tb",
+      "categoryId": "storage-secondary",
+      "name": "16 TB HDD (CMR)",
+      "brand": "Seagate",
+      "description": "Ekonomik arşiv; düşük erişim sıklığı için.",
+      "specs": [
+        { "label": "Hız", "value": "7200 rpm" },
+        { "label": "Arayüz", "value": "SATA 6 Gb/s" }
+      ],
+      "priceDelta": 8000,
+      "absolutePrice": 8000,
+      "currency": "TRY",
+      "powerDraw": 8,
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["sata"]
+    },
+
+    {
+      "id": "net-10gbe",
+      "categoryId": "network",
+      "name": "Dahili 2x 10 GbE + 1 GbE Yönetim",
+      "brand": "Intel",
+      "description": "Anakart üzerinde dahili RJ45; kurumsal ağ için yeterli.",
+      "specs": [
+        { "label": "Port", "value": "2x 10 GbE RJ45" },
+        { "label": "Yönetim", "value": "1 GbE IPMI" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 0,
+      "currency": "TRY",
+      "powerDraw": 5,
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["network-base"]
+    },
+    {
+      "id": "net-25gbe",
+      "categoryId": "network",
+      "name": "2x 25 GbE SFP28",
+      "brand": "Mellanox",
+      "description": "Depolama ve HPC için orta hızlı bağlantı.",
+      "specs": [
+        { "label": "Port", "value": "2x SFP28 25 GbE" },
+        { "label": "Protokol", "value": "RoCE v2" }
+      ],
+      "priceDelta": 24000,
+      "absolutePrice": 24000,
+      "currency": "TRY",
+      "powerDraw": 15,
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["network-25g"]
+    },
+    {
+      "id": "net-100gbe",
+      "categoryId": "network",
+      "name": "2x 100 GbE QSFP28",
+      "brand": "Mellanox",
+      "description": "Spine-leaf omurga ve storage backbone için.",
+      "specs": [
+        { "label": "Port", "value": "2x QSFP28 100 GbE" },
+        { "label": "Protokol", "value": "RoCE v2" }
+      ],
+      "priceDelta": 120000,
+      "absolutePrice": 120000,
+      "currency": "TRY",
+      "powerDraw": 25,
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["network-100g", "server-only"]
+    },
+    {
+      "id": "net-infini",
+      "categoryId": "network",
+      "name": "InfiniBand NDR (400 Gb/s)",
+      "brand": "NVIDIA",
+      "description": "HPC ve AI eğitim kümeleri için ultra düşük gecikme.",
+      "specs": [
+        { "label": "Hız", "value": "400 Gb/s" },
+        { "label": "Gecikme", "value": "< 1 µs" }
+      ],
+      "priceDelta": 260000,
+      "absolutePrice": 260000,
+      "currency": "TRY",
+      "powerDraw": 35,
+      "recommendation": "recommended",
+      "stock": "low",
+      "compatibilityTags": ["network-infiniband", "server-only"]
+    },
+
+    {
+      "id": "psu-1000",
+      "categoryId": "psu",
+      "name": "1000 W 80+ Titanium",
+      "brand": "Seasonic",
+      "description": "Tek GPU + standart CPU için yeterli.",
+      "specs": [
+        { "label": "Verim", "value": "%94 @ 50% yük" },
+        { "label": "Modüler", "value": "Tam modüler" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 14000,
+      "currency": "TRY",
+      "recommendation": "budget",
+      "stock": "available",
+      "compatibilityTags": ["psu-1000"]
+    },
+    {
+      "id": "psu-1600",
+      "categoryId": "psu",
+      "name": "1600 W 80+ Titanium",
+      "brand": "Seasonic",
+      "description": "Çift kartvetli GPU konfigleri için önerilir.",
+      "specs": [
+        { "label": "Verim", "value": "%94+ geniş bantta" },
+        { "label": "Fan", "value": "Hybrid passive" }
+      ],
+      "priceDelta": 18000,
+      "absolutePrice": 32000,
+      "currency": "TRY",
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["psu-1600", "psu-1600-plus"]
+    },
+    {
+      "id": "psu-2000",
+      "categoryId": "psu",
+      "name": "2000 W 80+ Titanium",
+      "brand": "Super Flower",
+      "description": "Aşırı güç talebi; çift GPU + yüksek TDP CPU.",
+      "specs": [
+        { "label": "Verim", "value": "%95+ @ 50%" },
+        { "label": "Üst sınır", "value": "2000 W sürekli" }
+      ],
+      "priceDelta": 42000,
+      "absolutePrice": 56000,
+      "currency": "TRY",
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["psu-2000", "psu-1600-plus"]
+    },
+
+    {
+      "id": "cool-air",
+      "categoryId": "cooling",
+      "name": "Hava Soğutma (Noctua NH-U12A)",
+      "brand": "Noctua",
+      "description": "Geleneksel kule soğutucu; sessiz ve bakım gerektirmez.",
+      "specs": [
+        { "label": "Maks TDP", "value": "270 W" },
+        { "label": "Gürültü", "value": "22 dB @idle" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 4500,
+      "currency": "TRY",
+      "recommendation": "budget",
+      "stock": "available",
+      "compatibilityTags": ["cool-air", "cool-max-270"]
+    },
+    {
+      "id": "cool-240",
+      "categoryId": "cooling",
+      "name": "240 mm Kapalı Devre Sıvı",
+      "brand": "ARCTIC",
+      "description": "Orta-yüksek TDP CPU'lar için dengeli.",
+      "specs": [
+        { "label": "Radyatör", "value": "240 mm" },
+        { "label": "Maks TDP", "value": "350 W" }
+      ],
+      "priceDelta": 8000,
+      "absolutePrice": 12500,
+      "currency": "TRY",
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["cool-aio-240"]
+    },
+    {
+      "id": "cool-360",
+      "categoryId": "cooling",
+      "name": "360 mm Kapalı Devre Sıvı",
+      "brand": "Corsair",
+      "description": "56 çekirdekli işlemciler için önerilir.",
+      "specs": [
+        { "label": "Radyatör", "value": "360 mm" },
+        { "label": "Maks TDP", "value": "420 W" }
+      ],
+      "priceDelta": 18000,
+      "absolutePrice": 22500,
+      "currency": "TRY",
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["cool-aio-360"]
+    },
+    {
+      "id": "cool-server",
+      "categoryId": "cooling",
+      "name": "Rack Standart (6x 80 mm PWM)",
+      "brand": "Delta",
+      "description": "4U sunucu şasisinde standart hava akışı; servis olmadan çalışır.",
+      "specs": [
+        { "label": "Fanlar", "value": "6x 80 mm hot-swap" },
+        { "label": "Gürültü", "value": "Sunucu seviyesi (52 dB)" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 0,
+      "currency": "TRY",
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["cool-server", "server-only"]
+    },
+
+    {
+      "id": "chs-full-tower",
+      "categoryId": "chassis",
+      "name": "Full Tower (Standart)",
+      "brand": "BOXX",
+      "description": "Çift genişlikli 2 GPU ve 360 mm radyatör kapasitesi.",
+      "specs": [
+        { "label": "Boyut", "value": "560 x 240 x 565 mm" },
+        { "label": "Ağırlık", "value": "22 kg" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 0,
+      "currency": "TRY",
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["form-tower"]
+    },
+    {
+      "id": "chs-silent-tower",
+      "categoryId": "chassis",
+      "name": "Silent Tower (ses izolasyonlu)",
+      "brand": "BOXX",
+      "description": "Açık ofis ortamı için akustik panelli tower.",
+      "specs": [
+        { "label": "Gürültü", "value": "Tam yükte < 32 dB" },
+        { "label": "Panel", "value": "Bitumen izolasyon" }
+      ],
+      "priceDelta": 12000,
+      "absolutePrice": 12000,
+      "currency": "TRY",
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["form-tower"]
+    },
+    {
+      "id": "chs-4u-rack",
+      "categoryId": "chassis",
+      "name": "4U Rack Şasi",
+      "brand": "BOXX",
+      "description": "Veri merkezi dağıtımı için standart 19'\" rack.",
+      "specs": [
+        { "label": "Form", "value": "4U / 19\"" },
+        { "label": "Ray", "value": "Tool-less slide rail" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 0,
+      "currency": "TRY",
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["form-rack-4u", "server-only"]
+    },
+
+    {
+      "id": "os-none",
+      "categoryId": "os",
+      "name": "OS Yok (boş sistem)",
+      "brand": "—",
+      "description": "OS müşteri tarafında kurulur.",
+      "specs": [],
+      "priceDelta": 0,
+      "absolutePrice": 0,
+      "currency": "TRY",
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": []
+    },
+    {
+      "id": "os-win11",
+      "categoryId": "os",
+      "name": "Windows 11 Pro for Workstations",
+      "brand": "Microsoft",
+      "description": "Sertifikalı sürücü paketi + ISV uygulama kurulumları.",
+      "specs": [
+        { "label": "Sürüm", "value": "Pro for Workstations" },
+        { "label": "Lisans", "value": "OEM — kalıcı" }
+      ],
+      "priceDelta": 9000,
+      "absolutePrice": 9000,
+      "currency": "TRY",
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["os-windows"]
+    },
+    {
+      "id": "os-rocky",
+      "categoryId": "os",
+      "name": "Rocky Linux 9",
+      "brand": "Rocky Enterprise",
+      "description": "HPC/AI için stabil kurumsal Linux.",
+      "specs": [
+        { "label": "Sürüm", "value": "9.3" },
+        { "label": "Destek", "value": "10 yıl LTS" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 0,
+      "currency": "TRY",
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["os-linux"]
+    },
+    {
+      "id": "os-ubuntu",
+      "categoryId": "os",
+      "name": "Ubuntu 22.04 LTS Pro",
+      "brand": "Canonical",
+      "description": "AI/ML ekosistemi ile geniş uyum. Pro destek dahil.",
+      "specs": [
+        { "label": "Sürüm", "value": "22.04 LTS" },
+        { "label": "Destek", "value": "10 yıl Pro" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 0,
+      "currency": "TRY",
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["os-linux"]
+    },
+
+    {
+      "id": "wr-3y",
+      "categoryId": "warranty",
+      "name": "3 Yıl Standart Garanti",
+      "brand": "BOXX",
+      "description": "Parça + işçilik; Türkiye genelinde servise getir-götür.",
+      "specs": [
+        { "label": "Süre", "value": "36 ay" },
+        { "label": "Kapsam", "value": "Parça + işçilik" }
+      ],
+      "priceDelta": 0,
+      "absolutePrice": 0,
+      "currency": "TRY",
+      "recommendation": "recommended",
+      "stock": "available",
+      "compatibilityTags": ["warranty-base"]
+    },
+    {
+      "id": "wr-5y",
+      "categoryId": "warranty",
+      "name": "5 Yıl Uzatılmış Garanti",
+      "brand": "BOXX",
+      "description": "5 yıl boyunca kapsam + öncelikli destek.",
+      "specs": [
+        { "label": "Süre", "value": "60 ay" },
+        { "label": "Hat", "value": "Öncelikli destek" }
+      ],
+      "priceDelta": 24500,
+      "absolutePrice": 24500,
+      "currency": "TRY",
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["warranty-ext"]
+    },
+    {
+      "id": "wr-onsite",
+      "categoryId": "warranty",
+      "name": "3 Yıl Yerinde Müdahale",
+      "brand": "BOXX",
+      "description": "İstanbul/Ankara/İzmir'de ertesi iş günü yerinde servis.",
+      "specs": [
+        { "label": "SLA", "value": "NBD (next business day)" },
+        { "label": "Lokasyon", "value": "IST, ANK, IZM" }
+      ],
+      "priceDelta": 42000,
+      "absolutePrice": 42000,
+      "currency": "TRY",
+      "recommendation": null,
+      "stock": "available",
+      "compatibilityTags": ["warranty-onsite"]
+    }
+  ],
+  "baseProducts": [
+    {
+      "id": "base-w680-pro",
+      "slug": "boxx-w680-pro",
+      "name": "BOXX W680 Pro",
+      "categoryName": "İş İstasyonu",
+      "shortDescription": "Xeon W tabanlı tower; render, simülasyon ve CAD için.",
+      "heroImageUrl": "/images/products/w680-pro/hero.jpg",
+      "basePrice": 285000,
+      "currency": "TRY",
+      "maxPsuWatt": 2000,
+      "estimatedLeadTimeDays": [10, 14],
+      "availableOptionIds": {
+        "cpu": ["cpu-w-2495x", "cpu-w-3465x", "cpu-w-3495x"],
+        "gpu": ["gpu-rtx-4000", "gpu-rtx-5000", "gpu-rtx-6000", "gpu-2x-rtx-6000"],
+        "ram": ["ram-64", "ram-128", "ram-256", "ram-512"],
+        "storage-primary": ["st-nvme-1tb", "st-nvme-2tb", "st-nvme-4tb", "st-nvme-8tb"],
+        "storage-secondary": ["st-none", "st-sata-4tb", "st-sata-8tb", "st-hdd-16tb"],
+        "network": ["net-10gbe", "net-25gbe"],
+        "psu": ["psu-1000", "psu-1600", "psu-2000"],
+        "cooling": ["cool-air", "cool-240", "cool-360"],
+        "chassis": ["chs-full-tower", "chs-silent-tower"],
+        "os": ["os-none", "os-win11", "os-rocky", "os-ubuntu"],
+        "warranty": ["wr-3y", "wr-5y", "wr-onsite"]
+      },
+      "defaultSelection": {
+        "cpu": "cpu-w-3465x",
+        "gpu": "gpu-rtx-6000",
+        "ram": "ram-128",
+        "storage-primary": "st-nvme-2tb",
+        "storage-secondary": "st-sata-4tb",
+        "network": "net-10gbe",
+        "psu": "psu-1600",
+        "cooling": "cool-360",
+        "chassis": "chs-full-tower",
+        "os": "os-win11",
+        "warranty": "wr-3y"
+      }
+    },
+    {
+      "id": "base-raxx-h100",
+      "slug": "boxx-raxx-h100",
+      "name": "BOXX RAXX H100",
+      "categoryName": "GPU Sunucu",
+      "shortDescription": "8x NVIDIA H100 ile 4U AI eğitimi ve HPC sunucusu.",
+      "heroImageUrl": "/images/products/raxx-h100/hero.jpg",
+      "basePrice": 6850000,
+      "currency": "TRY",
+      "maxPsuWatt": 10000,
+      "estimatedLeadTimeDays": [18, 24],
+      "availableOptionIds": {
+        "cpu": ["cpu-xeon-8480", "cpu-xeon-8592"],
+        "gpu": ["gpu-8x-h100", "gpu-8x-h100-ntx"],
+        "ram": ["ram-1tb", "ram-2tb", "ram-4tb"],
+        "storage-primary": ["st-nvme-2tb", "st-nvme-4tb", "st-nvme-8tb"],
+        "storage-secondary": ["st-none", "st-sata-8tb"],
+        "network": ["net-100gbe", "net-infini"],
+        "psu": ["psu-2000"],
+        "cooling": ["cool-server"],
+        "chassis": ["chs-4u-rack"],
+        "os": ["os-none", "os-rocky", "os-ubuntu"],
+        "warranty": ["wr-3y", "wr-5y", "wr-onsite"]
+      },
+      "defaultSelection": {
+        "cpu": "cpu-xeon-8480",
+        "gpu": "gpu-8x-h100",
+        "ram": "ram-2tb",
+        "storage-primary": "st-nvme-4tb",
+        "storage-secondary": "st-sata-8tb",
+        "network": "net-infini",
+        "psu": "psu-2000",
+        "cooling": "cool-server",
+        "chassis": "chs-4u-rack",
+        "os": "os-ubuntu",
+        "warranty": "wr-3y"
+      }
+    }
+  ],
+  "initialSelection": {
+    "baseProductId": "base-w680-pro",
+    "selections": {
+      "cpu": "cpu-w-3465x",
+      "gpu": "gpu-rtx-6000",
+      "ram": "ram-128",
+      "storage-primary": "st-nvme-2tb",
+      "storage-secondary": "st-sata-4tb",
+      "network": "net-10gbe",
+      "psu": "psu-1600",
+      "cooling": "cool-360",
+      "chassis": "chs-full-tower",
+      "os": "os-win11",
+      "warranty": "wr-3y"
+    }
+  },
+  "initialActiveCategoryId": "cpu",
+  "exampleWarnings": [
+    {
+      "id": "warn-2x-gpu-psu",
+      "categoryId": "gpu",
+      "optionId": "gpu-2x-rtx-6000",
+      "severity": "warning",
+      "message": "2x RTX 6000 Ada toplam 600 W çeker; seçili 1000 W PSU yetersiz kalabilir.",
+      "suggestion": "1600 W veya 2000 W PSU'ya geç."
+    },
+    {
+      "id": "warn-cool-cpu",
+      "categoryId": "cooling",
+      "optionId": "cool-air",
+      "severity": "warning",
+      "message": "Hava soğutma 56 çekirdekli Xeon W-3495X'i tam yükte tutamayabilir.",
+      "suggestion": "240 mm veya 360 mm sıvı soğutucu önerilir."
+    },
+    {
+      "id": "warn-low-stock",
+      "categoryId": "gpu",
+      "optionId": "gpu-8x-h100-ntx",
+      "severity": "info",
+      "message": "Stok düşük — tahmini teslimat 3 hafta uzayabilir."
+    }
+  ]
+}

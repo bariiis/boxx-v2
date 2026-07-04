@@ -42,6 +42,8 @@ import type { SpecFieldType } from "@/generated/prisma"
 
 export interface SpecEntry {
   key: string
+  label?: string
+  unit?: string
   value: string
   type: SpecFieldType
   options?: string[]
@@ -50,6 +52,10 @@ export interface SpecEntry {
 interface SpecsEditorProps {
   specs: SpecEntry[]
   onChange: (specs: SpecEntry[]) => void
+  /** Product type from the form (e.g. "CONFIGURABLE", "COMPONENT", "STANDALONE").
+   *  Used to filter presets — CONFIGURABLE shows "Basekit / Chassis",
+   *  COMPONENT/STANDALONE matches by componentType from existing specs. */
+  productType?: string
 }
 
 interface PresetData {
@@ -58,6 +64,8 @@ interface PresetData {
   description: string | null
   fields: {
     key: string
+    label: string | null
+    unit: string | null
     fieldType: SpecFieldType
     options: unknown
     defaultValue: string | null
@@ -74,13 +82,13 @@ const fieldTypeLabels: Record<SpecFieldType, string> = {
 // COMPONENT
 // ==========================================
 
-export function SpecsEditor({ specs, onChange }: SpecsEditorProps) {
+export function SpecsEditor({ specs, onChange, productType }: SpecsEditorProps) {
   const [entries, setEntries] = useState<SpecEntry[]>(specs)
   const [newKey, setNewKey] = useState("")
   const [newValue, setNewValue] = useState("")
   const [newType, setNewType] = useState<SpecFieldType>("TEXT")
   const [draggedIdx, setDraggedIdx] = useState<number | null>(null)
-  const [presets, setPresets] = useState<PresetData[]>([])
+  const [allPresets, setAllPresets] = useState<PresetData[]>([])
   const [presetsLoaded, setPresetsLoaded] = useState(false)
   const [presetConfirm, setPresetConfirm] = useState<PresetData | null>(null)
 
@@ -88,11 +96,43 @@ export function SpecsEditor({ specs, onChange }: SpecsEditorProps) {
   useEffect(() => {
     if (!presetsLoaded) {
       getSpecPresets().then((data) => {
-        setPresets(data)
+        setAllPresets(data)
         setPresetsLoaded(true)
       })
     }
   }, [presetsLoaded])
+
+  // Filter presets based on product type:
+  // - CONFIGURABLE → show only "basekit" preset
+  // - COMPONENT/STANDALONE → match by existing componentType in specs, or show all non-basekit
+  const presets = (() => {
+    if (allPresets.length === 0) return []
+    // Find componentType from current specs
+    const currentComponentType = entries.find((e) => e.key === "componentType")?.value
+
+    if (productType === "CONFIGURABLE") {
+      // Only show basekit preset
+      return allPresets.filter((p) => {
+        const ctField = p.fields.find((f) => f.key === "componentType")
+        return ctField?.defaultValue === "basekit"
+      })
+    }
+
+    if (currentComponentType) {
+      // Match preset whose componentType matches current specs
+      const matched = allPresets.filter((p) => {
+        const ctField = p.fields.find((f) => f.key === "componentType")
+        return ctField?.defaultValue === currentComponentType
+      })
+      if (matched.length > 0) return matched
+    }
+
+    // Default: show all except basekit
+    return allPresets.filter((p) => {
+      const ctField = p.fields.find((f) => f.key === "componentType")
+      return ctField?.defaultValue !== "basekit"
+    })
+  })()
 
   function sync(updated: SpecEntry[]) {
     setEntries(updated)
@@ -154,6 +194,8 @@ export function SpecsEditor({ specs, onChange }: SpecsEditorProps) {
   function applyPreset(preset: PresetData, mode: "replace" | "merge") {
     const presetEntries: SpecEntry[] = preset.fields.map((f) => ({
       key: f.key,
+      label: f.label || undefined,
+      unit: f.unit || undefined,
       value: f.defaultValue || "",
       type: f.fieldType,
       options: Array.isArray(f.options) ? (f.options as string[]) : undefined,
@@ -296,22 +338,34 @@ export function SpecsEditor({ specs, onChange }: SpecsEditorProps) {
                     <GripVertical className="size-4 text-muted-foreground/50" />
                   </div>
 
-                  <Input
-                    value={entry.key}
-                    onChange={(e) => updateEntry(i, "key", e.target.value)}
-                    placeholder="Özellik adı"
-                    className="h-8 text-sm"
-                  />
+                  <div className="space-y-0.5">
+                    <Input
+                      value={entry.label ?? entry.key}
+                      onChange={(e) => updateEntry(i, "label", e.target.value)}
+                      placeholder="Görünen ad"
+                      className="h-8 text-sm"
+                    />
+                    <code className="block truncate px-1 text-[10px] text-muted-foreground/70 font-mono">
+                      {entry.key}
+                    </code>
+                  </div>
 
                   {isTextarea ? (
                     <span className="text-xs text-muted-foreground italic">
                       Uzun metin (aşağıda)
                     </span>
                   ) : (
-                    <SpecValueInput
-                      entry={entry}
-                      onChange={(val) => updateEntry(i, "value", val)}
-                    />
+                    <div className="flex items-center gap-1">
+                      <SpecValueInput
+                        entry={entry}
+                        onChange={(val) => updateEntry(i, "value", val)}
+                      />
+                      {entry.unit && (
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
+                          {entry.unit}
+                        </span>
+                      )}
+                    </div>
                   )}
 
                   <div className="flex items-center justify-center gap-0.5">

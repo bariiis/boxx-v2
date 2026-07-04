@@ -1,0 +1,11 @@
+﻿node_modules/
+vendor/
+wp-content/uploads/
+wp-content/cache/
+wp-content/upgrade/
+wp-content/backup*/
+*.log
+*.zip
+*.sql
+.git/
+__pycache__/

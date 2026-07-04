@@ -110,6 +110,7 @@ interface QuotePDFData {
   projectNumber: string | null
   vatRate: number
   discountPercent: number | null
+  discountAmount: number | null
   totalAmount: number
   validUntil: Date | null
   publicNote: string | null
@@ -135,7 +136,9 @@ export function QuotePDF({ quote, companyName }: { quote: QuotePDFData; companyN
     return sum + itemTotal
   }, 0)
 
-  const discountAmount = quote.discountPercent ? subtotal * (quote.discountPercent / 100) : 0
+  const discountAmount = quote.discountPercent
+    ? subtotal * (quote.discountPercent / 100)
+    : (quote.discountAmount || 0)
   const afterDiscount = subtotal - discountAmount
   const vatAmount = afterDiscount * (quote.vatRate / 100)
   const grandTotal = afterDiscount + vatAmount
@@ -263,7 +266,9 @@ export function QuotePDF({ quote, companyName }: { quote: QuotePDFData; companyN
             </View>
             {discountAmount > 0 && (
               <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>İndirim (%{quote.discountPercent}):</Text>
+                <Text style={styles.totalLabel}>
+                  {quote.discountPercent ? `İndirim (%${quote.discountPercent}):` : "İndirim:"}
+                </Text>
                 <Text style={[styles.totalValue, { color: "#16a34a" }]}>-{fmt(discountAmount, s)}</Text>
               </View>
             )}

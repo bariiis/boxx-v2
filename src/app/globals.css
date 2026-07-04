@@ -2,6 +2,34 @@
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
 
+/* ============================================================
+   LANDING PAGE THEME — applies font + accent vars set by
+   LandingPageRenderer wrapper. Headings use --font-heading,
+   body inherits --font-body. Lets users pick fonts globally
+   without touching individual section components.
+   ============================================================ */
+.lp-themed {
+  font-family: var(--font-body);
+}
+.lp-themed h1,
+.lp-themed h2,
+.lp-themed h3,
+.lp-themed h4,
+.lp-themed h5,
+.lp-themed h6 {
+  font-family: var(--font-heading);
+}
+.lp-themed [data-lp="primary-bg"] {
+  background-color: var(--lp-primary) !important;
+  color: var(--lp-primary-fg) !important;
+}
+.lp-themed [data-lp="primary-text"] {
+  color: var(--lp-primary) !important;
+}
+.lp-themed [data-lp="accent-text"] {
+  color: var(--lp-accent) !important;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* shadcn animations and custom variants */
@@ -192,6 +220,24 @@
   }
 }
 
+/* ============================================================
+   DESIGN OS FONT ALIASES
+   Imported Design OS components use `font-['Space_Grotesk']`,
+   `font-['Inter']`, `font-['JetBrains_Mono']` arbitrary-value
+   classes. Map them to the next/font CSS variables so they
+   actually render with the loaded webfont instead of falling
+   back to system UI.
+   ============================================================ */
+.font-\[\'Space_Grotesk\'\] {
+  font-family: var(--font-space-grotesk), system-ui, sans-serif;
+}
+.font-\[\'Inter\'\] {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+.font-\[\'JetBrains_Mono\'\] {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+}
+
 /* Aurora page styles */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
@@ -272,4 +318,207 @@ body[data-home-theme="light"] {
   body[data-home-theme] {
     transition: none;
   }
+}
+
+/* ============================================================
+   STUUX BOXX — premium hardware design system
+   Applied on .stuux-theme wrapper (Home v2 journey redesign).
+   Palette: slate-based, CTA sky-700. Fonts: Bodoni Moda + Jost.
+   ============================================================ */
+:root {
+  --stuux-bg:        #F8FAFC;
+  --stuux-surface:   #FFFFFF;
+  --stuux-border:    #E2E8F0;
+  --stuux-primary:   #0F172A;
+  --stuux-secondary: #334155;
+  --stuux-cta:       #0369A1;
+  --stuux-cta-hover: #075985;
+  --stuux-text:      #020617;
+  --stuux-muted:     #475569;
+  --stuux-heading:   var(--font-bodoni-moda), Georgia, "Times New Roman", serif;
+  --stuux-body:      var(--font-jost), system-ui, sans-serif;
+}
+
+.stuux-theme {
+  font-family: var(--stuux-body);
+  color: var(--stuux-text);
+  background-color: var(--stuux-bg);
+}
+.stuux-theme h1,
+.stuux-theme h2,
+.stuux-theme h3,
+.stuux-theme h4,
+.stuux-heading {
+  font-family: var(--stuux-heading);
+  letter-spacing: -0.01em;
+}
+
+/* Liquid Glass card — performant backdrop-filter with enough opacity to meet contrast in light mode */
+.stuux-glass {
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(18px) saturate(1.25);
+  -webkit-backdrop-filter: blur(18px) saturate(1.25);
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 20px 40px -20px rgba(15, 23, 42, 0.18);
+  transition: background 300ms ease, border-color 300ms ease, transform 300ms ease;
+}
+.stuux-glass:hover {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: rgba(15, 23, 42, 0.12);
+}
+
+.stuux-glass-dark {
+  background: rgba(15, 23, 42, 0.62);
+  backdrop-filter: blur(18px) saturate(1.2);
+  -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #F8FAFC;
+}
+
+/* Iridescent gradient accent (used behind hero headline) */
+.stuux-iridescent {
+  background: radial-gradient(
+    120% 100% at 20% 10%,
+    rgba(3, 105, 161, 0.22) 0%,
+    rgba(147, 197, 253, 0.12) 30%,
+    rgba(248, 250, 252, 0) 70%
+  );
+}
+
+/* Morphing blob for liquid-glass hero background */
+@keyframes stuux-blob {
+  0%, 100% { transform: translate3d(0,0,0) scale(1); border-radius: 42% 58% 63% 37% / 43% 44% 56% 57%; }
+  33%      { transform: translate3d(2%, -3%, 0) scale(1.06); border-radius: 58% 42% 37% 63% / 44% 59% 41% 56%; }
+  66%      { transform: translate3d(-3%, 2%, 0) scale(0.96); border-radius: 47% 53% 59% 41% / 39% 56% 44% 61%; }
+}
+.stuux-blob {
+  animation: stuux-blob 18s ease-in-out infinite;
+}
+
+/* Premium underline reveal for large headings */
+.stuux-underline {
+  background-image: linear-gradient(120deg, var(--stuux-cta) 0%, var(--stuux-primary) 100%);
+  background-repeat: no-repeat;
+  background-size: 100% 0.12em;
+  background-position: 0 92%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stuux-blob { animation: none; }
+  .stuux-glass { transition: none; }
+}
+
+/* Keyboard focus ring (WCAG AA) — visible on all interactive elements inside STUUX */
+.stuux-theme a:focus-visible,
+.stuux-theme button:focus-visible,
+.stuux-theme [role="button"]:focus-visible {
+  outline: 2px solid var(--stuux-cta);
+  outline-offset: 3px;
+  border-radius: 9999px;
+}
+
+/* Primary CTA pill — tokenized background with hover/active/focus states */
+.stuux-btn-primary {
+  background-color: var(--stuux-cta);
+  color: #FFFFFF;
+  transition: background-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+  will-change: background-color, transform;
+}
+.stuux-btn-primary:hover {
+  background-color: var(--stuux-cta-hover);
+  box-shadow: 0 8px 24px -8px rgba(3, 105, 161, 0.45);
+}
+.stuux-btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Secondary outline pill */
+.stuux-btn-outline {
+  background-color: rgba(255, 255, 255, 0.72);
+  color: var(--stuux-primary);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  transition: background-color 200ms ease, border-color 200ms ease, transform 200ms ease;
+}
+.stuux-btn-outline:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  border-color: rgba(15, 23, 42, 0.2);
+}
+.stuux-btn-outline:active {
+  transform: scale(0.98);
+}
+
+/* ============================================================
+   STUUX header/footer overrides — while body.stuux-theme is on,
+   recolor the shared public-header/footer from orange → sky
+   so navigation doesn't clash with the white STUUX palette.
+   ============================================================ */
+body.stuux-theme header {
+  background-color: rgba(248, 250, 252, 0.82) !important;
+  border-bottom-color: rgba(15, 23, 42, 0.06) !important;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+}
+body.stuux-theme header .text-orange-500,
+body.stuux-theme footer .text-orange-500 {
+  color: var(--stuux-cta) !important;
+}
+body.stuux-theme header .bg-orange-500 {
+  background-color: var(--stuux-cta) !important;
+  box-shadow: 0 1px 2px rgba(3, 105, 161, 0.25) !important;
+}
+body.stuux-theme header .bg-orange-500:hover {
+  background-color: var(--stuux-cta-hover) !important;
+}
+body.stuux-theme header .hover\:bg-orange-600:hover {
+  background-color: var(--stuux-cta-hover) !important;
+}
+body.stuux-theme header .after\:bg-orange-500::after {
+  background-color: var(--stuux-cta) !important;
+}
+body.stuux-theme header .hover\:border-orange-400:hover {
+  border-color: rgba(3, 105, 161, 0.35) !important;
+}
+body.stuux-theme header .hover\:text-orange-600:hover {
+  color: var(--stuux-cta-hover) !important;
+}
+body.stuux-theme header .shadow-orange-500\/30,
+body.stuux-theme header [class*="shadow-orange"] {
+  box-shadow: 0 2px 8px rgba(3, 105, 161, 0.22) !important;
+}
+/* Footer — soften the dark slate footer to a lighter tone when on STUUX home */
+body.stuux-theme footer {
+  background-color: #F1F5F9 !important;
+  color: var(--stuux-text) !important;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+/* ============================================================
+   CodeNest Hero — liquid-glass card with high-end border frame
+   ============================================================ */
+.codenest-liquid-card {
+  position: relative;
+  isolation: isolate;
+}
+.codenest-liquid-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  padding: 1.4px;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.55) 0%,
+    rgba(255, 255, 255, 0.08) 100%
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }

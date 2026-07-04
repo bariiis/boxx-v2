@@ -10,6 +10,7 @@ interface HeroAudioReactiveProps {
   creditText?: string
   audioSrc?: string
   dark?: boolean
+  demoteHeading?: boolean
 }
 
 export function HeroAudioReactive({
@@ -20,7 +21,9 @@ export function HeroAudioReactive({
   creditText,
   audioSrc,
   dark = true,
+  demoteHeading = false,
 }: HeroAudioReactiveProps) {
+  const Heading = demoteHeading ? "h2" : "h1"
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
   const animationRef = useRef<number>(0)
@@ -342,11 +345,11 @@ export function HeroAudioReactive({
     }
   }, [updateProgress])
 
-  const bg = dark ? "bg-black" : "bg-white"
-  const textColor = dark ? "text-white" : "text-black"
-
   return (
-    <section className={`relative min-h-screen overflow-hidden ${bg} ${textColor}`}>
+    <section
+      className="relative min-h-screen overflow-hidden"
+      style={{ backgroundColor: "var(--lp-bg)", color: "var(--lp-fg)" }}
+    >
       {/* Canvas */}
       <canvas
         ref={canvasRef}
@@ -360,12 +363,12 @@ export function HeroAudioReactive({
             {tagline}
           </p>
         )}
-        <h1 className="text-5xl font-bold leading-[0.95] tracking-[-0.02em] sm:text-7xl md:text-8xl lg:text-9xl">
+        <Heading className="text-5xl font-bold leading-[0.95] tracking-[-0.02em] sm:text-7xl md:text-8xl lg:text-9xl">
           <span className="block">{headline}</span>
           {headlineSecondLine && (
             <span className="block">{headlineSecondLine}</span>
           )}
-        </h1>
+        </Heading>
         {subtitle && (
           <p className="mx-auto mt-8 max-w-md text-sm opacity-50 sm:text-base">
             {subtitle}
@@ -383,19 +386,22 @@ export function HeroAudioReactive({
             <button
               onClick={togglePlayback}
               disabled={isLoading}
-              className={`rounded-full border px-8 py-3 text-xs font-medium uppercase tracking-[0.2em] transition-all duration-300 ${
-                dark
-                  ? "border-white/20 hover:border-white/50 hover:bg-white/10"
-                  : "border-black/20 hover:border-black/50 hover:bg-black/10"
-              } ${isPlaying ? (dark ? "bg-white/10" : "bg-black/10") : ""} disabled:opacity-30`}
+              className="rounded-full border px-8 py-3 text-xs font-medium uppercase tracking-[0.2em] transition-all duration-300 disabled:opacity-30"
+              style={{
+                borderColor: "var(--lp-border)",
+                backgroundColor: isPlaying ? "var(--lp-muted)" : "transparent",
+              }}
             >
               {isLoading ? "Yükleniyor" : isPlaying ? "Durdur" : "Oynat"}
             </button>
             {isPlaying && (
-              <div className={`h-0.5 w-48 overflow-hidden rounded-full ${dark ? "bg-white/10" : "bg-black/10"}`}>
+              <div
+                className="h-0.5 w-48 overflow-hidden rounded-full"
+                style={{ backgroundColor: "var(--lp-muted)" }}
+              >
                 <div
-                  className={`h-full rounded-full transition-all duration-300 ${dark ? "bg-white/50" : "bg-black/50"}`}
-                  style={{ width: `${audioProgress}%` }}
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{ width: `${audioProgress}%`, backgroundColor: "var(--lp-primary)" }}
                 />
               </div>
             )}

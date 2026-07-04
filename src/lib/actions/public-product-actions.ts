@@ -3,27 +3,50 @@
 import { db } from "@/lib/db"
 
 export async function getPublicCategories() {
-  return db.productCategory.findMany({
+  const categories = await db.productCategory.findMany({
     where: { isActive: true, parentId: null },
     include: {
       children: {
         where: { isActive: true },
         include: {
-          _count: { select: { products: { where: { isActive: true } } } },
+          _count: { select: { products: { where: { isActive: true, isSaleOpen: true } } } },
           children: {
             where: { isActive: true },
             include: {
-              _count: { select: { products: { where: { isActive: true } } } },
+              _count: { select: { products: { where: { isActive: true, isSaleOpen: true } } } },
             },
             orderBy: { sortOrder: "asc" },
           },
         },
         orderBy: { sortOrder: "asc" },
       },
-      _count: { select: { products: { where: { isActive: true } } } },
+      _count: { select: { products: { where: { isActive: true, isSaleOpen: true } } } },
     },
     orderBy: { sortOrder: "asc" },
   })
+
+  // Filter out categories (and subcategories) with no products
+  return categories
+    .map((cat) => ({
+      ...cat,
+      children: cat.children
+        .map((child) => ({
+          ...child,
+          children: child.children.filter((gc) => gc._count.products > 0),
+        }))
+        .filter(
+          (child) =>
+            child._count.products > 0 ||
+            child.children.some((gc) => gc._count.products > 0),
+        ),
+    }))
+    .filter(
+      (cat) =>
+        cat._count.products > 0 ||
+        cat.children.some(
+          (c) => c._count.products > 0 || c.children.some((gc) => gc._count.products > 0),
+        ),
+    )
 }
 
 export async function getPublicProducts({
@@ -39,6 +62,7 @@ export async function getPublicProducts({
 } = {}) {
   const where: Record<string, unknown> = {
     isActive: true,
+    isSaleOpen: true,
   }
 
   if (search) {
@@ -80,6 +104,13 @@ export async function getPublicProducts({
           },
         },
         images: { orderBy: { sortOrder: "asc" }, take: 1 },
+        solutionProducts: {
+          include: {
+            solution: {
+              select: { id: true, title: true, slug: true, icon: true, isActive: true },
+            },
+          },
+        },
       },
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * limit,
@@ -93,7 +124,7 @@ export async function getPublicProducts({
 
 export async function getPublicProduct(slug: string) {
   return db.product.findUnique({
-    where: { slug, isActive: true },
+    where: { slug, isActive: true, isSaleOpen: true },
     include: {
       category: {
         select: {
@@ -105,6 +136,13 @@ export async function getPublicProduct(slug: string) {
       componentSpecs: true,
       sections: { orderBy: { sortOrder: "asc" } },
       faqs: { orderBy: { sortOrder: "asc" } },
+      solutionProducts: {
+        include: {
+          solution: {
+            select: { id: true, title: true, slug: true, icon: true, isActive: true },
+          },
+        },
+      },
     },
   })
 }
@@ -125,7 +163,7 @@ export async function getPublicCategoryBySlug(slug: string) {
 export async function getProductsForComparison(ids: string[]) {
   if (ids.length === 0) return []
   return db.product.findMany({
-    where: { id: { in: ids }, isActive: true },
+    where: { id: { in: ids }, isActive: true, isSaleOpen: true },
     include: {
       category: {
         select: {
@@ -145,6 +183,7 @@ export async function getRelatedProducts(productId: string, categoryId: string |
   return db.product.findMany({
     where: {
       isActive: true,
+      isSaleOpen: true,
       id: { not: productId },
       ...(categoryId && { categoryId }),
     },

@@ -6,6 +6,8 @@ import {
   TrendingUp, TrendingDown, Hash, AlertTriangle, ArrowRight,
 } from "lucide-react"
 import { getDashboardStats } from "@/lib/actions/dashboard-actions"
+import { getKanbanQuotes, getKanbanTickets } from "@/lib/actions/kanban-actions"
+import { DashboardKanban } from "@/components/admin/dashboard-kanban"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
 import { quoteStatusConfig, orderStatusConfig, ticketPriorityConfig, ticketStatusConfig, StatusBadge } from "@/lib/status-colors"
@@ -15,7 +17,11 @@ const currencySymbols: Record<string, string> = {
 }
 
 export default async function AdminDashboard() {
-  const stats = await getDashboardStats()
+  const [stats, kanbanQuotes, kanbanTickets] = await Promise.all([
+    getDashboardStats(),
+    getKanbanQuotes(),
+    getKanbanTickets(),
+  ])
 
   return (
     <div className="space-y-6">
@@ -59,6 +65,9 @@ export default async function AdminDashboard() {
         <MiniStat icon={Hash} label="Seri Numaraları" value={stats.totalSerialNumbers} href="/admin/serial-numbers"
           alert={stats.expiringWarranties > 0 ? `${stats.expiringWarranties} garanti dolacak` : undefined} />
       </div>
+
+      {/* Kanban board for quotes + tickets */}
+      <DashboardKanban quotes={kanbanQuotes} tickets={kanbanTickets} />
 
       {/* Recent activity */}
       <div className="grid gap-6 lg:grid-cols-3">

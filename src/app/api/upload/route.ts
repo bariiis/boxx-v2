@@ -2,13 +2,14 @@ import { NextRequest, NextResponse } from "next/server"
 import { writeFile } from "fs/promises"
 import path from "path"
 
+
 const ALLOWED_TYPES = [
   "image/svg+xml",
   "image/png",
   "image/jpeg",
   "image/webp",
 ]
-const MAX_SIZE = 2 * 1024 * 1024 // 2MB
+const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 
 export async function POST(request: NextRequest) {
   try {

@@ -1,3 +1,4 @@
+import { Fragment } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
@@ -7,7 +8,7 @@ import { getProductsForComparison } from "@/lib/actions/public-product-actions"
 import { ComparePageActions } from "@/components/public/compare-page-actions"
 
 export const metadata = {
-  title: "Ürün Karşılaştırma | STUUX",
+  title: "Ürün Karşılaştırma | BOXX",
 }
 
 const currencySymbols: Record<string, string> = {
@@ -19,6 +20,8 @@ const currencySymbols: Record<string, string> = {
 
 interface SpecEntry {
   key: string
+  label?: string
+  unit?: string
   value: string
 }
 
@@ -34,6 +37,15 @@ function normalizeSpecs(raw: unknown): SpecEntry[] {
   return []
 }
 
+/** Display name for a spec: prefer label, fall back to key */
+function specDisplayName(key: string, allSpecs: SpecEntry[][]): string {
+  for (const specs of allSpecs) {
+    const found = specs.find((s) => s.key === key)
+    if (found?.label) return found.label
+  }
+  return key
+}
+
 export default async function ComparePage({
   searchParams,
 }: {
@@ -43,39 +55,13 @@ export default async function ComparePage({
   const ids = idsParam?.split(",").filter(Boolean) || []
 
   if (ids.length < 2) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6">
-        <h1 className="text-2xl font-bold">Ürün Karşılaştırma</h1>
-        <p className="mt-4 text-muted-foreground">
-          Karşılaştırmak için en az 2 ürün seçmelisiniz.
-        </p>
-        <Button className="mt-6" asChild>
-          <Link href="/urunler">
-            <ArrowLeft className="mr-2 size-4" />
-            Ürünlere Dön
-          </Link>
-        </Button>
-      </div>
-    )
+    return <EmptyCompare message="Karşılaştırmak için en az 2 ürün seçmelisin." />
   }
 
   const products = await getProductsForComparison(ids)
 
   if (products.length < 2) {
-    return (
-      <div className="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6">
-        <h1 className="text-2xl font-bold">Ürünler Bulunamadı</h1>
-        <p className="mt-4 text-muted-foreground">
-          Seçilen ürünlerden bazıları bulunamadı.
-        </p>
-        <Button className="mt-6" asChild>
-          <Link href="/urunler">
-            <ArrowLeft className="mr-2 size-4" />
-            Ürünlere Dön
-          </Link>
-        </Button>
-      </div>
-    )
+    return <EmptyCompare message="Seçilen ürünlerden bazıları bulunamadı." />
   }
 
   // Order products in the same order as ids
@@ -128,33 +114,48 @@ export default async function ComparePage({
   const rootCat = ordered[0].category?.parent || ordered[0].category
 
   return (
-    <div>
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       {/* Header */}
-      <section className="bg-gradient-to-b from-background to-muted/30 py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <nav className="mb-3 flex items-center gap-2 text-sm text-muted-foreground">
-            <Link href="/urunler" className="hover:text-foreground transition-colors">
+      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-br from-white via-orange-50/30 to-teal-50/20 dark:border-slate-800/80 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400/20 to-teal-400/10 blur-3xl"
+        />
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16">
+          <nav className="mb-5 flex items-center gap-1.5 font-['JetBrains_Mono'] text-[11px] uppercase tracking-[0.18em] text-slate-500">
+            <Link href="/" className="transition-colors hover:text-orange-600 dark:hover:text-orange-300">
+              Ana Sayfa
+            </Link>
+            <span aria-hidden>/</span>
+            <Link href="/urunler" className="transition-colors hover:text-orange-600 dark:hover:text-orange-300">
               Ürünler
             </Link>
             {rootCat && (
               <>
-                <span>/</span>
+                <span aria-hidden>/</span>
                 <Link
                   href={`/urunler/kategori/${rootCat.slug}`}
-                  className="hover:text-foreground transition-colors"
+                  className="transition-colors hover:text-orange-600 dark:hover:text-orange-300"
                 >
                   {rootCat.name}
                 </Link>
               </>
             )}
-            <span>/</span>
-            <span className="text-foreground">Karşılaştırma</span>
+            <span aria-hidden>/</span>
+            <span className="text-slate-700 dark:text-slate-200">Karşılaştırma</span>
           </nav>
-          <h1 className="text-3xl font-bold">Ürün Karşılaştırma</h1>
-          <p className="mt-2 text-muted-foreground">
-            {ordered.length} ürün karşılaştırılıyor
-            {rootCat && ` — ${rootCat.name}`}
-          </p>
+          <div className="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.22em] text-orange-600 dark:text-orange-400">
+            Karşılaştırma · {ordered.length} ürün
+          </div>
+          <h1 className="mt-1 font-['Space_Grotesk'] text-3xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            Yan yana değerlendir
+            <span aria-hidden className="text-orange-500">.</span>
+          </h1>
+          {rootCat && (
+            <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+              {rootCat.name} kategorisinde seçilen ürünler.
+            </p>
+          )}
         </div>
       </section>
 
@@ -168,9 +169,9 @@ export default async function ComparePage({
               const symbol = currencySymbols[product.currency] || product.currency
 
               return (
-                <div key={product.id} className="sticky top-0 bg-background p-4 text-center">
-                  <Link href={`/urunler/${product.slug}`} className="group">
-                    <div className="mx-auto mb-3 relative aspect-square w-32 overflow-hidden rounded-lg bg-muted">
+                <div key={product.id} className="sticky top-0 bg-white p-4 text-center dark:bg-slate-950">
+                  <Link href={`/urunler/${product.slug}`} className="group block">
+                    <div className="mx-auto mb-3 relative aspect-square w-32 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
                       {imageUrl ? (
                         <Image
                           src={imageUrl}
@@ -181,26 +182,31 @@ export default async function ComparePage({
                         />
                       ) : (
                         <div className="flex size-full items-center justify-center">
-                          <Package className="size-8 text-muted-foreground/30" />
+                          <Package className="size-8 text-slate-300 dark:text-slate-700" />
                         </div>
                       )}
                     </div>
-                    <h3 className="text-sm font-semibold group-hover:text-primary transition-colors">
+                    <h3 className="font-['Space_Grotesk'] text-sm font-semibold text-slate-900 group-hover:text-orange-600 dark:text-white dark:group-hover:text-orange-300">
                       {product.name}
                     </h3>
                   </Link>
                   {product.price > 0 ? (
-                    <p className="mt-1 text-lg font-bold">
-                      {symbol}{product.price.toLocaleString("tr-TR")}
+                    <p className="mt-1 font-['Space_Grotesk'] text-lg font-semibold tabular-nums text-slate-900 dark:text-white">
+                      {symbol}
+                      {product.price.toLocaleString("tr-TR")}
                     </p>
                   ) : (
-                    <p className="mt-1 text-sm text-muted-foreground">Teklif Alın</p>
+                    <p className="mt-1 font-['JetBrains_Mono'] text-[11px] uppercase tracking-wider text-slate-500">
+                      Teklif Alın
+                    </p>
                   )}
-                  <Button size="sm" className="mt-2" asChild>
-                    <Link href={`/iletisim?urun=${product.slug}`}>
-                      Teklif İste <ArrowRight className="ml-1 size-3" />
-                    </Link>
-                  </Button>
+                  <Link
+                    href={`/iletisim?urun=${product.slug}`}
+                    className="mt-2 inline-flex items-center gap-1 rounded-full bg-orange-500 px-3 py-1.5 font-['Space_Grotesk'] text-xs font-semibold text-white shadow-sm shadow-orange-500/30 transition hover:bg-orange-600"
+                  >
+                    Teklif İste
+                    <ArrowRight className="size-3" />
+                  </Link>
                 </div>
               )
             })}
@@ -263,21 +269,23 @@ export default async function ComparePage({
               <>
                 <SectionHeader label="Teknik Özellikler" colCount={colCount} />
                 {allSpecKeys.map((specKey) => (
-                  <>
-                    <RowLabel key={`label-${specKey}`}>{specKey}</RowLabel>
+                  <Fragment key={specKey}>
+                    <RowLabel>{specDisplayName(specKey, productSpecs)}</RowLabel>
                     {ordered.map((p, pi) => {
                       const specs = productSpecs[pi]
                       const spec = specs.find((s) => s.key === specKey)
                       const value = spec?.value || "—"
-                      const isMultiline = value.includes("\n")
+                      const unit = spec?.unit
+                      const display = value === "—" ? "—" : unit ? `${value} ${unit}` : value
+                      const isMultiline = display.includes("\n")
 
                       return (
                         <Cell key={p.id} multiline={isMultiline}>
-                          {value}
+                          {display}
                         </Cell>
                       )
                     })}
-                  </>
+                  </Fragment>
                 ))}
               </>
             )}
@@ -307,15 +315,38 @@ export default async function ComparePage({
 
         {/* Actions */}
         <div className="mt-8 flex items-center justify-between">
-          <Button variant="ghost" asChild>
-            <Link href="/urunler">
-              <ArrowLeft className="mr-2 size-4" />
-              Ürünlere Dön
-            </Link>
-          </Button>
+          <Link
+            href="/urunler"
+            className="inline-flex items-center gap-2 font-['Space_Grotesk'] text-xs font-medium text-slate-500 transition hover:text-orange-600 dark:text-slate-400 dark:hover:text-orange-300"
+          >
+            <ArrowLeft className="size-3.5" />
+            Ürünlere dön
+          </Link>
           <ComparePageActions />
         </div>
       </section>
+    </div>
+  )
+}
+
+function EmptyCompare({ message }: { message: string }) {
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6">
+      <div className="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.22em] text-orange-600 dark:text-orange-400">
+        Karşılaştırma
+      </div>
+      <h1 className="mt-2 font-['Space_Grotesk'] text-2xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+        Karşılaştırma boş
+        <span aria-hidden className="text-orange-500">.</span>
+      </h1>
+      <p className="mt-3 text-sm text-slate-600 dark:text-slate-400">{message}</p>
+      <Link
+        href="/urunler"
+        className="mt-6 inline-flex items-center gap-2 rounded-full bg-orange-500 px-6 py-2.5 font-['Space_Grotesk'] text-sm font-semibold text-white shadow-sm shadow-orange-500/30 transition hover:bg-orange-600"
+      >
+        <ArrowLeft className="size-4" />
+        Ürünlere dön
+      </Link>
     </div>
   )
 }
@@ -324,20 +355,22 @@ export default async function ComparePage({
 // Sub-components
 // ==========================================
 
-function SectionHeader({ label, colCount }: { label: string; colCount: number }) {
+function SectionHeader({ label }: { label: string; colCount: number }) {
   return (
-    <div
-      className="col-span-full mt-4 border-b-2 border-primary/20 bg-muted/50 px-4 py-2"
-    >
-      <h2 className="text-sm font-bold text-primary">{label}</h2>
+    <div className="col-span-full mt-4 border-b-2 border-orange-400/50 bg-slate-50 px-4 py-2 dark:border-orange-500/40 dark:bg-slate-900">
+      <h2 className="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.22em] text-orange-600 dark:text-orange-400">
+        {label}
+      </h2>
     </div>
   )
 }
 
 function RowLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-start border-b bg-muted/30 px-4 py-2.5">
-      <span className="text-sm font-medium">{children}</span>
+    <div className="flex items-start border-b border-slate-100 bg-slate-50/60 px-4 py-2.5 dark:border-slate-800 dark:bg-slate-900/40">
+      <span className="font-['Space_Grotesk'] text-sm font-medium text-slate-700 dark:text-slate-200">
+        {children}
+      </span>
     </div>
   )
 }
@@ -350,11 +383,15 @@ function Cell({
   multiline?: boolean
 }) {
   return (
-    <div className="flex items-start border-b px-4 py-2.5">
+    <div className="flex items-start border-b border-slate-100 px-4 py-2.5 dark:border-slate-800">
       {multiline ? (
-        <p className="whitespace-pre-line text-sm text-muted-foreground">{children}</p>
+        <p className="whitespace-pre-line font-['Space_Grotesk'] text-sm text-slate-900 dark:text-white">
+          {children}
+        </p>
       ) : (
-        <span className="text-sm text-muted-foreground">{children}</span>
+        <span className="font-['Space_Grotesk'] text-sm text-slate-900 dark:text-white">
+          {children}
+        </span>
       )}
     </div>
   )

@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
-import { getTicket, getEmployeeList } from "@/lib/actions/ticket-actions"
+import { getTicket, getEmployeeList, getTicketCategories } from "@/lib/actions/ticket-actions"
 import { Badge } from "@/components/ui/badge"
 import { TicketConversation } from "@/components/admin/ticket-conversation"
 import { TicketSidebar } from "@/components/admin/ticket-sidebar"
@@ -30,9 +30,10 @@ export default async function TicketDetailPage({
   if (!session?.user) redirect("/login")
 
   const { id } = await params
-  const [ticket, employees] = await Promise.all([
+  const [ticket, employees, categories] = await Promise.all([
     getTicket(id),
     getEmployeeList(),
+    getTicketCategories(),
   ])
 
   if (!ticket) notFound()
@@ -63,6 +64,7 @@ export default async function TicketDetailPage({
         <TicketSidebar
           ticket={ticket}
           employees={employees}
+          categories={categories}
         />
       </div>
     </div>

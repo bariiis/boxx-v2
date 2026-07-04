@@ -19,31 +19,53 @@ interface Category {
 
 export function SupportPageClient({ categories }: { categories: Category[] }) {
   return (
-    <div>
+    <div className="min-h-screen bg-white dark:bg-slate-950">
       {/* Hero */}
-      <section className="bg-gradient-to-b from-background to-muted/30 py-16 sm:py-24">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 text-center">
-          <HeadphonesIcon className="mx-auto mb-4 size-12 text-primary" />
-          <h1 className="text-3xl font-bold sm:text-4xl">Teknik Destek</h1>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Yeni bir destek talebi oluşturun veya mevcut talebinizi takip numaranız ile sorgulayın.
+      <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-br from-white via-orange-50/30 to-teal-50/20 dark:border-slate-800/80 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -right-24 -top-24 h-80 w-80 rounded-full bg-gradient-to-br from-orange-400/20 to-teal-400/10 blur-3xl"
+        />
+        <div className="relative mx-auto max-w-3xl px-4 py-16 text-center sm:px-6 sm:py-20">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <HeadphonesIcon className="size-6 text-orange-500" />
+          </div>
+          <div className="mt-4 font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.22em] text-orange-600 dark:text-orange-400">
+            Teknik Destek
+          </div>
+          <h1 className="mt-1 font-['Space_Grotesk'] text-3xl font-semibold tracking-tight text-slate-900 dark:text-white sm:text-4xl">
+            Nasıl yardımcı olalım
+            <span aria-hidden className="text-orange-500">?</span>
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-sm text-slate-600 dark:text-slate-400 sm:text-base">
+            Yeni bir destek talebi oluştur, mevcut talebini takip numaranla sorgula veya
+            seri numaranın garanti durumunu kontrol et.
           </p>
         </div>
       </section>
 
       <section className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
         <Tabs defaultValue="new">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="new">
-              <Send className="mr-2 size-4" />
+          <TabsList className="grid w-full grid-cols-3 rounded-full border border-slate-200 bg-white p-1 dark:border-slate-800 dark:bg-slate-950">
+            <TabsTrigger
+              value="new"
+              className="rounded-full font-['Space_Grotesk'] text-xs font-medium data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:shadow-orange-500/30"
+            >
+              <Send className="mr-2 size-3.5" />
               Yeni Talep
             </TabsTrigger>
-            <TabsTrigger value="track">
-              <Search className="mr-2 size-4" />
+            <TabsTrigger
+              value="track"
+              className="rounded-full font-['Space_Grotesk'] text-xs font-medium data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:shadow-orange-500/30"
+            >
+              <Search className="mr-2 size-3.5" />
               Talep Takip
             </TabsTrigger>
-            <TabsTrigger value="serial">
-              <Package className="mr-2 size-4" />
+            <TabsTrigger
+              value="serial"
+              className="rounded-full font-['Space_Grotesk'] text-xs font-medium data-[state=active]:bg-orange-500 data-[state=active]:text-white data-[state=active]:shadow-sm data-[state=active]:shadow-orange-500/30"
+            >
+              <Package className="mr-2 size-3.5" />
               Seri No Sorgula
             </TabsTrigger>
           </TabsList>
