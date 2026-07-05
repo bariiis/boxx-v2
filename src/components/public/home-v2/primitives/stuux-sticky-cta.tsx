@@ -31,13 +31,13 @@ export function StuuxStickyCta() {
       className={[
         "pointer-events-none fixed inset-x-0 bottom-4 z-40 mx-auto flex w-fit items-center gap-2 rounded-full p-1.5 stuux-glass transition-all duration-300 sm:bottom-6 sm:right-6 sm:inset-x-auto sm:mx-0",
         visible
-          ? "translate-y-0 opacity-100"
-          : "pointer-events-none translate-y-4 opacity-0",
+          ? "visible translate-y-0 opacity-100"
+          : "invisible pointer-events-none translate-y-4 opacity-0",
       ].join(" ")}
       style={{ pointerEvents: visible ? "auto" : "none" }}
     >
       <Link
-        href="/yapilandirici"
+        href="/konfigurator"
         className="stuux-btn-primary inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 py-2.5 text-sm font-medium"
       >
         <Sparkles className="h-4 w-4" />

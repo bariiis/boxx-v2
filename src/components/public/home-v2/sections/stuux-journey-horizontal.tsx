@@ -13,6 +13,7 @@ if (typeof window !== "undefined") {
 
 type Panel = {
   slug: string
+  href: string
   title: string
   tagline: string
   specs: string[]
@@ -24,6 +25,7 @@ type Panel = {
 const PANELS: Panel[] = [
   {
     slug: "workstation",
+    href: "/urunler/kategori/is-istasyonlari",
     title: "Workstation",
     tagline: "Tek elden kontrol: tasarım, render, simülasyon.",
     specs: ["Dual RTX 5000 Ada", "128 GB ECC DDR5", "Liquid cooling — 36 dB"],
@@ -33,6 +35,7 @@ const PANELS: Panel[] = [
   },
   {
     slug: "gpu-server",
+    href: "/urunler",
     title: "GPU Server",
     tagline: "Multi-GPU pipeline. NVLink hazır iskelet. Data-center sertifikalı.",
     specs: ["8× H100 SXM", "NVLink + InfiniBand", "Redundant 3 kW PSU"],
@@ -42,6 +45,7 @@ const PANELS: Panel[] = [
   },
   {
     slug: "storage",
+    href: "/urunler",
     title: "Storage",
     tagline: "NVMe-first NAS. Yüksek throughput, saniyeler içinde snapshot.",
     specs: ["48× NVMe Gen5", "100 GbE uplink", "Hot-swap + IPMI"],
@@ -51,6 +55,7 @@ const PANELS: Panel[] = [
   },
   {
     slug: "networking",
+    href: "/urunler/kategori/ag-ekipmanlari",
     title: "Networking",
     tagline: "25/40/100 GbE switch hattı. Low-latency, on-prem AI için hazır.",
     specs: ["32× 100 GbE", "Cut-through 450 ns", "Stacking + MLAG"],
@@ -70,7 +75,7 @@ export function StuuxJourneyHorizontal() {
     const root = rootRef.current
     const track = trackRef.current
     if (!root || !track) return
-    if (window.matchMedia("(max-width: 768px)").matches) return
+    if (window.matchMedia("(max-width: 767px)").matches) return
 
     const ctx = gsap.context(() => {
       const totalScroll = () => track.scrollWidth - window.innerWidth
@@ -140,8 +145,10 @@ export function StuuxJourneyHorizontal() {
         </p>
       </div>
 
-      {/* Horizontal track */}
-      <div className="relative">
+      {/* Horizontal track — native swipe/scroll fallback when GSAP pinning is
+          inactive (mobile or prefers-reduced-motion); GSAP takes over on
+          desktop where the wrapper becomes a clipped viewport. */}
+      <div className="relative snap-x snap-mandatory overflow-x-auto md:motion-safe:snap-none md:motion-safe:overflow-x-hidden">
         <div
           ref={trackRef}
           className="flex w-max gap-6 px-6 pb-24 pt-6 md:gap-10 md:px-10 md:pb-32 md:pt-10"
@@ -149,7 +156,7 @@ export function StuuxJourneyHorizontal() {
           {PANELS.map((p, i) => (
             <article
               key={p.slug}
-              className="group relative flex h-[72vh] w-[85vw] max-w-[640px] shrink-0 flex-col justify-between overflow-hidden rounded-3xl p-8 stuux-glass md:h-[78vh] md:w-[44vw] md:p-10"
+              className="group relative flex h-[72vh] w-[85vw] max-w-[640px] shrink-0 snap-center flex-col justify-between overflow-hidden rounded-3xl p-8 stuux-glass md:h-[78vh] md:w-[44vw] md:p-10"
             >
               <div
                 aria-hidden
@@ -210,8 +217,8 @@ export function StuuxJourneyHorizontal() {
 
               <footer className="relative flex items-center justify-between">
                 <Link
-                  href={`/urunler/kategori/${p.slug}`}
-                  className="group/cta inline-flex cursor-pointer items-center gap-2 text-sm font-medium transition-colors duration-200"
+                  href={p.href}
+                  className="group/cta inline-flex min-h-11 cursor-pointer items-center gap-2 text-sm font-medium transition-colors duration-200"
                   style={{ color: "var(--stuux-cta)" }}
                 >
                   {p.cta}
@@ -229,7 +236,7 @@ export function StuuxJourneyHorizontal() {
 
           {/* Final lock panel — track end */}
           <article
-            className="flex h-[72vh] w-[65vw] max-w-[520px] shrink-0 flex-col items-start justify-center gap-6 rounded-3xl p-10 md:h-[78vh] md:w-[36vw]"
+            className="flex h-[72vh] w-[65vw] max-w-[520px] shrink-0 snap-center flex-col items-start justify-center gap-6 rounded-3xl p-10 md:h-[78vh] md:w-[36vw]"
             style={{
               background:
                 "linear-gradient(135deg, var(--stuux-primary) 0%, var(--stuux-secondary) 100%)",
@@ -243,7 +250,7 @@ export function StuuxJourneyHorizontal() {
               Senin iş yükün <span className="italic">seni</span> bekliyor.
             </h3>
             <Link
-              href="/yapilandirici"
+              href="/konfigurator"
               className="group inline-flex cursor-pointer items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-medium transition-transform duration-200 hover:translate-x-0.5"
               style={{ color: "var(--stuux-primary)" }}
             >

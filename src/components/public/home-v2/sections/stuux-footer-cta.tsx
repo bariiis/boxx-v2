@@ -55,7 +55,7 @@ export function StuuxFooterCta() {
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href="/yapilandirici"
+            href="/konfigurator"
             className="stuux-btn-primary group inline-flex min-h-12 cursor-pointer items-center gap-3 rounded-full px-7 py-3.5 text-base font-medium"
           >
             Yapılandırmaya başla
@@ -69,13 +69,13 @@ export function StuuxFooterCta() {
           </Link>
         </div>
 
-        <div
+        <dl
           className="grid w-full grid-cols-1 gap-6 border-t pt-10 sm:grid-cols-3"
           style={{ borderColor: "rgba(15,23,42,0.1)" }}
         >
           {[
             { k: "Merkez", v: "İstanbul · Maslak" },
-            { k: "E-posta", v: "info@stuux.com" },
+            { k: "E-posta", v: "info@stuux.com", href: "mailto:info@stuux.com" },
             { k: "Destek", v: "09:00 — 21:00 · TR" },
           ].map((item) => (
             <div key={item.k}>
@@ -89,11 +89,21 @@ export function StuuxFooterCta() {
                 className="mt-2 text-base"
                 style={{ color: "var(--stuux-primary)" }}
               >
-                {item.v}
+                {item.href ? (
+                  <a
+                    href={item.href}
+                    className="cursor-pointer underline-offset-4 transition-colors duration-200 hover:underline"
+                    style={{ color: "var(--stuux-cta)" }}
+                  >
+                    {item.v}
+                  </a>
+                ) : (
+                  item.v
+                )}
               </dd>
             </div>
           ))}
-        </div>
+        </dl>
       </div>
     </section>
   )
