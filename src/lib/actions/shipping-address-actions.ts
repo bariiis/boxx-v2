@@ -1,9 +1,12 @@
 "use server"
 
+
+import { requireUser } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
 export async function getShippingAddresses(organizationId: string) {
+  await requireUser()
   return db.shippingAddress.findMany({
     where: { organizationId },
     orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
@@ -22,6 +25,7 @@ export async function createShippingAddress(data: {
   country?: string
   isDefault?: boolean
 }) {
+  await requireUser()
   // If setting as default, unset others
   if (data.isDefault) {
     await db.shippingAddress.updateMany({
@@ -50,6 +54,7 @@ export async function updateShippingAddress(
     isDefault?: boolean
   }
 ) {
+  await requireUser()
   const existing = await db.shippingAddress.findUnique({ where: { id } })
   if (!existing) return null
 
@@ -67,6 +72,7 @@ export async function updateShippingAddress(
 }
 
 export async function deleteShippingAddress(id: string) {
+  await requireUser()
   const address = await db.shippingAddress.delete({ where: { id } })
   revalidatePath(`/admin/organizations/${address.organizationId}`)
   revalidatePath("/portal")

@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import type { TicketStatus, TicketPriority } from "@/generated/prisma"
@@ -28,6 +30,7 @@ export async function getTickets({
   status?: TicketStatus
   priority?: TicketPriority
 } = {}) {
+  await requireStaff()
   const where = {
     ...(search && {
       OR: [
@@ -62,6 +65,7 @@ export async function getTickets({
 }
 
 export async function getTicket(id: string) {
+  await requireStaff()
   return db.ticket.findUnique({
     where: { id },
     include: {
@@ -80,10 +84,12 @@ export async function getTicket(id: string) {
 }
 
 export async function getTicketCategories() {
+  await requireStaff()
   return db.ticketCategory.findMany({ where: { isActive: true }, orderBy: { name: "asc" } })
 }
 
 export async function getEmployeeList() {
+  await requireStaff()
   return db.user.findMany({
     where: { role: { in: ["ADMIN", "EMPLOYEE"] }, isActive: true },
     select: { id: true, name: true, surname: true },
@@ -101,6 +107,7 @@ export async function createTicket(data: {
   serialNumberId?: string
   assignedToId?: string
 }) {
+  await requireStaff()
   const ticketNumber = await generateTicketNumber()
   const ticket = await db.ticket.create({
     data: {
@@ -128,6 +135,7 @@ export async function updateTicket(
     categoryId?: string | null
   }
 ) {
+  await requireStaff()
   const updateData: Record<string, unknown> = {}
   if (data.status) {
     updateData.status = data.status
@@ -151,6 +159,7 @@ export async function updateTicket(
 }
 
 export async function deleteTicket(id: string) {
+  await requireStaff()
   await db.ticket.delete({ where: { id } })
   revalidatePath("/admin/tickets")
 }
@@ -161,6 +170,7 @@ export async function addTicketMessage(data: {
   content: string
   isInternal?: boolean
 }) {
+  await requireStaff()
   const message = await db.ticketMessage.create({ data })
 
   // Update ticket status to AWAITING_REPLY if staff replies + send email
@@ -206,6 +216,7 @@ export async function addTicketAttachment(data: {
   fileSize: number
   mimeType: string
 }) {
+  await requireStaff()
   const attachment = await db.ticketAttachment.create({ data })
   revalidatePath(`/admin/tickets/${data.ticketId}`)
   return attachment

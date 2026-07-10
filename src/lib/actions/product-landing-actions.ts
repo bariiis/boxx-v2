@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -8,6 +10,7 @@ import { revalidatePath } from "next/cache"
 // ==========================================
 
 export async function getProductSections(productId: string) {
+  await requireStaff()
   return db.productSection.findMany({
     where: { productId },
     orderBy: { sortOrder: "asc" },
@@ -21,6 +24,7 @@ export async function addProductSection(productId: string, data: {
   content?: string
   sortOrder?: number
 }) {
+  await requireStaff()
   const maxOrder = await db.productSection.findFirst({
     where: { productId },
     orderBy: { sortOrder: "desc" },
@@ -44,6 +48,7 @@ export async function updateProductSection(id: string, data: {
   content?: string
   sortOrder?: number
 }) {
+  await requireStaff()
   const section = await db.productSection.update({ where: { id }, data })
   revalidatePath(`/admin/products/${section.productId}`)
   revalidatePath("/urunler")
@@ -51,12 +56,14 @@ export async function updateProductSection(id: string, data: {
 }
 
 export async function deleteProductSection(id: string) {
+  await requireStaff()
   const section = await db.productSection.delete({ where: { id } })
   revalidatePath(`/admin/products/${section.productId}`)
   revalidatePath("/urunler")
 }
 
 export async function reorderProductSections(productId: string, sectionIds: string[]) {
+  await requireStaff()
   await db.$transaction(
     sectionIds.map((id, i) => db.productSection.update({ where: { id }, data: { sortOrder: i } }))
   )
@@ -68,6 +75,7 @@ export async function reorderProductSections(productId: string, sectionIds: stri
 // ==========================================
 
 export async function getProductFaqs(productId: string) {
+  await requireStaff()
   return db.productFaq.findMany({
     where: { productId },
     orderBy: { sortOrder: "asc" },
@@ -75,6 +83,7 @@ export async function getProductFaqs(productId: string) {
 }
 
 export async function addProductFaq(productId: string, data: { question: string; answer: string }) {
+  await requireStaff()
   const maxOrder = await db.productFaq.findFirst({
     where: { productId },
     orderBy: { sortOrder: "desc" },
@@ -89,17 +98,20 @@ export async function addProductFaq(productId: string, data: { question: string;
 }
 
 export async function updateProductFaq(id: string, data: { question?: string; answer?: string }) {
+  await requireStaff()
   const faq = await db.productFaq.update({ where: { id }, data })
   revalidatePath(`/admin/products/${faq.productId}`)
   return faq
 }
 
 export async function deleteProductFaq(id: string) {
+  await requireStaff()
   const faq = await db.productFaq.delete({ where: { id } })
   revalidatePath(`/admin/products/${faq.productId}`)
 }
 
 export async function reorderProductFaqs(productId: string, faqIds: string[]) {
+  await requireStaff()
   await db.$transaction(
     faqIds.map((id, i) => db.productFaq.update({ where: { id }, data: { sortOrder: i } }))
   )
@@ -116,6 +128,7 @@ export async function updateProductLanding(productId: string, data: {
   heroVideo?: string | null
   features?: { icon: string; title: string; description: string }[] | null
 }) {
+  await requireStaff()
   await db.product.update({
     where: { id: productId },
     data: {
@@ -134,6 +147,7 @@ export async function updateProductLanding(productId: string, data: {
 // ==========================================
 
 export async function getProductBenchmarks(productId: string) {
+  await requireStaff()
   return db.benchmarkChart.findMany({
     where: { productId },
     include: { datasets: { orderBy: { sortOrder: "asc" } } },
@@ -149,6 +163,7 @@ export async function addProductBenchmark(productId: string, data: {
   labels: string[]
   datasets: { name: string; color: string; values: number[] }[]
 }) {
+  await requireStaff()
   const chart = await db.benchmarkChart.create({
     data: {
       productId,
@@ -172,6 +187,7 @@ export async function addProductBenchmark(productId: string, data: {
 }
 
 export async function deleteProductBenchmark(id: string) {
+  await requireStaff()
   const chart = await db.benchmarkChart.delete({ where: { id } })
   if (chart.productId) revalidatePath(`/admin/products/${chart.productId}`)
 }

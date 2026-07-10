@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server"
 import { writeFile, mkdir } from "fs/promises"
 import path from "path"
+import { getStaffSession } from "@/lib/auth-guard"
 
 const ALLOWED_TYPES = ["image/png", "image/jpeg", "image/webp"]
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 
 export async function POST(request: NextRequest) {
+  if (!(await getStaffSession())) {
+    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 })
+  }
   try {
     const formData = await request.formData()
     const file = formData.get("file") as File | null
@@ -15,7 +19,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Dosya bulunamadı" }, { status: 400 })
     }
 
-    if (!productId) {
+    if (!productId || !/^[a-zA-Z0-9_-]+$/.test(productId)) {
       return NextResponse.json({ error: "Ürün ID gerekli" }, { status: 400 })
     }
 

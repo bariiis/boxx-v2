@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -14,6 +16,7 @@ export async function getContacts({
   limit?: number
   organizationId?: string
 } = {}) {
+  await requireStaff()
   const where = {
     ...(search && {
       OR: [
@@ -41,6 +44,7 @@ export async function getContacts({
 }
 
 export async function getContact(id: string) {
+  await requireStaff()
   return db.contact.findUnique({
     where: { id },
     include: {
@@ -62,6 +66,7 @@ export async function createContact(data: {
   notes?: string
   organizationId?: string
 }) {
+  await requireStaff()
   const contact = await db.contact.create({ data })
   revalidatePath("/admin/contacts")
   return contact
@@ -80,6 +85,7 @@ export async function updateContact(
     organizationId?: string | null
   }
 ) {
+  await requireStaff()
   const contact = await db.contact.update({ where: { id }, data })
   revalidatePath("/admin/contacts")
   revalidatePath(`/admin/contacts/${id}`)
@@ -87,6 +93,7 @@ export async function updateContact(
 }
 
 export async function deleteContact(id: string) {
+  await requireStaff()
   await db.contact.delete({ where: { id } })
   revalidatePath("/admin/contacts")
 }

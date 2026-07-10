@@ -1,9 +1,12 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
 export async function getSolutions({ search = "", page = 1, limit = 20 } = {}) {
+  await requireStaff()
   const where = {
     ...(search && {
       OR: [
@@ -46,6 +49,7 @@ async function loadBenchmarks(solutionId: string) {
 }
 
 export async function getSolution(id: string) {
+  await requireStaff()
   const solution = await db.solution.findUnique({ where: { id }, include: { category: true } })
   if (!solution) return null
   const [sections, benchmarks, recommendedProducts] = await Promise.all([
@@ -176,6 +180,7 @@ export async function getSolutionCategoryPage(slug: string) {
 }
 
 export async function createSolution(data: { title: string; titleEn?: string; slug: string; subtitle?: string; heroImage?: string; metaTitle?: string; metaDescription?: string; categoryId?: string }) {
+  await requireStaff()
   const { categoryId, ...rest } = data
   const solution = await db.solution.create({ data: { ...rest, ...(categoryId && { category: { connect: { id: categoryId } } }) } })
   await db.solutionSection.createMany({
@@ -193,6 +198,7 @@ export async function createSolution(data: { title: string; titleEn?: string; sl
 }
 
 export async function updateSolution(id: string, data: { title?: string; titleEn?: string; slug?: string; subtitle?: string; icon?: string; heroImage?: string; metaTitle?: string; metaDescription?: string; categoryId?: string | null; isActive?: boolean }) {
+  await requireStaff()
   const { categoryId, ...rest } = data
   await db.solution.update({ where: { id }, data: { ...rest, ...(categoryId === null ? { category: { disconnect: true } } : categoryId ? { category: { connect: { id: categoryId } } } : {}) } })
   revalidatePath("/admin/solutions")
@@ -200,21 +206,25 @@ export async function updateSolution(id: string, data: { title?: string; titleEn
 }
 
 export async function deleteSolution(id: string) {
+  await requireStaff()
   await db.solution.delete({ where: { id } })
   revalidatePath("/admin/solutions")
 }
 
 export async function updateSectionContent(solutionId: string, tabKey: string, content: string) {
+  await requireStaff()
   await db.solutionSection.update({ where: { solutionId_tabKey: { solutionId, tabKey } }, data: { content } })
   revalidatePath(`/admin/solutions/${solutionId}`)
 }
 
 export async function addSection(solutionId: string, tabKey: string, tabLabel: string, sortOrder: number) {
+  await requireStaff()
   await db.solutionSection.create({ data: { solutionId, tabKey, tabLabel, sortOrder } })
   revalidatePath(`/admin/solutions/${solutionId}`)
 }
 
 export async function deleteSection(solutionId: string, tabKey: string) {
+  await requireStaff()
   await db.solutionSection.delete({ where: { solutionId_tabKey: { solutionId, tabKey } } })
   revalidatePath(`/admin/solutions/${solutionId}`)
 }
@@ -223,6 +233,7 @@ export async function createBenchmark(data: {
   solutionId: string; title: string; chartType?: string; unit?: string; sectionKey?: string
   labels: string[]; datasets: { name: string; color: string; values: number[] }[]
 }) {
+  await requireStaff()
   const chart = await db.benchmarkChart.create({
     data: { solutionId: data.solutionId, title: data.title, chartType: data.chartType || "bar", unit: data.unit || "points", sectionKey: data.sectionKey, labels: JSON.stringify(data.labels) },
   })
@@ -239,6 +250,7 @@ export async function updateBenchmark(id: string, solutionId: string, data: {
   title?: string; chartType?: string; unit?: string; sectionKey?: string
   labels?: string[]; datasets?: { name: string; color: string; values: number[] }[]
 }) {
+  await requireStaff()
   const updateData: Record<string, unknown> = {}
   if (data.title !== undefined) updateData.title = data.title
   if (data.chartType !== undefined) updateData.chartType = data.chartType
@@ -256,6 +268,7 @@ export async function updateBenchmark(id: string, solutionId: string, data: {
 }
 
 export async function deleteBenchmark(id: string, solutionId: string) {
+  await requireStaff()
   await db.benchmarkChart.delete({ where: { id } })
   revalidatePath(`/admin/solutions/${solutionId}`)
 }
@@ -265,6 +278,7 @@ export async function deleteBenchmark(id: string, solutionId: string) {
 // ==========================================
 
 export async function addRecommendedProduct(solutionId: string, productId: string, note?: string) {
+  await requireStaff()
   const count = await db.solutionProduct.count({ where: { solutionId } })
   await db.solutionProduct.create({
     data: { solutionId, productId, note, sortOrder: count },
@@ -273,16 +287,19 @@ export async function addRecommendedProduct(solutionId: string, productId: strin
 }
 
 export async function updateRecommendedProduct(id: string, solutionId: string, data: { note?: string; sortOrder?: number }) {
+  await requireStaff()
   await db.solutionProduct.update({ where: { id }, data })
   revalidatePath(`/admin/solutions/${solutionId}`)
 }
 
 export async function removeRecommendedProduct(id: string, solutionId: string) {
+  await requireStaff()
   await db.solutionProduct.delete({ where: { id } })
   revalidatePath(`/admin/solutions/${solutionId}`)
 }
 
 export async function searchProducts(query: string) {
+  await requireStaff()
   if (!query || query.length < 2) return []
   return db.product.findMany({
     where: {

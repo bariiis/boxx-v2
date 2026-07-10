@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -8,6 +10,7 @@ export async function createCustomerUser(data: {
   organizationId: string
   password: string
 }) {
+  await requireStaff()
   const contact = await db.contact.findUnique({ where: { id: data.contactId } })
   if (!contact || !contact.email) throw new Error("Kişinin e-posta adresi gerekli")
 
@@ -35,6 +38,7 @@ export async function createCustomerUser(data: {
 }
 
 export async function resetCustomerPassword(email: string, newPassword: string) {
+  await requireStaff()
   const bcrypt = await import("bcryptjs")
   const hashedPassword = await bcrypt.hash(newPassword, 12)
 
@@ -48,6 +52,7 @@ export async function resetCustomerPassword(email: string, newPassword: string) 
 }
 
 export async function getOrganizationUsers(organizationId: string) {
+  await requireStaff()
   return db.user.findMany({
     where: { organizationId, role: "CUSTOMER" },
     select: { id: true, name: true, surname: true, email: true, isActive: true, createdAt: true },

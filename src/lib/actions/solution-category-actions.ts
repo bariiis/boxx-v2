@@ -1,9 +1,12 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
 export async function getSolutionCategoryTree() {
+  await requireStaff()
   const all = await db.solutionCategory.findMany({ orderBy: { sortOrder: "asc" } })
   const roots = all.filter((c) => !c.parentId)
   return roots.map((root) => ({
@@ -16,6 +19,7 @@ export async function getSolutionCategoryTree() {
 }
 
 export async function getSolutionCategoryById(id: string) {
+  await requireStaff()
   return db.solutionCategory.findUnique({ where: { id } })
 }
 
@@ -27,6 +31,7 @@ export async function createSolutionCategory(data: {
   parentId?: string
   sortOrder?: number
 }) {
+  await requireStaff()
   await db.solutionCategory.create({ data })
   revalidatePath("/admin/solutions/categories")
   revalidatePath("/admin/solutions")
@@ -48,6 +53,7 @@ export async function updateSolutionCategory(
     isActive?: boolean
   }
 ) {
+  await requireStaff()
   await db.solutionCategory.update({ where: { id }, data })
   revalidatePath("/admin/solutions/categories")
   revalidatePath(`/admin/solutions/categories/${id}`)
@@ -55,6 +61,7 @@ export async function updateSolutionCategory(
 }
 
 export async function deleteSolutionCategory(id: string) {
+  await requireStaff()
   await db.solutionCategory.updateMany({ where: { parentId: id }, data: { parentId: null } })
   await db.solution.updateMany({ where: { categoryId: id }, data: { categoryId: null } })
   await db.solutionCategory.delete({ where: { id } })

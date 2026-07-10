@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -15,6 +17,7 @@ export async function createCustomFont(data: {
   fileUrl: string
   format?: string
 }) {
+  await requireStaff()
   const font = await db.customFont.create({
     data: {
       name: data.name,
@@ -30,6 +33,7 @@ export async function createCustomFont(data: {
 }
 
 export async function deleteCustomFont(id: string) {
+  await requireStaff()
   await db.customFont.delete({ where: { id } })
   revalidatePath("/admin/landing-pages")
 }

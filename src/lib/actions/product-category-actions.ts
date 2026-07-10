@@ -1,9 +1,12 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
 export async function getProductCategoryTree() {
+  await requireStaff()
   const all = await db.productCategory.findMany({ orderBy: { sortOrder: "asc" } })
 
   type CatNode = (typeof all)[number] & { children: CatNode[] }
@@ -27,6 +30,7 @@ export async function createProductCategory(data: {
   parentId?: string
   sortOrder?: number
 }) {
+  await requireStaff()
   await db.productCategory.create({ data })
   revalidatePath("/admin/products/categories")
   revalidatePath("/admin/products")
@@ -36,12 +40,14 @@ export async function updateProductCategory(
   id: string,
   data: { name?: string; nameEn?: string; subtitle?: string; slug?: string; description?: string; parentId?: string | null; sortOrder?: number; isActive?: boolean }
 ) {
+  await requireStaff()
   await db.productCategory.update({ where: { id }, data })
   revalidatePath("/admin/products/categories")
   revalidatePath("/admin/products")
 }
 
 export async function deleteProductCategory(id: string) {
+  await requireStaff()
   await db.productCategory.updateMany({ where: { parentId: id }, data: { parentId: null } })
   await db.product.updateMany({ where: { categoryId: id }, data: { categoryId: null } })
   await db.productCategory.delete({ where: { id } })

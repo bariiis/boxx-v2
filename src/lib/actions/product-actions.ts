@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import type { ProductType } from "@/generated/prisma"
@@ -9,6 +11,7 @@ import type { ProductType } from "@/generated/prisma"
 // ==========================================
 
 export async function getCategories() {
+  await requireStaff()
   return db.productCategory.findMany({
     include: {
       products: { select: { id: true } },
@@ -23,6 +26,7 @@ export async function getCategories() {
 }
 
 export async function getAllCategories() {
+  await requireStaff()
   const all = await db.productCategory.findMany({ orderBy: { sortOrder: "asc" } })
   const result: { id: string; name: string; depth: number; parentId: string | null }[] = []
 
@@ -47,6 +51,7 @@ export async function createCategory(data: {
   parentId?: string
   sortOrder?: number
 }) {
+  await requireStaff()
   const category = await db.productCategory.create({ data })
   revalidatePath("/admin/products/categories")
   return category
@@ -64,12 +69,14 @@ export async function updateCategory(
     isActive?: boolean
   }
 ) {
+  await requireStaff()
   const category = await db.productCategory.update({ where: { id }, data })
   revalidatePath("/admin/products/categories")
   return category
 }
 
 export async function deleteCategory(id: string) {
+  await requireStaff()
   await db.productCategory.delete({ where: { id } })
   revalidatePath("/admin/products/categories")
 }
@@ -93,6 +100,7 @@ export async function getProducts({
   categoryId?: string
   type?: ProductType
 } = {}) {
+  await requireStaff()
   // Expand categoryId(s) to include child categories of any selected parent.
   let categoryIdSet: string[] | undefined
   if (categoryId) {
@@ -148,6 +156,7 @@ export async function getProducts({
 }
 
 export async function getProduct(id: string) {
+  await requireStaff()
   return db.product.findUnique({
     where: { id },
     include: {
@@ -160,6 +169,7 @@ export async function getProduct(id: string) {
 }
 
 export async function getSolutionsForPicker() {
+  await requireStaff()
   const solutions = await db.solution.findMany({
     where: { isActive: true },
     select: {
@@ -189,6 +199,7 @@ export async function getSolutionsForPicker() {
 }
 
 export async function duplicateProduct(id: string) {
+  await requireStaff()
   const source = await db.product.findUnique({
     where: { id },
     include: { images: true },
@@ -257,6 +268,7 @@ export async function duplicateProduct(id: string) {
 }
 
 export async function generateSku() {
+  await requireStaff()
   const last = await db.product.findFirst({
     where: { sku: { startsWith: "STX-" } },
     orderBy: { sku: "desc" },
@@ -289,6 +301,7 @@ export async function createProduct(data: {
   tags?: string[]
   solutionIds?: string[]
 }) {
+  await requireStaff()
   const { categoryId, specs, tags, solutionIds, ...rest } = data
   const product = await db.product.create({
     data: {
@@ -333,6 +346,7 @@ export async function updateProduct(
     solutionIds?: string[]
   }
 ) {
+  await requireStaff()
   const { categoryId, specs, tags, solutionIds, ...rest } = data
   const product = await db.product.update({
     where: { id },
@@ -366,11 +380,13 @@ export async function updateProduct(
 }
 
 export async function deleteProduct(id: string) {
+  await requireStaff()
   await db.product.delete({ where: { id } })
   revalidatePath("/admin/products")
 }
 
 export async function reorderProducts(productIds: string[]) {
+  await requireStaff()
   await db.$transaction(
     productIds.map((id, index) =>
       db.product.update({ where: { id }, data: { sortOrder: index } })
@@ -381,6 +397,7 @@ export async function reorderProducts(productIds: string[]) {
 }
 
 export async function searchProducts(query: string) {
+  await requireStaff()
   if (!query || query.length < 2) return []
   return db.product.findMany({
     where: {
@@ -452,6 +469,7 @@ export async function getProductForLandingHero(productId: string) {
 // ==========================================
 
 export async function getProductImages(productId: string) {
+  await requireStaff()
   return db.productImage.findMany({
     where: { productId },
     orderBy: { sortOrder: "asc" },
@@ -459,6 +477,7 @@ export async function getProductImages(productId: string) {
 }
 
 export async function addProductImage(productId: string, url: string, alt?: string) {
+  await requireStaff()
   const maxOrder = await db.productImage.findFirst({
     where: { productId },
     orderBy: { sortOrder: "desc" },
@@ -480,6 +499,7 @@ export async function addProductImage(productId: string, url: string, alt?: stri
 }
 
 export async function deleteProductImage(id: string) {
+  await requireStaff()
   const image = await db.productImage.delete({ where: { id } })
 
   // Delete file from disk
@@ -496,6 +516,7 @@ export async function deleteProductImage(id: string) {
 }
 
 export async function setHeroImage(productId: string, imageUrl: string) {
+  await requireStaff()
   await db.product.update({
     where: { id: productId },
     data: { heroImage: imageUrl },
@@ -505,6 +526,7 @@ export async function setHeroImage(productId: string, imageUrl: string) {
 }
 
 export async function reorderProductImages(productId: string, imageIds: string[]) {
+  await requireStaff()
   await db.$transaction(
     imageIds.map((id, index) =>
       db.productImage.update({

@@ -35,7 +35,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const folder = ticketId || "general"
+    // Allow only safe id characters so the folder can't escape the uploads dir
+    const folder = ticketId && /^[a-zA-Z0-9_-]+$/.test(ticketId) ? ticketId : "general"
     const dir = path.join(process.cwd(), "public", "uploads", "tickets", folder)
     await mkdir(dir, { recursive: true })
 

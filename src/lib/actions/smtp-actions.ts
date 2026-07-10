@@ -1,10 +1,13 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { testSmtpConnection } from "@/lib/email"
 
 export async function getSmtpConfig(userId: string) {
+  await requireStaff()
   return db.smtpConfig.findUnique({ where: { userId } })
 }
 
@@ -20,6 +23,7 @@ export async function saveSmtpConfig(
     fromEmail?: string
   }
 ) {
+  await requireStaff()
   const config = await db.smtpConfig.upsert({
     where: { userId },
     update: data,
@@ -36,10 +40,12 @@ export async function testSmtp(data: {
   username: string
   password: string
 }) {
+  await requireStaff()
   return testSmtpConnection(data)
 }
 
 export async function sendTestEmail(userId: string, to: string) {
+  await requireStaff()
   const { sendEmail } = await import("@/lib/email")
   const result = await sendEmail(
     {

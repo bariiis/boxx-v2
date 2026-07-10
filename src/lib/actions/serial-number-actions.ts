@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -16,6 +18,7 @@ export async function getSerialNumbers({
   isActive?: boolean
   warranty?: "active" | "expiring" | "expired"
 } = {}) {
+  await requireStaff()
   const now = new Date()
   const in90Days = new Date()
   in90Days.setDate(in90Days.getDate() + 90)
@@ -59,6 +62,7 @@ export async function getSerialNumbers({
 }
 
 export async function getSerialNumber(id: string) {
+  await requireStaff()
   return db.serialNumber.findUnique({
     where: { id },
     include: {
@@ -84,6 +88,7 @@ export async function createSerialNumber(data: {
   warrantyEnd?: string
   notes?: string
 }) {
+  await requireStaff()
   const sn = await db.serialNumber.create({
     data: {
       serialNumber: data.serialNumber,
@@ -114,6 +119,7 @@ export async function updateSerialNumber(
     contactId?: string | null
   }
 ) {
+  await requireStaff()
   const { productId, organizationId, contactId, warrantyStart, warrantyEnd, ...rest } = data
   await db.serialNumber.update({
     where: { id },
@@ -137,11 +143,13 @@ export async function updateSerialNumber(
 }
 
 export async function deleteSerialNumber(id: string) {
+  await requireStaff()
   await db.serialNumber.delete({ where: { id } })
   revalidatePath("/admin/serial-numbers")
 }
 
 export async function searchSerialNumbers(query: string) {
+  await requireStaff()
   if (!query || query.length < 2) return []
   return db.serialNumber.findMany({
     where: {

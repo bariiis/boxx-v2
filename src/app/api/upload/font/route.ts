@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { writeFile, mkdir } from "fs/promises"
 import path from "path"
+import { getStaffSession } from "@/lib/auth-guard"
 
 const ALLOWED_EXT = ["woff2", "woff", "ttf", "otf"]
 const MAX_SIZE = 5 * 1024 * 1024 // 5MB
@@ -13,6 +14,9 @@ const FORMAT_MAP: Record<string, string> = {
 }
 
 export async function POST(request: NextRequest) {
+  if (!(await getStaffSession())) {
+    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 })
+  }
   try {
     const formData = await request.formData()
     const file = formData.get("file") as File | null

@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import type { OrganizationType, OrganizationSource, OrganizationStatus } from "@/generated/prisma"
@@ -15,6 +17,7 @@ export async function getOrganizations({
   limit?: number
   status?: OrganizationStatus
 } = {}) {
+  await requireStaff()
   const where = {
     ...(search && {
       OR: [
@@ -46,6 +49,7 @@ export async function getOrganizations({
 }
 
 export async function getOrganization(id: string) {
+  await requireStaff()
   return db.organization.findUnique({
     where: { id },
     include: {
@@ -74,6 +78,7 @@ export async function createOrganization(data: {
   country?: string
   notes?: string
 }) {
+  await requireStaff()
   const organization = await db.organization.create({ data })
   revalidatePath("/admin/organizations")
   return organization
@@ -98,6 +103,7 @@ export async function updateOrganization(
     notes?: string
   }
 ) {
+  await requireStaff()
   const organization = await db.organization.update({ where: { id }, data })
   revalidatePath("/admin/organizations")
   revalidatePath(`/admin/organizations/${id}`)
@@ -105,11 +111,13 @@ export async function updateOrganization(
 }
 
 export async function deleteOrganization(id: string) {
+  await requireStaff()
   await db.organization.delete({ where: { id } })
   revalidatePath("/admin/organizations")
 }
 
 export async function searchOrganizations(query: string) {
+  await requireStaff()
   if (!query || query.length < 2) return []
   return db.organization.findMany({
     where: {

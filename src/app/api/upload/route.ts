@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { writeFile } from "fs/promises"
 import path from "path"
+import { getStaffSession } from "@/lib/auth-guard"
 
 
 const ALLOWED_TYPES = [
@@ -12,6 +13,9 @@ const ALLOWED_TYPES = [
 const MAX_SIZE = 10 * 1024 * 1024 // 10MB
 
 export async function POST(request: NextRequest) {
+  if (!(await getStaffSession())) {
+    return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 401 })
+  }
   try {
     const formData = await request.formData()
     const file = formData.get("file") as File | null
@@ -29,7 +33,7 @@ export async function POST(request: NextRequest) {
 
     if (file.size > MAX_SIZE) {
       return NextResponse.json(
-        { error: "Dosya boyutu 2MB'dan büyük olamaz" },
+        { error: "Dosya boyutu 10MB'dan büyük olamaz" },
         { status: 400 }
       )
     }

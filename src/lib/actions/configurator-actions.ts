@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -11,6 +13,7 @@ export type ConfiguratorMeta = {
 }
 
 export async function getConfiguratorMeta(basekitId: string): Promise<ConfiguratorMeta> {
+  await requireStaff()
   const p = await db.product.findUnique({
     where: { id: basekitId },
     select: { configuratorMeta: true },
@@ -23,6 +26,7 @@ export async function setSingleSelectCategory(
   category: string,
   enabled: boolean
 ) {
+  await requireStaff()
   const p = await db.product.findUnique({
     where: { id: basekitId },
     select: { configuratorMeta: true },
@@ -67,6 +71,7 @@ export async function getConfiguratorPayloadBySlug(slug: string) {
 // LIST OPTIONS FOR A BASEKIT
 // ============================================================
 export async function listConfiguratorOptions(basekitId: string) {
+  await requireStaff()
   return db.configuratorOption.findMany({
     where: { basekitId },
     include: {
@@ -89,6 +94,7 @@ export async function listConfiguratorOptions(basekitId: string) {
 // (used in admin "add option" picker)
 // ============================================================
 export async function listComponentCandidates(componentType?: string) {
+  await requireStaff()
   // Load all active products. Admin picks which to use as components.
   // Filter by componentType (stored in Product.specs JSON) in memory.
   const rows = await db.product.findMany({
@@ -132,6 +138,7 @@ export async function createConfiguratorOption(data: {
   maxQty?: number | null
   sortOrder?: number
 }) {
+  await requireStaff()
   const created = await db.configuratorOption.create({
     data: {
       basekitId: data.basekitId,
@@ -166,6 +173,7 @@ export async function updateConfiguratorOption(
     category: string
   }>
 ) {
+  await requireStaff()
   const updated = await db.configuratorOption.update({
     where: { id },
     data,
@@ -178,6 +186,7 @@ export async function updateConfiguratorOption(
 // REORDER
 // ============================================================
 export async function reorderConfiguratorOptions(basekitId: string, ids: string[]) {
+  await requireStaff()
   await db.$transaction(
     ids.map((id, index) =>
       db.configuratorOption.update({ where: { id }, data: { sortOrder: index } })
@@ -190,6 +199,7 @@ export async function reorderConfiguratorOptions(basekitId: string, ids: string[
 // DELETE
 // ============================================================
 export async function deleteConfiguratorOption(id: string) {
+  await requireStaff()
   const deleted = await db.configuratorOption.delete({ where: { id } })
   revalidatePath(`/admin/products/${deleted.basekitId}`)
 }

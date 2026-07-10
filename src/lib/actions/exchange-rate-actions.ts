@@ -1,11 +1,14 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { fetchTCMBRates } from "@/lib/exchange-rates"
 import { revalidatePath } from "next/cache"
 import type { Currency } from "@/generated/prisma"
 
 export async function fetchAndSaveRates() {
+  await requireStaff()
   const rates = await fetchTCMBRates()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
@@ -46,6 +49,7 @@ export async function fetchAndSaveRates() {
 export async function saveManualRates(
   rates: { currency: Currency; buyRate: number; sellRate: number; source: string }[]
 ) {
+  await requireStaff()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -67,6 +71,7 @@ export async function saveManualRates(
 }
 
 export async function getStoredRates() {
+  await requireStaff()
   return db.exchangeRate.findMany({
     orderBy: [{ date: "desc" }, { currency: "asc" }],
     take: 10,

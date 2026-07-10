@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -10,11 +12,13 @@ export async function getSettings(group?: string) {
 }
 
 export async function getSetting(key: string) {
+  await requireStaff()
   const setting = await db.setting.findUnique({ where: { key } })
   return setting?.value
 }
 
 export async function updateSettings(data: Record<string, string>) {
+  await requireStaff()
   for (const [key, value] of Object.entries(data)) {
     await db.setting.upsert({
       where: { key },
@@ -33,6 +37,7 @@ export async function updateSettings(data: Record<string, string>) {
 }
 
 export async function getLatestExchangeRates() {
+  await requireStaff()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
@@ -48,6 +53,7 @@ export async function saveExchangeRates(rates: {
   sellRate: number
   source: string
 }[]) {
+  await requireStaff()
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 

@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import bcrypt from "bcryptjs"
@@ -10,6 +12,7 @@ export async function getEmployees({
   page = 1,
   limit = 20,
 } = {}) {
+  await requireStaff()
   const where = {
     role: { in: ["ADMIN" as const, "EMPLOYEE" as const] },
     ...(search && {
@@ -47,6 +50,7 @@ export async function getEmployees({
 }
 
 export async function getEmployee(id: string) {
+  await requireStaff()
   return db.user.findUnique({
     where: { id },
     select: {
@@ -72,6 +76,7 @@ export async function createEmployee(data: {
   password: string
   role: UserRole
 }) {
+  await requireStaff()
   const hashedPassword = await bcrypt.hash(data.password, 12)
   const employee = await db.user.create({
     data: {
@@ -96,6 +101,7 @@ export async function updateEmployee(
     password?: string
   }
 ) {
+  await requireStaff()
   const updateData: Record<string, unknown> = { ...data }
   if (data.password) {
     updateData.password = await bcrypt.hash(data.password, 12)
@@ -110,6 +116,7 @@ export async function updateEmployee(
 }
 
 export async function deleteEmployee(id: string) {
+  await requireStaff()
   await db.user.delete({ where: { id } })
   revalidatePath("/admin/employees")
 }

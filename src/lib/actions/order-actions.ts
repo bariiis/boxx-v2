@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import type { OrderStatus } from "@/generated/prisma"
@@ -15,6 +17,7 @@ export async function getOrders({
   limit?: number
   status?: OrderStatus
 } = {}) {
+  await requireStaff()
   const where = {
     ...(search && {
       OR: [
@@ -45,6 +48,7 @@ export async function getOrders({
 }
 
 export async function getOrder(id: string) {
+  await requireStaff()
   return db.order.findUnique({
     where: { id },
     include: {
@@ -67,6 +71,7 @@ export async function getOrder(id: string) {
 }
 
 export async function updateOrderStatus(id: string, status: OrderStatus) {
+  await requireStaff()
   const order = await db.order.update({
     where: { id },
     data: { status },

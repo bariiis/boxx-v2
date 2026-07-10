@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -159,6 +161,7 @@ const PAGES: SeedPageDef[] = [
 ]
 
 export async function seedStaticPages(overwrite = false) {
+  await requireStaff()
   const created: string[] = []
   const skipped: string[] = []
 

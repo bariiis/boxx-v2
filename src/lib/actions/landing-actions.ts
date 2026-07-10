@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -8,6 +10,7 @@ import { revalidatePath } from "next/cache"
 // ==========================================
 
 export async function getLandingPages(params?: { search?: string; page?: number; limit?: number }) {
+  await requireStaff()
   const { search, page = 1, limit = 50 } = params || {}
   const skip = (page - 1) * limit
 
@@ -33,6 +36,7 @@ export async function getLandingPages(params?: { search?: string; page?: number;
 }
 
 export async function getLandingPage(id: string) {
+  await requireStaff()
   return db.landingPage.findUnique({
     where: { id },
     include: {
@@ -59,6 +63,7 @@ export async function createLandingPage(data: {
   productId?: string
   templateId?: string
 }) {
+  await requireStaff()
   const landing = await db.landingPage.create({
     data: {
       title: data.title,
@@ -101,6 +106,7 @@ export async function updateLandingPage(
     theme?: Record<string, unknown> | null
   }
 ) {
+  await requireStaff()
   const { theme, ...rest } = data
   const landing = await db.landingPage.update({
     where: { id },
@@ -116,6 +122,7 @@ export async function updateLandingPage(
 }
 
 export async function deleteLandingPage(id: string) {
+  await requireStaff()
   const landing = await db.landingPage.delete({ where: { id } })
   revalidatePath("/admin/landing-pages")
   revalidatePath(`/landing/${landing.slug}`)
@@ -130,6 +137,7 @@ export async function addSection(
   sectionType: string,
   config: Record<string, unknown>
 ) {
+  await requireStaff()
   // Get max sortOrder
   const last = await db.landingSection.findFirst({
     where: { landingPageId },
@@ -154,6 +162,7 @@ export async function updateSection(
   sectionId: string,
   data: { sectionType?: string; config?: Record<string, unknown>; sortOrder?: number }
 ) {
+  await requireStaff()
   const updateData: Record<string, unknown> = {}
   if (data.sectionType) updateData.sectionType = data.sectionType
   if (data.config) updateData.config = JSON.stringify(data.config)
@@ -169,6 +178,7 @@ export async function updateSection(
 }
 
 export async function duplicateSection(sectionId: string) {
+  await requireStaff()
   const original = await db.landingSection.findUnique({ where: { id: sectionId } })
   if (!original) throw new Error("Section bulunamadı")
 
@@ -195,11 +205,13 @@ export async function duplicateSection(sectionId: string) {
 }
 
 export async function deleteSection(sectionId: string) {
+  await requireStaff()
   await db.landingSection.delete({ where: { id: sectionId } })
   revalidatePath("/admin/landing-pages")
 }
 
 export async function reorderSections(landingPageId: string, sectionIds: string[]) {
+  await requireStaff()
   await db.$transaction(
     sectionIds.map((id, index) =>
       db.landingSection.update({

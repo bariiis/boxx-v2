@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import type { QuoteStatus, TicketStatus } from "@/generated/prisma"
@@ -32,6 +34,7 @@ export type KanbanTicket = {
 }
 
 export async function getKanbanQuotes(): Promise<KanbanQuote[]> {
+  await requireStaff()
   const quotes = await db.quote.findMany({
     orderBy: { updatedAt: "desc" },
     take: 120,
@@ -53,6 +56,7 @@ export async function getKanbanQuotes(): Promise<KanbanQuote[]> {
 }
 
 export async function getKanbanTickets(): Promise<KanbanTicket[]> {
+  await requireStaff()
   const tickets = await db.ticket.findMany({
     orderBy: [{ priority: "desc" }, { updatedAt: "desc" }],
     take: 120,
@@ -84,6 +88,7 @@ export async function getKanbanTickets(): Promise<KanbanTicket[]> {
 }
 
 export async function moveQuoteStatus(id: string, status: QuoteStatus) {
+  await requireStaff()
   const updateData: Record<string, unknown> = { status }
   if (status === "SENT") updateData.sentAt = new Date()
   if (status === "APPROVED") updateData.approvedAt = new Date()
@@ -95,6 +100,7 @@ export async function moveQuoteStatus(id: string, status: QuoteStatus) {
 }
 
 export async function moveTicketStatus(id: string, status: TicketStatus) {
+  await requireStaff()
   const updateData: Record<string, unknown> = { status }
   if (status === "CLOSED") updateData.closedAt = new Date()
 

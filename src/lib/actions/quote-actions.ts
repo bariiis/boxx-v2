@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import type { QuoteStatus, Currency, DisplayMode } from "@/generated/prisma"
@@ -15,6 +17,7 @@ export async function getQuotes({
   limit?: number
   status?: QuoteStatus
 } = {}) {
+  await requireStaff()
   const where = {
     ...(search && {
       OR: [
@@ -46,6 +49,7 @@ export async function getQuotes({
 }
 
 export async function getQuote(id: string) {
+  await requireStaff()
   return db.quote.findUnique({
     where: { id },
     include: {
@@ -126,6 +130,7 @@ export async function createQuote(data: {
   publicNote?: string
   internalNote?: string
 }) {
+  await requireStaff()
   const quoteNumber = await generateQuoteNumber()
   const validUntil = data.validUntil ? new Date(data.validUntil) : undefined
 
@@ -228,6 +233,7 @@ export async function updateQuote(
     status?: QuoteStatus
   }
 ) {
+  await requireStaff()
   const updateData: Record<string, unknown> = { ...data }
   if (data.validUntil) updateData.validUntil = new Date(data.validUntil)
   if (data.validUntil === null) updateData.validUntil = null
@@ -339,6 +345,7 @@ async function getConversionRate(from: Currency, to: Currency): Promise<number> 
 }
 
 export async function deleteQuote(id: string) {
+  await requireStaff()
   await db.quote.delete({ where: { id } })
   revalidatePath("/admin/quotes")
 }
@@ -358,6 +365,7 @@ export async function addQuoteItem(data: {
   isConfig?: boolean
   sortOrder?: number
 }) {
+  await requireStaff()
   const item = await db.quoteItem.create({ data })
   await recalculateQuoteTotal(data.quoteId)
   revalidatePath(`/admin/quotes/${data.quoteId}`)
@@ -376,6 +384,7 @@ export async function updateQuoteItem(
     sortOrder?: number
   }
 ) {
+  await requireStaff()
   const item = await db.quoteItem.update({ where: { id }, data })
   await recalculateQuoteTotal(quoteId)
   revalidatePath(`/admin/quotes/${quoteId}`)
@@ -383,6 +392,7 @@ export async function updateQuoteItem(
 }
 
 export async function removeQuoteItem(id: string, quoteId: string) {
+  await requireStaff()
   await db.quoteItem.delete({ where: { id } })
   await recalculateQuoteTotal(quoteId)
   revalidatePath(`/admin/quotes/${quoteId}`)
@@ -404,6 +414,7 @@ export async function addQuoteConfigItem(data: {
   isSelected?: boolean
   sortOrder?: number
 }) {
+  await requireStaff()
   const item = await db.quoteConfigItem.create({ data })
   const quoteItem = await db.quoteItem.findUnique({ where: { id: data.quoteItemId } })
   if (quoteItem) await recalculateQuoteTotal(quoteItem.quoteId)
@@ -422,6 +433,7 @@ export async function updateQuoteConfigItem(
     isSelected?: boolean
   }
 ) {
+  await requireStaff()
   const item = await db.quoteConfigItem.update({ where: { id }, data })
   const quoteItem = await db.quoteItem.findUnique({ where: { id: item.quoteItemId } })
   if (quoteItem) await recalculateQuoteTotal(quoteItem.quoteId)
@@ -429,6 +441,7 @@ export async function updateQuoteConfigItem(
 }
 
 export async function removeQuoteConfigItem(id: string) {
+  await requireStaff()
   const configItem = await db.quoteConfigItem.findUnique({
     where: { id },
     include: { quoteItem: { select: { quoteId: true } } },
@@ -438,6 +451,7 @@ export async function removeQuoteConfigItem(id: string) {
 }
 
 export async function reorderQuoteItems(quoteId: string, itemIds: string[]) {
+  await requireStaff()
   await db.$transaction(
     itemIds.map((id, index) =>
       db.quoteItem.update({ where: { id }, data: { sortOrder: index } })
@@ -447,6 +461,7 @@ export async function reorderQuoteItems(quoteId: string, itemIds: string[]) {
 }
 
 export async function reorderQuoteConfigItems(quoteItemId: string, configItemIds: string[]) {
+  await requireStaff()
   await db.$transaction(
     configItemIds.map((id, index) =>
       db.quoteConfigItem.update({ where: { id }, data: { sortOrder: index } })
@@ -705,6 +720,7 @@ export async function selectGroupOption(token: string, configItemId: string) {
 }
 
 export async function cloneQuote(id: string, userId: string) {
+  await requireStaff()
   const original = await getQuote(id)
   if (!original) return null
 
@@ -814,6 +830,7 @@ async function sendQuoteEmail(quoteId: string) {
 }
 
 export async function sendOrderConfirmationEmail(orderId: string) {
+  await requireStaff()
   const order = await db.order.findUnique({
     where: { id: orderId },
     include: {

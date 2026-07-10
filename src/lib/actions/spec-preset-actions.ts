@@ -1,5 +1,7 @@
 "use server"
 
+
+import { requireStaff } from "@/lib/auth-guard"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import type { SpecFieldType } from "@/generated/prisma"
@@ -9,6 +11,7 @@ import type { SpecFieldType } from "@/generated/prisma"
 // ==========================================
 
 export async function getSpecPresets() {
+  await requireStaff()
   return db.specPreset.findMany({
     include: {
       fields: { orderBy: { sortOrder: "asc" } },
@@ -18,6 +21,7 @@ export async function getSpecPresets() {
 }
 
 export async function getSpecPreset(id: string) {
+  await requireStaff()
   return db.specPreset.findUnique({
     where: { id },
     include: {
@@ -27,6 +31,7 @@ export async function getSpecPreset(id: string) {
 }
 
 export async function createSpecPreset(data: { name: string; description?: string }) {
+  await requireStaff()
   const maxOrder = await db.specPreset.findFirst({
     orderBy: { sortOrder: "desc" },
     select: { sortOrder: true },
@@ -42,17 +47,20 @@ export async function updateSpecPreset(
   id: string,
   data: { name?: string; description?: string }
 ) {
+  await requireStaff()
   const preset = await db.specPreset.update({ where: { id }, data })
   revalidatePath("/admin/products/presets")
   return preset
 }
 
 export async function deleteSpecPreset(id: string) {
+  await requireStaff()
   await db.specPreset.delete({ where: { id } })
   revalidatePath("/admin/products/presets")
 }
 
 export async function reorderSpecPresets(ids: string[]) {
+  await requireStaff()
   await db.$transaction(
     ids.map((id, index) =>
       db.specPreset.update({ where: { id }, data: { sortOrder: index } })
@@ -76,6 +84,7 @@ export async function addPresetField(
     defaultValue?: string
   }
 ) {
+  await requireStaff()
   const maxOrder = await db.specPresetField.findFirst({
     where: { presetId },
     orderBy: { sortOrder: "desc" },
@@ -109,6 +118,7 @@ export async function updatePresetField(
     defaultValue?: string | null
   }
 ) {
+  await requireStaff()
   const { options, ...rest } = data
   const field = await db.specPresetField.update({
     where: { id },
@@ -122,11 +132,13 @@ export async function updatePresetField(
 }
 
 export async function deletePresetField(id: string) {
+  await requireStaff()
   await db.specPresetField.delete({ where: { id } })
   revalidatePath("/admin/products/presets")
 }
 
 export async function reorderPresetFields(presetId: string, fieldIds: string[]) {
+  await requireStaff()
   await db.$transaction(
     fieldIds.map((id, index) =>
       db.specPresetField.update({ where: { id }, data: { sortOrder: index } })
