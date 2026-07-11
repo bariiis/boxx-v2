@@ -3036,7 +3036,7 @@ function SplitHero3dConfig({
       <div className="space-y-3 rounded-lg border p-3">
         <Label className="text-sm font-semibold">3D Sahne Görseli (opsiyonel)</Label>
         <p className="text-xs text-muted-foreground">
-          Boş bırakılırsa varsayılan Sprint dashboard mockup'ı gösterilir. Kendi ekran görüntünüzü
+          Boş bırakılırsa varsayılan Sprint dashboard mockup&apos;ı gösterilir. Kendi ekran görüntünüzü
           yüklerseniz onu 3D perspektifte gösterilir.
         </p>
         <ImageUploadField
@@ -3162,7 +3162,7 @@ function AnimatedRoadmapConfig({
       <div className="space-y-3 rounded-lg border p-3">
         <Label className="text-sm font-semibold">Harita Arka Plan Görseli</Label>
         <p className="text-xs text-muted-foreground">
-          Opsiyonel. Boş bırakılırsa sadece SVG patika ve milestone'lar gösterilir.
+          Opsiyonel. Boş bırakılırsa sadece SVG patika ve milestone&apos;lar gösterilir.
         </p>
         <ImageUploadField
           label="Harita Görseli"
@@ -3825,16 +3825,12 @@ function ProductHeroConfig({ config, update }: {
 }) {
   const productId = (config.productId as string) || ""
   const [query, setQuery] = useState("")
-  const [results, setResults] = useState<ProductPick[]>([])
+  const [search, setSearch] = useState<{ q: string; list: ProductPick[] } | null>(null)
   const [current, setCurrent] = useState<ProductPick | null>(null)
-  const [loading, setLoading] = useState(false)
 
   // Load current selection label
   useEffect(() => {
-    if (!productId) {
-      setCurrent(null)
-      return
-    }
+    if (!productId) return
     searchProducts(productId).then((list) => {
       const found = list.find((p) => p.id === productId)
       if (found) setCurrent({ id: found.id, name: found.name, sku: found.sku })
@@ -3844,28 +3840,29 @@ function ProductHeroConfig({ config, update }: {
   // Debounced search
   useEffect(() => {
     const q = query.trim()
-    if (q.length < 2) {
-      setResults([])
-      return
-    }
-    setLoading(true)
+    if (q.length < 2) return
     const t = setTimeout(async () => {
       const list = await searchProducts(q)
-      setResults(list.map((p) => ({ id: p.id, name: p.name, sku: p.sku })))
-      setLoading(false)
+      setSearch({ q, list: list.map((p) => ({ id: p.id, name: p.name, sku: p.sku })) })
     }, 250)
     return () => clearTimeout(t)
   }, [query])
+
+  // Derived during render: selection and results matching the current inputs
+  const selected = productId && current?.id === productId ? current : null
+  const trimmedQuery = query.trim()
+  const results = search && search.q === trimmedQuery ? search.list : []
+  const loading = trimmedQuery.length >= 2 && search?.q !== trimmedQuery
 
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         <Label>Seçili ürün</Label>
-        {current ? (
+        {selected ? (
           <div className="flex items-center justify-between gap-3 rounded-md border bg-muted/30 px-3 py-2">
             <div className="min-w-0">
-              <div className="truncate text-sm font-medium">{current.name}</div>
-              <div className="font-mono text-xs text-muted-foreground">{current.sku}</div>
+              <div className="truncate text-sm font-medium">{selected.name}</div>
+              <div className="font-mono text-xs text-muted-foreground">{selected.sku}</div>
             </div>
             <Button
               type="button"
@@ -3912,7 +3909,7 @@ function ProductHeroConfig({ config, update }: {
                     update("productId", p.id)
                     setCurrent(p)
                     setQuery("")
-                    setResults([])
+                    setSearch(null)
                   }}
                   className="flex w-full items-center justify-between gap-3 border-b px-3 py-2 text-left text-sm last:border-b-0 hover:bg-muted"
                 >
@@ -4204,9 +4201,9 @@ function CodeNestHeroConfig({
         </Label>
         <div className="flex items-center justify-between">
           <div className="space-y-0.5">
-            <Label>Section içinde kendi nav'ını göster</Label>
+            <Label>Section içinde kendi nav&apos;ını göster</Label>
             <p className="text-xs text-muted-foreground">
-              Kapalı tutun — sitenin üst header'ı ile çakışır. Standalone kullanım için açın.
+              Kapalı tutun — sitenin üst header&apos;ı ile çakışır. Standalone kullanım için açın.
             </p>
           </div>
           <Switch
@@ -4611,7 +4608,7 @@ function MasonryGalleryConfig({
           Hover Davranışı
         </Label>
         <div className="flex items-center justify-between">
-          <Label>Hover'da Ölçeklendir</Label>
+          <Label>Hover&apos;da Ölçeklendir</Label>
           <Switch
             checked={config.scaleOnHover !== false}
             onCheckedChange={(v) => update("scaleOnHover", v)}
@@ -4631,7 +4628,7 @@ function MasonryGalleryConfig({
           />
         </div>
         <div className="flex items-center justify-between">
-          <Label>Hover'da Renk Overlay</Label>
+          <Label>Hover&apos;da Renk Overlay</Label>
           <Switch
             checked={!!config.colorShiftOnHover}
             onCheckedChange={(v) => update("colorShiftOnHover", v)}
@@ -5334,7 +5331,7 @@ function LiveblocksHomeHeroConfig({
       <Field label="Açıklama Sonek" value={config.descriptionSuffix as string} onChange={(v) => update("descriptionSuffix", v)} placeholder="in days, not months..." />
 
       <div className="space-y-2">
-        <Label>Özellik Chip'leri</Label>
+        <Label>Özellik Chip&apos;leri</Label>
         {features.map((f, i) => (
           <div key={i} className="grid gap-2 grid-cols-[1fr_1fr_80px_32px] items-center">
             <Input value={f.label} onChange={(e) => updateFeature(i, "label", e.target.value)} placeholder="GPU Server" className="h-8 text-xs" />

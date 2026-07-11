@@ -85,10 +85,12 @@ function ActivityLine({
 }
 
 export function NexusMetricsSection({ demoteHeading = false }: { demoteHeading?: boolean }) {
-  const [time, setTime] = useState<Date | null>(null);
+  // Lazy init guarded for SSR; the rendering span has suppressHydrationWarning
+  const [time, setTime] = useState<Date | null>(() =>
+    typeof window === "undefined" ? null : new Date(),
+  );
 
   useEffect(() => {
-    setTime(new Date());
     const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
@@ -104,7 +106,7 @@ export function NexusMetricsSection({ demoteHeading = false }: { demoteHeading?:
       <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-16">
           <div>
-            <p className="text-sm font-mono text-primary mb-3">// CANLI METRİKLER</p>
+            <p className="text-sm font-mono text-primary mb-3">{"// CANLI METRİKLER"}</p>
             <Heading className="text-3xl lg:text-5xl font-semibold tracking-tight text-balance">
               Gerçek zamanlı altyapı
               <br />

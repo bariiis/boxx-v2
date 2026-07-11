@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { NexusAsciiWave } from "./nexus-ascii-wave";
+import { useHydrated } from "@/hooks/use-hydrated";
 
 export function NexusHeroSection({
   demoteHeading = false,
@@ -13,11 +13,8 @@ export function NexusHeroSection({
   config?: Record<string, unknown>
 }) {
   const isDark = (config.theme as string) === "dark";
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
+  // False during SSR/hydration, true right after — drives the entrance transition
+  const isVisible = useHydrated();
 
   const Heading = demoteHeading ? "h2" : "h1";
 

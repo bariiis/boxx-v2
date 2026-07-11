@@ -38,7 +38,7 @@ export function SplitProductDirection({ demoteHeading = false }: { demoteHeading
           <span className="text-white font-medium">
             Ekibinizi ortak bir ürün zaman çizelgesi etrafında hizalayın.
           </span>{" "}
-          Sprint'in görsel planlama araçlarıyla tüm ürün girişimlerini planlayın ve takip edin.
+          Sprint&apos;in görsel planlama araçlarıyla tüm ürün girişimlerini planlayın ve takip edin.
         </p>
 
         {/* 3D Timeline */}

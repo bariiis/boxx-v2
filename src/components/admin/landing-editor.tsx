@@ -65,6 +65,7 @@ import {
 } from "@/lib/landing-section-types"
 import { LandingSectionConfigEditor } from "./landing-section-config"
 import { Palette } from "lucide-react"
+import { safeJsonParse } from "@/lib/safe-json"
 
 type LandingSection = {
   id: string
@@ -541,7 +542,7 @@ export function LandingEditor({
               key={selectedSection.id}
               sectionId={selectedSection.id}
               sectionType={selectedSection.sectionType}
-              config={JSON.parse(selectedSection.config)}
+              config={safeJsonParse<Record<string, unknown>>(selectedSection.config, {})}
               onSave={(config) => handleSaveConfig(selectedSection.id, config)}
               saving={saving}
             />

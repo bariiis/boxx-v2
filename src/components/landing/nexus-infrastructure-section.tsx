@@ -50,7 +50,7 @@ export function NexusInfrastructureSection({
               isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
             }`}
           >
-            <p className="text-sm font-mono text-primary mb-4">// GLOBAL ALTYAPI</p>
+            <p className="text-sm font-mono text-primary mb-4">{"// GLOBAL ALTYAPI"}</p>
             <Heading className="text-4xl lg:text-5xl font-semibold tracking-tight mb-6 text-balance">
               Gezegen ölçeğinde kurgulandı.
             </Heading>

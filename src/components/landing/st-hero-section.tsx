@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import { StAnimatedSphere } from "./st-animated-sphere";
+import { useHydrated } from "@/hooks/use-hydrated";
 
 const words = ["create", "build", "scale", "ship"];
 
@@ -11,12 +12,9 @@ export function StHeroSection({ config = {} }: { config?: Record<string, unknown
   const theme = (config.theme as string) === "light" ? "light" : "dark";
   const isLight = theme === "light";
 
-  const [isVisible, setIsVisible] = useState(false);
+  // False during SSR/hydration, true right after — drives the entrance transition
+  const isVisible = useHydrated();
   const [wordIndex, setWordIndex] = useState(0);
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

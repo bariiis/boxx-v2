@@ -6,6 +6,7 @@ import { listCustomFonts } from "@/lib/actions/font-actions"
 import { getProductForLandingHero } from "@/lib/actions/product-actions"
 import { LandingPageRenderer } from "@/components/landing/landing-renderer"
 import { buildFontFaceCss, type LandingTheme } from "@/lib/fonts"
+import { safeJsonParse } from "@/lib/safe-json"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
@@ -51,7 +52,7 @@ export default async function LandingPage({
   const rawSections = landing.sections.map((s) => ({
     id: s.id,
     type: s.sectionType,
-    config: JSON.parse(s.config) as Record<string, unknown>,
+    config: safeJsonParse<Record<string, unknown>>(s.config, {}),
   }))
 
   // Enrich product-hero sections with live product data
@@ -75,7 +76,7 @@ export default async function LandingPage({
     })
   )
 
-  const theme: LandingTheme | null = landing.theme ? JSON.parse(landing.theme) : null
+  const theme = safeJsonParse<LandingTheme | null>(landing.theme, null)
   const customFonts = await listCustomFonts()
   const fontFaceCss = buildFontFaceCss(customFonts)
 

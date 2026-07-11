@@ -81,14 +81,14 @@ export function NexusDevelopersSection({ demoteHeading = false }: { demoteHeadin
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-start">
           <div>
-            <p className="text-sm font-mono text-primary mb-3">// GELİŞTİRİCİLER İÇİN</p>
+            <p className="text-sm font-mono text-primary mb-3">{"// GELİŞTİRİCİLER İÇİN"}</p>
             <Heading className="text-3xl lg:text-5xl font-semibold tracking-tight mb-6 text-balance">
               Geliştiriciler için,
               <br />
               geliştiriciler tarafından.
             </Heading>
             <p className="text-lg text-muted-foreground mb-10 leading-relaxed">
-              Yolunuzdan çekilen düşünceli tasarlanmış bir SDK. Sezgisel API'ler ve kapsamlı
+              Yolunuzdan çekilen düşünceli tasarlanmış bir SDK. Sezgisel API&apos;ler ve kapsamlı
               dokümantasyonla daha hızlı teslim edin.
             </p>
 
@@ -173,7 +173,7 @@ export function NexusDevelopersSection({ demoteHeading = false }: { demoteHeadin
               </a>
               <span className="text-border">|</span>
               <a href="#" className="text-muted-foreground hover:text-foreground font-mono">
-                GitHub'da görüntüle
+                GitHub&apos;da görüntüle
               </a>
             </div>
           </div>

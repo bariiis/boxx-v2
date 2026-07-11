@@ -1,18 +1,16 @@
 "use client"
 
-import { useEffect, useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { useCompareStore } from "@/lib/stores/compare-store"
 import { Button } from "@/components/ui/button"
 import { GitCompareArrows, X, Package, Trash2 } from "lucide-react"
+import { useHydrated } from "@/hooks/use-hydrated"
 
 export function CompareBar() {
   const { items, remove, clear } = useCompareStore()
-  const [mounted, setMounted] = useState(false)
-
   // Prevent hydration mismatch (store uses localStorage)
-  useEffect(() => setMounted(true), [])
+  const mounted = useHydrated()
 
   if (!mounted || items.length === 0) return null
 

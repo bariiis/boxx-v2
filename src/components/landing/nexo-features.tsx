@@ -5,7 +5,11 @@ import { Search, Cpu, QrCode } from "lucide-react"
 
 export function NexoFeatures() {
   const [activeFeature, setActiveFeature] = useState(0)
-  const [connectionLines, setConnectionLines] = useState<Array<{ from: number; to: number; active: boolean }>>([])
+  const [connectionLines, setConnectionLines] = useState<Array<{ from: number; to: number; active: boolean }>>([
+    { from: 0, to: 1, active: false },
+    { from: 1, to: 2, active: false },
+    { from: 0, to: 2, active: false },
+  ])
 
   const features = [
     {
@@ -65,13 +69,6 @@ export function NexoFeatures() {
   ]
 
   useEffect(() => {
-    const lines = [
-      { from: 0, to: 1, active: false },
-      { from: 1, to: 2, active: false },
-      { from: 0, to: 2, active: false },
-    ]
-    setConnectionLines(lines)
-
     const interval = setInterval(() => {
       setConnectionLines((prev) =>
         prev.map((line) => ({

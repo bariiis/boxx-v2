@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useHydrated } from "@/hooks/use-hydrated";
 
 const words = ["automate", "delegate", "execute", "scale"];
 
@@ -105,13 +106,10 @@ function BlurWord({ word, trigger }: { word: string; trigger: number }) {
 }
 
 export function VtHeroSection({ demoteHeading = false }: { demoteHeading?: boolean } = {}) {
-  const [isVisible, setIsVisible] = useState(false);
+  // False during SSR/hydration, true right after — drives the entrance transition
+  const isVisible = useHydrated();
   const [wordIndex, setWordIndex] = useState(0);
   const Heading = demoteHeading ? "h2" : "h1";
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {

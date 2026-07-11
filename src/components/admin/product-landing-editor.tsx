@@ -210,13 +210,17 @@ function FeaturesEditor({ productId, features: raw }: { productId: string; featu
 // SECTIONS MANAGER
 // ==========================================
 
+function makeTabKey(type: string) {
+  return type.toLowerCase() + "-" + Date.now().toString(36)
+}
+
 function SectionsManager({ productId, sections }: { productId: string; sections: Section[] }) {
   const router = useRouter()
   const [addOpen, setAddOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
 
   async function handleAdd(type: string, label: string) {
-    const tabKey = type.toLowerCase() + "-" + Date.now().toString(36)
+    const tabKey = makeTabKey(type)
     try {
       await addProductSection(productId, { sectionType: type, tabKey, tabLabel: label })
       toast.success("Section eklendi")
@@ -245,7 +249,7 @@ function SectionsManager({ productId, sections }: { productId: string; sections:
       <CardHeader className="flex flex-row items-center justify-between space-y-0">
         <CardTitle className="flex items-center gap-2 text-base">
           <FileText className="size-5" />
-          İçerik Section'ları ({sections.length})
+          İçerik Section&apos;ları ({sections.length})
         </CardTitle>
         <Dialog open={addOpen} onOpenChange={setAddOpen}>
           <DialogTrigger render={

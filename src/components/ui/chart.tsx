@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment -- shadcn-generated file, recharts types lag React 19 */
 // @ts-nocheck
 "use client"
 

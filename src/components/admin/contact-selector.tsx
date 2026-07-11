@@ -26,19 +26,22 @@ export function ContactSelector({
   defaultLabel,
   onSelect,
 }: ContactSelectorProps) {
-  const [contacts, setContacts] = useState<Contact[]>([])
-  const [loading, setLoading] = useState(false)
+  const [result, setResult] = useState<{ orgId: string; contacts: Contact[] } | null>(null)
 
   useEffect(() => {
-    if (!organizationId) {
-      setContacts([])
-      return
+    if (!organizationId) return
+    let cancelled = false
+    getContacts({ organizationId, limit: 50 }).then(({ contacts }) => {
+      if (!cancelled) setResult({ orgId: organizationId, contacts })
+    })
+    return () => {
+      cancelled = true
     }
-    setLoading(true)
-    getContacts({ organizationId, limit: 50 })
-      .then(({ contacts }) => setContacts(contacts))
-      .finally(() => setLoading(false))
   }, [organizationId])
+
+  // Derived during render: stale results from another org are ignored
+  const contacts = organizationId && result?.orgId === organizationId ? result.contacts : []
+  const loading = !!organizationId && result?.orgId !== organizationId
 
   if (!organizationId) {
     return (

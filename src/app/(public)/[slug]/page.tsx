@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation"
 import { getLandingPageBySlug } from "@/lib/actions/landing-actions"
 import { LandingPageRenderer } from "@/components/landing/landing-renderer"
+import { safeJsonParse } from "@/lib/safe-json"
 
 // Reserved slugs handled by their own folders/routes — never serve them from DB.
 const RESERVED_SLUGS = new Set([
@@ -41,7 +42,7 @@ export default async function DynamicLandingPage({
   const sections = landing.sections.map((s) => ({
     id: s.id,
     type: s.sectionType,
-    config: JSON.parse(s.config) as Record<string, unknown>,
+    config: safeJsonParse<Record<string, unknown>>(s.config, {}),
   }))
 
   return <LandingPageRenderer sections={sections} />

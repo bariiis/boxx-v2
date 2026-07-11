@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { renderToBuffer } from "@react-pdf/renderer"
 import { db } from "@/lib/db"
-import { QuotePDF } from "@/lib/pdf/quote-pdf"
+import { QuotePDF, type QuotePDFData } from "@/lib/pdf/quote-pdf"
 
 export async function GET(
   request: NextRequest,
@@ -38,7 +38,7 @@ export async function GET(
 
   try {
     const buffer = await renderToBuffer(
-      <QuotePDF quote={quote as any} companyName={companyName} />
+      <QuotePDF quote={quote as unknown as QuotePDFData} companyName={companyName} />
     )
 
     return new NextResponse(new Uint8Array(buffer), {

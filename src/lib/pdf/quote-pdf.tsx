@@ -101,7 +101,7 @@ interface QuoteItem {
   configItems: ConfigItem[]
 }
 
-interface QuotePDFData {
+export interface QuotePDFData {
   quoteNumber: string
   status: string
   currency: string

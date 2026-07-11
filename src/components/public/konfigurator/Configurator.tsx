@@ -261,7 +261,7 @@ function ContextBar({
               className="inline-flex items-center gap-1.5 border border-slate-300 bg-white px-3 py-2 font-['Space_Grotesk'] text-xs font-semibold text-slate-700 transition-colors hover:border-slate-400 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              Önerilen'e sıfırla
+              Önerilen&apos;e sıfırla
             </button>
             <div className="inline-flex items-center gap-3 border border-slate-200 bg-white px-4 py-2 dark:border-slate-800 dark:bg-slate-950">
               <span className="font-['JetBrains_Mono'] text-[10px] uppercase tracking-[0.25em] text-slate-500">

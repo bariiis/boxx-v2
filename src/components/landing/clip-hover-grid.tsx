@@ -40,6 +40,9 @@ function Card({
   const isVertical = orientation === "vertical"
 
   useEffect(() => {
+    // Random offsets must be generated client-side after hydration (SSR output
+    // must stay deterministic), and Math.random is not allowed during render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOffsets(
       Array.from({ length: slicesTotal }, (_, i) => {
         const r = 25 + Math.random() * 50

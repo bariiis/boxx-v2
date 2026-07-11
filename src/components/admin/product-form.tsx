@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -396,9 +397,9 @@ export function ProductForm({ product, categories, solutions = [] }: ProductForm
               {solutions.length === 0 && (
                 <p className="text-xs text-muted-foreground">
                   Henüz çözüm tanımlanmamış. Önce{" "}
-                  <a href="/admin/solutions" className="underline">
+                  <Link href="/admin/solutions" className="underline">
                     çözümler
-                  </a>{" "}
+                  </Link>{" "}
                   oluşturun.
                 </p>
               )}

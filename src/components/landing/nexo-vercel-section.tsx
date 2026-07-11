@@ -93,7 +93,7 @@ export function NexoVercelSection() {
           <h2 className="text-5xl font-light tracking-wider mb-6 font-mono">VERCEL INFRASTRUCTURE</h2>
           <div className="w-32 h-px bg-[var(--lp-bg)] mx-auto mb-8"></div>
           <p className="text-gray-400 max-w-3xl mx-auto text-lg">
-            Powered by Vercel's cutting-edge platform architecture with global edge computing
+            Powered by Vercel&apos;s cutting-edge platform architecture with global edge computing
           </p>
         </div>
 

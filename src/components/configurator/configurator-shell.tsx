@@ -341,7 +341,6 @@ function OptionCard({
 // ============================================================
 function SummaryCard({ heroImg }: { heroImg: string | null }) {
   const { basekit, selection, result, options } = useConfigurator()
-  if (!basekit || !result) return null
 
   const grouped = useMemo(() => {
     const m: Record<string, { name: string; qty: number }[]> = {}
@@ -355,6 +354,8 @@ function SummaryCard({ heroImg }: { heroImg: string | null }) {
     }
     return m
   }, [selection, options])
+
+  if (!basekit || !result) return null
 
   const total = result.totalPriceCents
 

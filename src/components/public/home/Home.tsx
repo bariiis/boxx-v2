@@ -932,7 +932,7 @@ function TestimonialLead({ testimonial }: { testimonial: HomeTestimonial }) {
     <article className="flex h-full flex-col gap-6 border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-950 lg:p-10">
       <Quote className="h-8 w-8 text-orange-500" strokeWidth={1.4} />
       <blockquote className="font-['Space_Grotesk'] text-2xl font-semibold leading-snug text-slate-900 dark:text-white sm:text-3xl">
-        "{testimonial.quote}"
+        &quot;{testimonial.quote}&quot;
       </blockquote>
       <div className="mt-auto flex flex-wrap items-end justify-between gap-6 border-t border-slate-200 pt-6 dark:border-slate-800">
         <div>
@@ -966,7 +966,7 @@ function TestimonialSmall({ testimonial }: { testimonial: HomeTestimonial }) {
     <article className="flex h-full flex-col gap-4 border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
       <Quote className="h-5 w-5 text-teal-600 dark:text-teal-400" strokeWidth={1.5} />
       <blockquote className="font-['Space_Grotesk'] text-base font-medium leading-snug text-slate-800 dark:text-slate-100">
-        "{testimonial.quote}"
+        &quot;{testimonial.quote}&quot;
       </blockquote>
       <div className="mt-auto flex items-end justify-between gap-4 border-t border-slate-200 pt-4 dark:border-slate-800">
         <div className="min-w-0">

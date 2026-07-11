@@ -64,7 +64,7 @@ export function SplitAiSection({ demoteHeading = false }: { demoteHeading?: bool
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-zinc-400 max-w-md mb-8"
           >
-            <span className="text-white font-medium">Agent'lar için Sprint.</span> Çeşitli AI agent'ları arasından seçim
+            <span className="text-white font-medium">Agent&apos;lar için Sprint.</span> Çeşitli AI agent&apos;ları arasından seçim
             yapın; kod üretiminden teknik görevlere kadar iş delege etmeye başlayın.
           </motion.p>
 
@@ -225,7 +225,7 @@ export function SplitAiSection({ demoteHeading = false }: { demoteHeading?: bool
                     </div>
                     <p className="text-zinc-500 text-xs mb-2">Bu atanan neden önerildi</p>
                     <p className="text-zinc-500 text-sm mb-4">
-                      Mobile app launch akışındaki performans problemleriyle ilgili önceki issue'larda atanmıştı.
+                      Mobile app launch akışındaki performans problemleriyle ilgili önceki issue&apos;larda atanmıştı.
                     </p>
                     <button
                       type="button"
@@ -241,11 +241,11 @@ export function SplitAiSection({ demoteHeading = false }: { demoteHeading?: bool
               <div className="border-t border-b border-zinc-800/60 pt-12 pl-12 pb-16">
                 <h3 className="text-zinc-200 font-medium text-xl mb-3">Sprint MCP</h3>
                 <p className="text-zinc-500 text-base mb-8">
-                  Sprint'i Cursor, Claude, ChatGPT ve diğer favori araçlarınıza bağlayın.
+                  Sprint&apos;i Cursor, Claude, ChatGPT ve diğer favori araçlarınıza bağlayın.
                 </p>
 
                 <div className="bg-zinc-900/30 border border-zinc-800/60 rounded-xl p-5 font-mono text-sm">
-                  <p className="text-zinc-700 mb-3">//mcp.sprint.app/sse</p>
+                  <p className="text-zinc-700 mb-3">{"//mcp.sprint.app/sse"}</p>
                   <div className="space-y-1 mb-6">
                     <p>
                       <span className="text-orange-400/70">&quot;mcpServers&quot;</span>

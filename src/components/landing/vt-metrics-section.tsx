@@ -164,7 +164,8 @@ function DotGraph({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef(0);
-  const timeRef = useRef(Math.random() * 100);
+  const [initialTime] = useState(() => Math.random() * 100);
+  const timeRef = useRef(initialTime);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -217,12 +218,14 @@ function DotGraph({
 }
 
 export function VtMetricsSection() {
-  const [time, setTime] = useState<Date | null>(null);
+  // Lazy init guarded for SSR; the rendering span has suppressHydrationWarning
+  const [time, setTime] = useState<Date | null>(() =>
+    typeof window === "undefined" ? null : new Date(),
+  );
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    setTime(new Date());
     const interval = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
@@ -251,7 +254,7 @@ export function VtMetricsSection() {
                 <span className="w-2 h-2 rounded-full bg-[#eca8d6] animate-pulse" />
                 LIVE
               </span>
-              <span className="text-sm font-mono text-muted-foreground">
+              <span suppressHydrationWarning className="text-sm font-mono text-muted-foreground">
                 {time ? `${time.toLocaleTimeString("en-GB")} UTC` : ""}
               </span>
             </div>

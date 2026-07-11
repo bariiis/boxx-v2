@@ -45,6 +45,19 @@ function icon(name: string | undefined, fallback: LucideIcon): LucideIcon {
   return ICONS[name] || fallback
 }
 
+function DynamicIcon({
+  name,
+  fallback: Fallback,
+  className,
+}: {
+  name?: string
+  fallback: LucideIcon
+  className?: string
+}) {
+  const Icon = (name && ICONS[name]) || Fallback
+  return <Icon className={className} />
+}
+
 export interface Testimonial {
   id: number
   name: string
@@ -152,11 +165,7 @@ export function SinglePricingCard({
     return () => clearInterval(t)
   }, [testimonials.length, testimonialRotationSpeed])
 
-  const SectionBadgeIcon = icon(sectionBadgeIcon, CreditCard)
-  const CardBadgeIcon = icon(badgeIcon, Crown)
   const FeaturesIcon = icon(featuresIcon, Check)
-  const PrimaryIcon = icon(primaryButtonIcon, ShoppingCart)
-  const SecondaryIcon = icon(secondaryButtonIcon, ExternalLink)
   const Heading = demoteHeading ? "h3" : "h2"
 
   return (
@@ -173,7 +182,7 @@ export function SinglePricingCard({
                 className="inline-flex items-center gap-1 px-3 py-1 mb-4 rounded-full border shadow-sm"
                 style={{ borderColor: "var(--lp-border)" }}
               >
-                <SectionBadgeIcon className="mr-1 h-3.5 w-3.5 text-primary" />
+                <DynamicIcon name={sectionBadgeIcon} fallback={CreditCard} className="mr-1 h-3.5 w-3.5 text-primary" />
                 <span className="text-xs font-medium">{sectionBadgeText}</span>
               </div>
             )}
@@ -203,7 +212,7 @@ export function SinglePricingCard({
                 {badgeText && (
                   <div className="flex items-center mb-4">
                     <Badge className="px-3 py-1 bg-primary/5 border-primary/10 text-primary hover:bg-primary/10">
-                      <CardBadgeIcon className="h-3.5 w-3.5 mr-1" />
+                      <DynamicIcon name={badgeIcon} fallback={Crown} className="h-3.5 w-3.5 mr-1" />
                       <span>{badgeText}</span>
                     </Badge>
                   </div>
@@ -244,13 +253,13 @@ export function SinglePricingCard({
                   <Button className="w-full gap-2 group" size="lg" asChild={!!primaryButtonHref}>
                     {primaryButtonHref ? (
                       <Link href={primaryButtonHref}>
-                        <PrimaryIcon className="h-4 w-4" />
+                        <DynamicIcon name={primaryButtonIcon} fallback={ShoppingCart} className="h-4 w-4" />
                         <span>{primaryButtonText}</span>
                         <ChevronRight className="h-4 w-4 ml-auto transition-transform group-hover:translate-x-1" />
                       </Link>
                     ) : (
                       <>
-                        <PrimaryIcon className="h-4 w-4" />
+                        <DynamicIcon name={primaryButtonIcon} fallback={ShoppingCart} className="h-4 w-4" />
                         <span>{primaryButtonText}</span>
                       </>
                     )}
@@ -260,7 +269,7 @@ export function SinglePricingCard({
                     <Button variant="outline" className="w-full gap-2" size="lg" asChild>
                       <Link href={secondaryButtonHref} target="_blank">
                         <span>{secondaryButtonText}</span>
-                        <SecondaryIcon className="h-4 w-4 ml-auto" />
+                        <DynamicIcon name={secondaryButtonIcon} fallback={ExternalLink} className="h-4 w-4 ml-auto" />
                       </Link>
                     </Button>
                   )}

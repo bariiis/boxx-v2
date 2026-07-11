@@ -93,7 +93,7 @@ export function NexusIntegrationsSection({
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <p className="text-sm font-mono text-primary mb-4">// ENTEGRASYON EKOSİSTEMİ</p>
+          <p className="text-sm font-mono text-primary mb-4">{"// ENTEGRASYON EKOSİSTEMİ"}</p>
           <Heading className="text-4xl lg:text-5xl font-semibold tracking-tight mb-6 text-balance">
             Her şeyi bağlayın.
             <br />
@@ -142,7 +142,7 @@ export function NexusIntegrationsSection({
                   Özel bir entegrasyon mu lazım?
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  REST ve GraphQL API'lerimizle özel entegrasyonlar kurmak çok kolay. Ayrıca
+                  REST ve GraphQL API&apos;lerimizle özel entegrasyonlar kurmak çok kolay. Ayrıca
                   gerçek zamanlı olaylar için webhook erişimi.
                 </p>
                 <button
@@ -154,7 +154,7 @@ export function NexusIntegrationsSection({
               </div>
 
               <div className="font-mono text-xs text-muted-foreground space-y-2 bg-background/50 rounded-lg p-6 border border-border">
-                <div className="text-primary mb-2">// Örnek: Bildirim gönder</div>
+                <div className="text-primary mb-2">{"// Örnek: Bildirim gönder"}</div>
                 <div>
                   <span className="text-purple-400">const</span> response ={" "}
                   <span className="text-blue-400">await</span> nexus.send({"{"}

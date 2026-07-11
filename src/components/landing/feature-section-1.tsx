@@ -58,6 +58,19 @@ function resolveIcon(name: string | undefined, fallback: LucideIcon = Check): Lu
   return ICONS[name] || fallback
 }
 
+function DynamicIcon({
+  name,
+  fallback: Fallback,
+  className,
+}: {
+  name?: string
+  fallback: LucideIcon
+  className?: string
+}) {
+  const Icon = (name && ICONS[name]) || Fallback
+  return <Icon className={className} />
+}
+
 export interface FeatureSection1Feature {
   icon?: string
   title: string
@@ -95,9 +108,6 @@ export function FeatureSection1({
   secondaryButtonHref,
   demoteHeading = false,
 }: FeatureSection1Props) {
-  const MainIcon = resolveIcon(mainIcon, Heart)
-  const PrimaryIcon = resolveIcon(primaryButtonIcon, Download)
-  const SecondaryIcon = resolveIcon(secondaryButtonIcon, ExternalLink)
   const Heading = demoteHeading ? "h2" : "h1"
   const showCta =
     ctaTitle ||
@@ -113,7 +123,7 @@ export function FeatureSection1({
       <div className="container mx-auto max-w-5xl px-4 md:px-6">
         <div className="flex flex-col items-center text-center">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10 text-primary">
-            <MainIcon className="h-8 w-8" />
+            <DynamicIcon name={mainIcon} fallback={Heart} className="h-8 w-8" />
           </div>
 
           <Heading className="text-3xl font-bold tracking-tight sm:text-5xl">
@@ -165,7 +175,7 @@ export function FeatureSection1({
                 {primaryButtonText && primaryButtonHref && (
                   <Button variant="outline" asChild className="w-full sm:w-auto">
                     <Link href={primaryButtonHref}>
-                      <PrimaryIcon className="mr-2 h-5 w-5" />
+                      <DynamicIcon name={primaryButtonIcon} fallback={Download} className="mr-2 h-5 w-5" />
                       {primaryButtonText}
                     </Link>
                   </Button>
@@ -173,7 +183,7 @@ export function FeatureSection1({
                 {secondaryButtonText && secondaryButtonHref && (
                   <Button variant="outline" asChild className="w-full sm:w-auto">
                     <Link href={secondaryButtonHref}>
-                      <SecondaryIcon className="mr-2 h-5 w-5" />
+                      <DynamicIcon name={secondaryButtonIcon} fallback={ExternalLink} className="mr-2 h-5 w-5" />
                       {secondaryButtonText}
                     </Link>
                   </Button>

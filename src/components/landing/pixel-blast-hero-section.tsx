@@ -4,7 +4,8 @@ import dynamic from "next/dynamic"
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useEffect, useState } from "react"
+import { useMemo } from "react"
+import { useHydrated } from "@/hooks/use-hydrated"
 
 const PixelBlast = dynamic(() => import("@/components/ui/pixel-blast"), {
   ssr: false,
@@ -76,11 +77,13 @@ export function PixelBlastHeroSection({
   heroImage,
   heroImageAlt = "",
 }: PixelBlastHeroProps) {
-  const [fontFamily, setFontFamily] = useState("'Urbanist', sans-serif")
-  useEffect(() => {
+  // Fallback during SSR/hydration; resolved from the CSS variable on the client
+  const hydrated = useHydrated()
+  const fontFamily = useMemo(() => {
+    if (!hydrated) return "'Urbanist', sans-serif"
     const val = getComputedStyle(document.documentElement).getPropertyValue("--font-urbanist").trim()
-    if (val) setFontFamily(val)
-  }, [])
+    return val || "'Urbanist', sans-serif"
+  }, [hydrated])
 
   return (
     <section

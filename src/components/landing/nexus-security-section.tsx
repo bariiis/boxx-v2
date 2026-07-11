@@ -85,7 +85,7 @@ export function NexusSecuritySection({ demoteHeading = false }: { demoteHeading?
             isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}
         >
-          <p className="text-sm font-mono text-primary mb-4">// KURUMSAL GÜVENLİK</p>
+          <p className="text-sm font-mono text-primary mb-4">{"// KURUMSAL GÜVENLİK"}</p>
           <Heading className="text-4xl lg:text-5xl font-semibold tracking-tight mb-6 text-balance">
             Güvenebileceğiniz güvenlik.
           </Heading>

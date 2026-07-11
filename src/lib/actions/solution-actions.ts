@@ -2,6 +2,7 @@
 
 
 import { requireStaff } from "@/lib/auth-guard"
+import { safeJsonParse } from "@/lib/safe-json"
 import { db } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 
@@ -41,8 +42,8 @@ async function loadBenchmarks(solutionId: string) {
       const datasets = await db.benchmarkDataset.findMany({ where: { chartId: c.id }, orderBy: { sortOrder: "asc" } })
       return {
         ...c,
-        labels: JSON.parse(c.labels) as string[],
-        datasets: datasets.map((d) => ({ ...d, values: JSON.parse(d.values) as number[] })),
+        labels: safeJsonParse<string[]>(c.labels, []),
+        datasets: datasets.map((d) => ({ ...d, values: safeJsonParse<number[]>(d.values, []) })),
       }
     })
   )

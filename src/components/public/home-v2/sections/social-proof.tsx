@@ -21,7 +21,7 @@ export function SocialProof({ logos, testimonial }: SocialProofProps) {
               Birlikte çalıştığımız ekipler
             </p>
             <h2 className="mt-3 text-3xl md:text-4xl font-semibold tracking-tight">
-              Türkiye'nin ajans, araştırma ve üretim ekipleri
+              Türkiye&apos;nin ajans, araştırma ve üretim ekipleri
             </h2>
           </Reveal>
           <Reveal delay={0.1}>
@@ -53,7 +53,7 @@ export function SocialProof({ logos, testimonial }: SocialProofProps) {
           <figure className="relative rounded-3xl border border-black/5 bg-white p-8 md:p-12">
             <Quote className="absolute -top-4 -left-2 h-10 w-10 text-[var(--home-brand)]" />
             <blockquote className="text-2xl md:text-3xl leading-[1.35] tracking-tight text-black/80">
-              "{testimonial.quote}"
+              &quot;{testimonial.quote}&quot;
             </blockquote>
             <figcaption className="mt-6 font-mono text-xs uppercase tracking-wider text-black/50">
               {testimonial.author} · {testimonial.role} · {testimonial.company}

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { useState } from "react"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -82,8 +83,9 @@ function QuoteCard({ quote }: { quote: KanbanQuote }) {
   const owner = quote.createdBy
     ? `${quote.createdBy.name || ""} ${quote.createdBy.surname || ""}`.trim()
     : null
+  const [now] = useState(() => Date.now())
   const expiringSoon =
-    quote.validUntil && new Date(quote.validUntil).getTime() - Date.now() < 1000 * 60 * 60 * 24 * 7
+    quote.validUntil && new Date(quote.validUntil).getTime() - now < 1000 * 60 * 60 * 24 * 7
 
   return (
     <Card className="gap-2 p-3 shadow-sm transition-shadow hover:shadow-md">

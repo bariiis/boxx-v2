@@ -49,8 +49,8 @@ export function SmtpForm({ userId, config }: { userId: string; config: SmtpConfi
     }
   }
 
-  async function handleTest(e: React.FormEvent<HTMLFormElement>) {
-    const fd = new FormData(e.currentTarget)
+  async function handleTest(form: HTMLFormElement) {
+    const fd = new FormData(form)
     setTesting(true)
 
     try {
@@ -142,7 +142,7 @@ export function SmtpForm({ userId, config }: { userId: string; config: SmtpConfi
                 {saving ? <><Loader2 className="mr-2 size-4 animate-spin" />Kaydediliyor...</> : <><Check className="mr-2 size-4" />Kaydet</>}
               </Button>
               <Button type="button" variant="outline" disabled={testing}
-                onClick={() => { const form = document.getElementById("smtp-form") as HTMLFormElement; handleTest(form as any) }}>
+                onClick={() => { const form = document.getElementById("smtp-form") as HTMLFormElement; handleTest(form) }}>
                 {testing ? <><Loader2 className="mr-2 size-4 animate-spin" />Test Ediliyor...</> : <><Wifi className="mr-2 size-4" />Bağlantı Testi</>}
               </Button>
             </div>

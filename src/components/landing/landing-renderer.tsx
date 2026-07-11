@@ -1,121 +1,124 @@
 "use client"
 
-import type { CSSProperties } from "react"
+import type { CSSProperties, ReactNode } from "react"
 import { resolveFontFamily, DEFAULT_THEME, type LandingTheme } from "@/lib/fonts"
-import { HeroStatement } from "./hero-statement"
-import { HeroVideo } from "./hero-video"
-import { FeatureStorytelling } from "./feature-storytelling"
-import { FeaturesBlock } from "./features-block"
-import { FeatureGrid } from "./feature-grid"
-import { FullBleedMedia } from "./full-bleed-media"
-import { TechSpecs } from "./tech-specs"
-import { PurchaseCta } from "./purchase-cta"
-import { BentoBox } from "./bento-box"
-import { BentoGrid } from "./bento-grid"
-import { CtaIllustration } from "./cta-illustration"
-import { HeroAudioReactive } from "./hero-audio-reactive"
-import { HeroShade } from "./hero-shade"
-import { LogoCloud } from "./logo-cloud"
-import { UrunlerSlide } from "./urunler-slide"
-import { TestimonialsV2 } from "./testimonials-v2"
-import { MainHero } from "./main-hero"
-import { StatsCounter } from "./stats-counter"
-import { FaqAccordion } from "./faq-accordion"
-import { ContactForm } from "./contact-form"
-import { PricingTable } from "./pricing-table"
-import { ImageTextSplit } from "./image-text-split"
-import { CtaBanner } from "./cta-banner"
-import HookableAiCta3 from "@/components/registry/hookable-ai-cta-3"
-import AdvantagesXPremium from "@/components/registry/advantages-x-premium"
-import ImwebMeStats6 from "@/components/registry/imweb-me-stats-6"
-import { HeroGradient } from "./hero-gradient"
 import dynamic from "next/dynamic"
+const HeroStatement = dynamic(() => import("./hero-statement").then(m => m.HeroStatement))
+const HeroVideo = dynamic(() => import("./hero-video").then(m => m.HeroVideo))
+const FeatureStorytelling = dynamic(() => import("./feature-storytelling").then(m => m.FeatureStorytelling))
+const FeaturesBlock = dynamic(() => import("./features-block").then(m => m.FeaturesBlock))
+const FeatureGrid = dynamic(() => import("./feature-grid").then(m => m.FeatureGrid))
+const FullBleedMedia = dynamic(() => import("./full-bleed-media").then(m => m.FullBleedMedia))
+const TechSpecs = dynamic(() => import("./tech-specs").then(m => m.TechSpecs))
+const PurchaseCta = dynamic(() => import("./purchase-cta").then(m => m.PurchaseCta))
+const BentoBox = dynamic(() => import("./bento-box").then(m => m.BentoBox))
+const BentoGrid = dynamic(() => import("./bento-grid").then(m => m.BentoGrid))
+const CtaIllustration = dynamic(() => import("./cta-illustration").then(m => m.CtaIllustration))
+const HeroAudioReactive = dynamic(() => import("./hero-audio-reactive").then(m => m.HeroAudioReactive))
+const HeroShade = dynamic(() => import("./hero-shade").then(m => m.HeroShade))
+const LogoCloud = dynamic(() => import("./logo-cloud").then(m => m.LogoCloud))
+const UrunlerSlide = dynamic(() => import("./urunler-slide").then(m => m.UrunlerSlide))
+const TestimonialsV2 = dynamic(() => import("./testimonials-v2").then(m => m.TestimonialsV2))
+const MainHero = dynamic(() => import("./main-hero").then(m => m.MainHero))
+const StatsCounter = dynamic(() => import("./stats-counter").then(m => m.StatsCounter))
+const FaqAccordion = dynamic(() => import("./faq-accordion").then(m => m.FaqAccordion))
+const ContactForm = dynamic(() => import("./contact-form").then(m => m.ContactForm))
+const PricingTable = dynamic(() => import("./pricing-table").then(m => m.PricingTable))
+const ImageTextSplit = dynamic(() => import("./image-text-split").then(m => m.ImageTextSplit))
+const CtaBanner = dynamic(() => import("./cta-banner").then(m => m.CtaBanner))
+const HookableAiCta3 = dynamic(() => import("@/components/registry/hookable-ai-cta-3"))
+const AdvantagesXPremium = dynamic(() => import("@/components/registry/advantages-x-premium"))
+const ImwebMeStats6 = dynamic(() => import("@/components/registry/imweb-me-stats-6"))
+const HeroGradient = dynamic(() => import("./hero-gradient").then(m => m.HeroGradient))
 const HeroTextImage = dynamic(
   () => import("@/components/HeroSection").then((m) => m.HeroSection),
   { ssr: false }
 )
-import SaaspoFeatureSectionsLinear from "@/components/registry/saaspo-feature-sections-linear"
-import SaaspoFeatureSectionsVoiceflow from "@/components/registry/saaspo-feature-sections-voiceflow"
-import SpatialProductShowcase from "@/components/registry/spatial-product-showcase"
-import { VtHeroSection } from "./vt-hero-section"
-import { VtFeaturesSection } from "./vt-features-section"
-import { VtHowItWorksSection } from "./vt-how-it-works-section"
-import { VtMetricsSection } from "./vt-metrics-section"
-import { VtIntegrationsSection } from "./vt-integrations-section"
-import { VtInfrastructureSection } from "./vt-infrastructure-section"
-import { VtSecuritySection } from "./vt-security-section"
-import { VtDevelopersSection } from "./vt-developers-section"
-import { VtPricingSection } from "./vt-pricing-section"
-import { VtTestimonialsSection } from "./vt-testimonials-section"
-import { VtCtaSection } from "./vt-cta-section"
-import { ConversionIntegrationsSection } from "./conversion-integrations-section"
-import { StHeroSection } from "./st-hero-section"
-import { StFeaturesSection } from "./st-features-section"
-import { StHowItWorksSection } from "./st-how-it-works-section"
-import { StMetricsSection } from "./st-metrics-section"
-import { StIntegrationsSection } from "./st-integrations-section"
-import { StInfrastructureSection } from "./st-infrastructure-section"
-import { StSecuritySection } from "./st-security-section"
-import { StDevelopersSection } from "./st-developers-section"
-import { StPricingSection } from "./st-pricing-section"
-import { StTestimonialsSection } from "./st-testimonials-section"
-import { StCtaSection } from "./st-cta-section"
-import { NexoHero } from "./nexo-hero"
-import { NexoFeatures } from "./nexo-features"
-import { NexoAISection } from "./nexo-ai-section"
-import { NexoVercelSection } from "./nexo-vercel-section"
-import { NexusHeroSection } from "./nexus-hero-section"
-import { NexusFeaturesSection } from "./nexus-features-section"
-import { NexusHowItWorksSection } from "./nexus-how-it-works-section"
-import { NexusInfrastructureSection } from "./nexus-infrastructure-section"
-import { NexusMetricsSection } from "./nexus-metrics-section"
-import { NexusIntegrationsSection } from "./nexus-integrations-section"
-import { NexusSecuritySection } from "./nexus-security-section"
-import { NexusDevelopersSection } from "./nexus-developers-section"
-import { NexusCtaSection } from "./nexus-cta-section"
-import {
-  AnimatedRoadmapSection,
-  type RoadmapMilestone,
-} from "./animated-roadmap-section"
-import { SplitHero3d } from "./split-hero-3d"
-import { SplitLogoCloud } from "./split-logo-cloud"
-import { SplitFeatureCards } from "./split-feature-cards"
-import { SplitAiSection } from "./split-ai-section"
-import { SplitWorkflows } from "./split-workflows"
-import { SplitProductDirection } from "./split-product-direction"
-import { SplitCta } from "./split-cta"
-import { ClipHoverGrid, type ClipHoverItem } from "./clip-hover-grid"
-import { SinglePricingCard, type Testimonial as SinglePricingTestimonial } from "./single-pricing-card"
-import { SinglePricingCard3Col } from "./single-pricing-card-3col"
-import { ImmersiveGallery } from "./immersive-gallery"
-import { BenchmarkCharts, type BenchmarkChartItem } from "./benchmark-charts"
-import { FeatureSection1, type FeatureSection1Feature } from "./feature-section-1"
-import { RiottersHero } from "./riotters-hero"
-import { StAeroHero1 } from "./st-aero-hero-1"
-import { StTabsSection } from "./st-tabs"
-import { StLetsWorkSection } from "./st-lets-work"
-import { StMarqueeSection } from "./st-marquee"
-import { AzHero } from "./az-hero"
-import { AzProjectsStack } from "./az-projects-stack"
-import { AzStickyCaption } from "./az-sticky-caption"
-import { AzStickyImages } from "./az-sticky-images"
-import { AzManifestSplit } from "./az-manifest-split"
-import { AzParallaxDivider } from "./az-parallax-divider"
-import { AzBlogGrid } from "./az-blog-grid"
-import { AzCtaMarquee } from "./az-cta-marquee"
-import { CrowdCanvasSection } from "./crowd-canvas-section"
-import { HoverBrandLogoSection } from "./hover-brand-logo-section"
-import { CodeNestHeroSection } from "./code-nest-hero-section"
-import { PixelBlastHeroSection } from "./pixel-blast-hero-section"
-import { MasonryGallerySection } from "./masonry-gallery-section"
+const SaaspoFeatureSectionsLinear = dynamic(() => import("@/components/registry/saaspo-feature-sections-linear"))
+const SaaspoFeatureSectionsVoiceflow = dynamic(() => import("@/components/registry/saaspo-feature-sections-voiceflow"))
+const SpatialProductShowcase = dynamic(() => import("@/components/registry/spatial-product-showcase"))
+const VtHeroSection = dynamic(() => import("./vt-hero-section").then(m => m.VtHeroSection))
+const VtFeaturesSection = dynamic(() => import("./vt-features-section").then(m => m.VtFeaturesSection))
+const VtHowItWorksSection = dynamic(() => import("./vt-how-it-works-section").then(m => m.VtHowItWorksSection))
+const VtMetricsSection = dynamic(() => import("./vt-metrics-section").then(m => m.VtMetricsSection))
+const VtIntegrationsSection = dynamic(() => import("./vt-integrations-section").then(m => m.VtIntegrationsSection))
+const VtInfrastructureSection = dynamic(() => import("./vt-infrastructure-section").then(m => m.VtInfrastructureSection))
+const VtSecuritySection = dynamic(() => import("./vt-security-section").then(m => m.VtSecuritySection))
+const VtDevelopersSection = dynamic(() => import("./vt-developers-section").then(m => m.VtDevelopersSection))
+const VtPricingSection = dynamic(() => import("./vt-pricing-section").then(m => m.VtPricingSection))
+const VtTestimonialsSection = dynamic(() => import("./vt-testimonials-section").then(m => m.VtTestimonialsSection))
+const VtCtaSection = dynamic(() => import("./vt-cta-section").then(m => m.VtCtaSection))
+const ConversionIntegrationsSection = dynamic(() => import("./conversion-integrations-section").then(m => m.ConversionIntegrationsSection))
+const StHeroSection = dynamic(() => import("./st-hero-section").then(m => m.StHeroSection))
+const StFeaturesSection = dynamic(() => import("./st-features-section").then(m => m.StFeaturesSection))
+const StHowItWorksSection = dynamic(() => import("./st-how-it-works-section").then(m => m.StHowItWorksSection))
+const StMetricsSection = dynamic(() => import("./st-metrics-section").then(m => m.StMetricsSection))
+const StIntegrationsSection = dynamic(() => import("./st-integrations-section").then(m => m.StIntegrationsSection))
+const StInfrastructureSection = dynamic(() => import("./st-infrastructure-section").then(m => m.StInfrastructureSection))
+const StSecuritySection = dynamic(() => import("./st-security-section").then(m => m.StSecuritySection))
+const StDevelopersSection = dynamic(() => import("./st-developers-section").then(m => m.StDevelopersSection))
+const StPricingSection = dynamic(() => import("./st-pricing-section").then(m => m.StPricingSection))
+const StTestimonialsSection = dynamic(() => import("./st-testimonials-section").then(m => m.StTestimonialsSection))
+const StCtaSection = dynamic(() => import("./st-cta-section").then(m => m.StCtaSection))
+const NexoHero = dynamic(() => import("./nexo-hero").then(m => m.NexoHero))
+const NexoFeatures = dynamic(() => import("./nexo-features").then(m => m.NexoFeatures))
+const NexoAISection = dynamic(() => import("./nexo-ai-section").then(m => m.NexoAISection))
+const NexoVercelSection = dynamic(() => import("./nexo-vercel-section").then(m => m.NexoVercelSection))
+const NexusHeroSection = dynamic(() => import("./nexus-hero-section").then(m => m.NexusHeroSection))
+const NexusFeaturesSection = dynamic(() => import("./nexus-features-section").then(m => m.NexusFeaturesSection))
+const NexusHowItWorksSection = dynamic(() => import("./nexus-how-it-works-section").then(m => m.NexusHowItWorksSection))
+const NexusInfrastructureSection = dynamic(() => import("./nexus-infrastructure-section").then(m => m.NexusInfrastructureSection))
+const NexusMetricsSection = dynamic(() => import("./nexus-metrics-section").then(m => m.NexusMetricsSection))
+const NexusIntegrationsSection = dynamic(() => import("./nexus-integrations-section").then(m => m.NexusIntegrationsSection))
+const NexusSecuritySection = dynamic(() => import("./nexus-security-section").then(m => m.NexusSecuritySection))
+const NexusDevelopersSection = dynamic(() => import("./nexus-developers-section").then(m => m.NexusDevelopersSection))
+const NexusCtaSection = dynamic(() => import("./nexus-cta-section").then(m => m.NexusCtaSection))
+import { type RoadmapMilestone } from "./animated-roadmap-section"
+const AnimatedRoadmapSection = dynamic(() => import("./animated-roadmap-section").then(m => m.AnimatedRoadmapSection))
+const SplitHero3d = dynamic(() => import("./split-hero-3d").then(m => m.SplitHero3d))
+const SplitLogoCloud = dynamic(() => import("./split-logo-cloud").then(m => m.SplitLogoCloud))
+const SplitFeatureCards = dynamic(() => import("./split-feature-cards").then(m => m.SplitFeatureCards))
+const SplitAiSection = dynamic(() => import("./split-ai-section").then(m => m.SplitAiSection))
+const SplitWorkflows = dynamic(() => import("./split-workflows").then(m => m.SplitWorkflows))
+const SplitProductDirection = dynamic(() => import("./split-product-direction").then(m => m.SplitProductDirection))
+const SplitCta = dynamic(() => import("./split-cta").then(m => m.SplitCta))
+import { type ClipHoverItem } from "./clip-hover-grid"
+const ClipHoverGrid = dynamic(() => import("./clip-hover-grid").then(m => m.ClipHoverGrid))
+import { type Testimonial as SinglePricingTestimonial } from "./single-pricing-card"
+const SinglePricingCard = dynamic(() => import("./single-pricing-card").then(m => m.SinglePricingCard))
+const SinglePricingCard3Col = dynamic(() => import("./single-pricing-card-3col").then(m => m.SinglePricingCard3Col))
+const ImmersiveGallery = dynamic(() => import("./immersive-gallery").then(m => m.ImmersiveGallery))
+import { type BenchmarkChartItem } from "./benchmark-charts"
+const BenchmarkCharts = dynamic(() => import("./benchmark-charts").then(m => m.BenchmarkCharts))
+import { type FeatureSection1Feature } from "./feature-section-1"
+const FeatureSection1 = dynamic(() => import("./feature-section-1").then(m => m.FeatureSection1))
+const RiottersHero = dynamic(() => import("./riotters-hero").then(m => m.RiottersHero))
+const StAeroHero1 = dynamic(() => import("./st-aero-hero-1").then(m => m.StAeroHero1))
+const StTabsSection = dynamic(() => import("./st-tabs").then(m => m.StTabsSection))
+const StLetsWorkSection = dynamic(() => import("./st-lets-work").then(m => m.StLetsWorkSection))
+const StMarqueeSection = dynamic(() => import("./st-marquee").then(m => m.StMarqueeSection))
+const AzHero = dynamic(() => import("./az-hero").then(m => m.AzHero))
+const AzProjectsStack = dynamic(() => import("./az-projects-stack").then(m => m.AzProjectsStack))
+const AzStickyCaption = dynamic(() => import("./az-sticky-caption").then(m => m.AzStickyCaption))
+const AzStickyImages = dynamic(() => import("./az-sticky-images").then(m => m.AzStickyImages))
+const AzManifestSplit = dynamic(() => import("./az-manifest-split").then(m => m.AzManifestSplit))
+const AzParallaxDivider = dynamic(() => import("./az-parallax-divider").then(m => m.AzParallaxDivider))
+const AzBlogGrid = dynamic(() => import("./az-blog-grid").then(m => m.AzBlogGrid))
+const AzCtaMarquee = dynamic(() => import("./az-cta-marquee").then(m => m.AzCtaMarquee))
+const CrowdCanvasSection = dynamic(() => import("./crowd-canvas-section").then(m => m.CrowdCanvasSection))
+const HoverBrandLogoSection = dynamic(() => import("./hover-brand-logo-section").then(m => m.HoverBrandLogoSection))
+const CodeNestHeroSection = dynamic(() => import("./code-nest-hero-section").then(m => m.CodeNestHeroSection))
+const PixelBlastHeroSection = dynamic(() => import("./pixel-blast-hero-section").then(m => m.PixelBlastHeroSection))
+const MasonryGallerySection = dynamic(() => import("./masonry-gallery-section").then(m => m.MasonryGallerySection))
 import type { MasonryItem } from "@/components/ui/masonry"
-import { ProductDetailHero } from "@/components/public/product-detail-hero"
-import { ScrollBlurTypography, type ScrollBlurItem } from "./scroll-blur-typography"
-import { LiveblocksHomeHero } from "./liveblocks-home-hero"
-import CustomersShowcase from "@/components/registry/customers-showcase"
+const ProductDetailHero = dynamic(() => import("@/components/public/product-detail-hero").then(m => m.ProductDetailHero))
+import { type ScrollBlurItem } from "./scroll-blur-typography"
+const ScrollBlurTypography = dynamic(() => import("./scroll-blur-typography").then(m => m.ScrollBlurTypography))
+const LiveblocksHomeHero = dynamic(() => import("./liveblocks-home-hero").then(m => m.LiveblocksHomeHero))
+const CustomersShowcase = dynamic(() => import("@/components/registry/customers-showcase"))
 import type { CustomerLogoConfig } from "@/components/registry/customers-showcase"
-import PerspectiveHero from "@/components/registry/perspective-hero"
-import FeatureCarousel from "@/components/registry/feature-carousel"
+const PerspectiveHero = dynamic(() => import("@/components/registry/perspective-hero"))
+const FeatureCarousel = dynamic(() => import("@/components/registry/feature-carousel"))
 import type { FeatureCarouselItem } from "@/components/registry/feature-carousel"
 
 interface Section {
@@ -185,61 +188,62 @@ export function LandingPageRenderer({
 
   const injectedCss = fontRules + sizeRules
 
+  const rendered: ReactNode[] = []
+  let heroCount = 0
+  for (const section of sections) {
+    const isHero =
+      section.type.startsWith("hero-") ||
+      section.type === "vt-hero" ||
+      section.type === "st-hero" ||
+      section.type === "nexo-hero" ||
+      section.type === "nexus-hero" ||
+      section.type === "split-hero-3d" ||
+      section.type === "animated-roadmap" ||
+      section.type === "main-hero" ||
+      section.type === "st-aero-hero-1" ||
+      section.type === "az-hero" ||
+      section.type === "liveblocks-home-hero"
+    let demoteHeading = false
+    if (isHero) {
+      const hl = (section.config.headline as string) || ""
+      const hasSlides =
+        Array.isArray(section.config.slides) &&
+        (section.config.slides as unknown[]).length > 0
+      // SEO: skip empty-headline heroes that would emit an empty <h1>
+      if (
+        !hl.trim() &&
+        !hasSlides &&
+        section.type !== "hero-audio-reactive" &&
+        section.type !== "vt-hero" &&
+        section.type !== "st-hero" &&
+        section.type !== "nexo-hero" &&
+        section.type !== "nexus-hero" &&
+        section.type !== "split-hero-3d" &&
+        section.type !== "animated-roadmap" &&
+        section.type !== "st-aero-hero-1" &&
+        section.type !== "az-hero" &&
+        section.type !== "hero-text-image"
+      ) {
+        continue
+      }
+      heroCount += 1
+      demoteHeading = heroCount > 1
+    }
+    rendered.push(
+      <SectionSwitch
+        key={section.id}
+        type={section.type}
+        config={section.config}
+        demoteHeading={demoteHeading}
+      />
+    )
+  }
+
   return (
     <>
       <style dangerouslySetInnerHTML={{ __html: injectedCss }} />
       <div className="lp-themed" style={style}>
-        {(() => {
-          let heroCount = 0
-          return sections.map((section) => {
-            const isHero =
-              section.type.startsWith("hero-") ||
-              section.type === "vt-hero" ||
-              section.type === "st-hero" ||
-              section.type === "nexo-hero" ||
-              section.type === "nexus-hero" ||
-              section.type === "split-hero-3d" ||
-              section.type === "animated-roadmap" ||
-              section.type === "main-hero" ||
-              section.type === "st-aero-hero-1" ||
-              section.type === "az-hero" ||
-              section.type === "liveblocks-home-hero"
-            let demoteHeading = false
-            if (isHero) {
-              const hl = (section.config.headline as string) || ""
-              const hasSlides =
-                Array.isArray(section.config.slides) &&
-                (section.config.slides as unknown[]).length > 0
-              // SEO: skip empty-headline heroes that would emit an empty <h1>
-              if (
-                !hl.trim() &&
-                !hasSlides &&
-                section.type !== "hero-audio-reactive" &&
-                section.type !== "vt-hero" &&
-                section.type !== "st-hero" &&
-                section.type !== "nexo-hero" &&
-                section.type !== "nexus-hero" &&
-                section.type !== "split-hero-3d" &&
-                section.type !== "animated-roadmap" &&
-                section.type !== "st-aero-hero-1" &&
-                section.type !== "az-hero" &&
-                section.type !== "hero-text-image"
-              ) {
-                return null
-              }
-              heroCount += 1
-              demoteHeading = heroCount > 1
-            }
-            return (
-              <SectionSwitch
-                key={section.id}
-                type={section.type}
-                config={section.config}
-                demoteHeading={demoteHeading}
-              />
-            )
-          })
-        })()}
+        {rendered}
       </div>
     </>
   )
